@@ -2,286 +2,615 @@
   {
     "category": "กาแฟ",
     "name": "อเมริกาโน่",
-    "price": 40
+    "price": 40,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "shot",
+      "size"
+    ]
   },
   {
     "category": "กาแฟ",
     "name": "เอสเพรสโซ่",
-    "price": 45
+    "price": 45,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "shot",
+      "size"
+    ]
   },
   {
     "category": "กาแฟ",
     "name": "คาปูชิโน่",
-    "price": 45
+    "price": 45,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "shot",
+      "size"
+    ]
   },
   {
     "category": "กาแฟ",
     "name": "มอคค่า",
-    "price": 45
+    "price": 45,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "shot",
+      "size"
+    ]
   },
   {
     "category": "กาแฟ",
     "name": "ลาเต้",
-    "price": 45
+    "price": 45,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "shot",
+      "size"
+    ]
   },
   {
     "category": "กาแฟ",
     "name": "คาราเมลมัคคิอาโต",
-    "price": 50
+    "price": 50,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "shot",
+      "size"
+    ]
   },
   {
     "category": "กาแฟ",
     "name": "กาแฟส้ม",
-    "price": 55
+    "price": 55,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "shot",
+      "size"
+    ]
   },
   {
     "category": "กาแฟ",
     "name": "กาแฟมะพร้าว",
-    "price": 55
+    "price": 55,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "shot",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "เฉาก๊วยนมสด",
-    "price": 25
+    "price": 25,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "นมสด",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "ชาไทย",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "ชาเขียว",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "นมชมพู",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "นมสดมิ้นท์",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "นมสดบราวน์ชูก้า",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "โกโก้",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "ดาร์กช็อกโกแลต",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "โกโก้มิ้นท์",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "นมสดคาราเมล",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "นมสดน้ำผึ้ง",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "ชาพีช",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "ชามะนาว",
-    "price": 30
+    "price": 30,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "น้ำผึ้งมะนาว",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "blend",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "ปีโป้นมสดปั่น",
-    "price": 45
+    "price": 45,
+    "mods": [
+      "sweet",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "นมสดโอริโอ้ปั่น",
-    "price": 45
+    "price": 45,
+    "mods": [
+      "sweet",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "โกโก้โอริโอ้ปั่น",
-    "price": 45
+    "price": 45,
+    "mods": [
+      "sweet",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "กล้วยปั่นนมสดโอริโอ้",
-    "price": 50
+    "price": 50,
+    "mods": [
+      "sweet",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "ชา & นม",
     "name": "กล้วยปั่นโกโก้โอริโอ้",
-    "price": 50
+    "price": 50,
+    "mods": [
+      "sweet",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "มิกซ์เบอร์รี่ โยเกิร์ต สมูทตี้",
-    "price": 60
+    "price": 60,
+    "mods": [
+      "sweet",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "มะม่วง โยเกิร์ต สมูทตี้",
-    "price": 60
+    "price": 60,
+    "mods": [
+      "sweet",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "สตรอว์เบอร์รี่ โยเกิร์ต สมูทตี้",
-    "price": 60
+    "price": 60,
+    "mods": [
+      "sweet",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "กีวี่ โยเกิร์ต สมูทตี้",
-    "price": 60
+    "price": 60,
+    "mods": [
+      "sweet",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "เสาวรส โยเกิร์ต สมูทตี้",
-    "price": 60
+    "price": 60,
+    "mods": [
+      "sweet",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "สับปะรด โยเกิร์ต สมูทตี้",
-    "price": 60
+    "price": 60,
+    "mods": [
+      "sweet",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "มะพร้าวนมสดสมูทตี้",
-    "price": 50
+    "price": 50,
+    "mods": [
+      "sweet",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "อาโวคาโดนมสดสมูทตี้",
-    "price": 50
+    "price": 50,
+    "mods": [
+      "sweet",
+      "milk",
+      "topping",
+      "size"
+    ]
   },
   {
     "category": "สมูทตี้",
     "name": "แตงโมสมูทตี้",
-    "price": 50
+    "price": 50,
+    "mods": [
+      "sweet",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "สตรอว์เบอร์รีโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "กีวี่โซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "เสาวรสโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "บลูฮาวายโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "ลิ้นจี่โซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "มะม่วงโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "มะนาวโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "แดงมะนาวโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "ส้มโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "โยเกิร์ตโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "โซดา",
     "name": "มะพร้าวโซดา",
-    "price": 35
+    "price": 35,
+    "mods": [
+      "sweet",
+      "ice",
+      "size"
+    ]
   },
   {
     "category": "ปังเย็น",
     "name": "ปังเย็นนมสด",
-    "price": 55
+    "price": 55,
+    "mods": [
+      "sweet",
+      "topping"
+    ]
   },
   {
     "category": "ปังเย็น",
     "name": "ปังเย็นนมชมพู",
-    "price": 55
+    "price": 55,
+    "mods": [
+      "sweet",
+      "topping"
+    ]
   },
   {
     "category": "ปังเย็น",
     "name": "ปังเย็นชาไทย",
-    "price": 55
+    "price": 55,
+    "mods": [
+      "sweet",
+      "topping"
+    ]
   },
   {
     "category": "ปังเย็น",
     "name": "ปังเย็นชาเขียว",
-    "price": 55
+    "price": 55,
+    "mods": [
+      "sweet",
+      "topping"
+    ]
   },
   {
     "category": "ปังเย็น",
     "name": "ปังเย็นโกโก้",
-    "price": 55
+    "price": 55,
+    "mods": [
+      "sweet",
+      "topping"
+    ]
   },
   {
     "category": "ขนมปังปิ้ง",
     "name": "เนยนม",
-    "price": 15
+    "price": 15,
+    "mods": []
   },
   {
     "category": "ขนมปังปิ้ง",
     "name": "เนยน้ำตาล",
-    "price": 15
+    "price": 15,
+    "mods": []
   },
   {
     "category": "ขนมปังปิ้ง",
     "name": "เนยช็อกโกแลต",
-    "price": 15
+    "price": 15,
+    "mods": []
   },
   {
     "category": "ขนมปังปิ้ง",
     "name": "เนยคาราเมล",
-    "price": 15
+    "price": 15,
+    "mods": []
   }
 ]
