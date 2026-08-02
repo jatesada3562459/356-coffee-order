@@ -46,6 +46,9 @@ const selectedMemberBox = document.getElementById("selectedMemberBox");
 const selectedMemberInfo = document.getElementById("selectedMemberInfo");
 const clearSelectedMember = document.getElementById("clearSelectedMember");
 const cupCountPreview = document.getElementById("cupCountPreview");
+const rewardUseBox = document.getElementById("rewardUseBox");
+const rewardUseMessage = document.getElementById("rewardUseMessage");
+const useMemberReward = document.getElementById("useMemberReward");
 
 let firstLoadFinished = false;
 let knownOrderIds = new Set();
@@ -58,6 +61,7 @@ let historyDate = bangkokDateKey();
 let checkoutOrder = null;
 let checkoutMembers = [];
 let selectedMember = null;
+let rewardDiscountApplied = false;
 
 injectKitchenStyles();
 updateSoundButton();
@@ -321,6 +325,9 @@ function renderSelectedMember() {
   if (!selectedMember) {
     selectedMemberBox.classList.add("hidden");
     selectedMemberInfo.innerHTML = "";
+    rewardUseBox.classList.add("hidden");
+    useMemberReward.checked = false;
+    rewardDiscountApplied = false;
     return;
   }
 
@@ -331,6 +338,51 @@ function renderSelectedMember() {
     ☕ สะสม ${selectedMember.stamp_count || 0}/10<br>
     ${memberRewardText(selectedMember)}
   `;
+
+  updateRewardAvailability();
+}
+
+function updateRewardAvailability() {
+  if (!selectedMember || !checkoutOrder) {
+    rewardUseBox.classList.add("hidden");
+    return;
+  }
+
+  const currentStamps = Number(selectedMember.stamp_count || 0);
+  const cupsThisOrder = countDrinkCups(checkoutOrder);
+  const alreadyHasReward = Boolean(selectedMember.reward_available);
+  const reachesRewardNow = currentStamps + cupsThisOrder >= 10;
+  const canUseReward = alreadyHasReward || reachesRewardNow;
+
+  rewardUseBox.classList.toggle("hidden", !canUseReward);
+
+  if (!canUseReward) {
+    useMemberReward.checked = false;
+    rewardDiscountApplied = false;
+    return;
+  }
+
+  rewardUseMessage.textContent = alreadyHasReward
+    ? `มีสิทธิ์ค้างอยู่แล้ว • ออเดอร์นี้มี ${cupsThisOrder} แก้ว`
+    : `ออเดอร์นี้ทำให้ครบ ${currentStamps + cupsThisOrder}/10 และใช้สิทธิ์ได้ทันที`;
+}
+
+function applyRewardDiscountState() {
+  rewardDiscountApplied = useMemberReward.checked;
+
+  if (rewardDiscountApplied) {
+    discountAmount.value = "30";
+    discountReason.value = "บัตรสะสมครบ 10 แก้ว";
+    otherReasonWrap.classList.add("hidden");
+  } else if (
+    discountReason.value === "บัตรสะสมครบ 10 แก้ว" &&
+    Number(discountAmount.value || 0) === 30
+  ) {
+    discountAmount.value = "0";
+    discountReason.value = "";
+  }
+
+  calculateCheckout();
 }
 
 function renderCheckoutMemberResults() {
@@ -366,7 +418,10 @@ function renderCheckoutMemberResults() {
       selectedMember = member;
       checkoutMemberSearch.value = "";
       checkoutMemberResults.innerHTML = "";
+      useMemberReward.checked = false;
+      rewardDiscountApplied = false;
       renderSelectedMember();
+      calculateCheckout();
     });
 
     checkoutMemberResults.appendChild(button);
@@ -446,6 +501,8 @@ function openCheckout(order) {
   checkoutTotal.textContent = numberBaht(order.total);
 
   selectedMember = null;
+  rewardDiscountApplied = false;
+  useMemberReward.checked = false;
   checkoutMemberSearch.value = "";
   checkoutMemberResults.innerHTML = "";
   renderSelectedMember();
@@ -490,11 +547,25 @@ checkoutModal
   .querySelector("[data-close-checkout]")
   .addEventListener("click", closeCheckout);
 
-discountAmount.addEventListener("input", calculateCheckout);
+discountAmount.addEventListener("input", () => {
+  if (useMemberReward.checked && Number(discountAmount.value || 0) !== 30) {
+    useMemberReward.checked = false;
+    rewardDiscountApplied = false;
+  }
+  calculateCheckout();
+});
 cashReceived.addEventListener("input", calculateCheckout);
 otherDiscountReason.addEventListener("input", calculateCheckout);
 
 discountReason.addEventListener("change", () => {
+  if (
+    useMemberReward.checked &&
+    discountReason.value !== "บัตรสะสมครบ 10 แก้ว"
+  ) {
+    useMemberReward.checked = false;
+    rewardDiscountApplied = false;
+  }
+
   otherReasonWrap.classList.toggle(
     "hidden",
     discountReason.value !== "อื่น ๆ"
@@ -510,8 +581,13 @@ checkoutMemberSearch.addEventListener("input", renderCheckoutMemberResults);
 
 clearSelectedMember.addEventListener("click", () => {
   selectedMember = null;
+  rewardDiscountApplied = false;
+  useMemberReward.checked = false;
   renderSelectedMember();
+  calculateCheckout();
 });
+
+useMemberReward.addEventListener("change", applyRewardDiscountState);
 
 checkoutDoneButton.addEventListener("click", async () => {
   if (!checkoutOrder) return;
@@ -532,7 +608,8 @@ checkoutDoneButton.addEventListener("click", async () => {
       result.paymentMethod === "counter" ? result.received : null,
     p_change_amount:
       result.paymentMethod === "counter" ? result.change : 0,
-    p_member_id: selectedMember?.id || null
+    p_member_id: selectedMember?.id || null,
+    p_use_reward: Boolean(useMemberReward.checked)
   });
 
   checkoutDoneButton.disabled = false;
@@ -547,6 +624,7 @@ checkoutDoneButton.addEventListener("click", async () => {
   const pointsAdded = Number(saved?.points_added || 0);
   const newStampCount = saved?.new_stamp_count;
   const rewardAvailable = saved?.reward_available;
+  const rewardUsed = Boolean(saved?.reward_used);
 
   closeCheckout();
 
@@ -575,7 +653,9 @@ checkoutDoneButton.addEventListener("click", async () => {
     message += `\n\nสมาชิก: ${selectedMember.name}`;
     message += `\nเพิ่มแต้ม ${pointsAdded} แก้ว`;
     message += `\nสะสมใหม่ ${newStampCount}/10`;
-    if (rewardAvailable) {
+    if (rewardUsed) {
+      message += `\n🎁 ใช้สิทธิ์ลด 30 บาทแล้ว`;
+    } else if (rewardAvailable) {
       message += `\n🎁 มีสิทธิ์ลด 30 บาท`;
     }
   }
