@@ -10,14 +10,25 @@ function renderMenu(){$("menu").innerHTML="";if(cat==="ADD-ON"){db.addons.forEac
 db.products.filter(x=>cat==="ทั้งหมด"||x.category===cat).forEach(p=>{const d=document.createElement("div");d.className="card";d.innerHTML=`<div class=name>${p.name}</div><div class=price>฿${p.price}</div><button>เลือกเมนู</button>`;d.onclick=()=>openProduct(p);$("menu").appendChild(d)})}
 function radios(title,name,opts,sel){return `<h3>${title}</h3>`+opts.map(o=>`<label><input type=radio name=${name} value="${o}" ${o===sel?"checked":""}> ${o}</label>`).join("")}
 function checks(title,name,opts,sel){return `<h3>${title}</h3>`+opts.map(o=>`<label><input type=checkbox name=${name} value="${o.n}" data-price=${o.p} ${sel.includes(o.n)?"checked":""}> ${o.n} +${o.p}</label>`).join("")}
-function openProduct(p,i=null){current=p;editIndex=i;qty=i===null?1:cart[i].qty;$("qtyValue").textContent=qty;$("pname").textContent=p.name;const old=i===null?[]:cart[i].options;let h="";
-if(p.groups.includes("sweet"))h+=radios("ความหวาน","sweet",["ไม่หวาน","หวานน้อย","ปกติ","เพิ่มหวาน"],old.find(x=>["ไม่หวาน","หวานน้อย","ปกติ","เพิ่มหวาน"].includes(x))||"ปกติ");
-if(p.groups.includes("milk"))h+=radios("ชนิดนม","milk",["นมสด","นมโอ๊ต"],old.find(x=>["นมสด","นมโอ๊ต"].includes(x))||"นมสด");
-if(p.groups.includes("extras_all"))h+=checks("เพิ่มเติม","extra",[{n:"ปั่น",p:10},{n:"ไข่มุกบุก",p:10},{n:"ปีโป้",p:10},{n:"โยเกิร์ต",p:10},{n:"ครีมชีส",p:15}],old);
-if(p.groups.includes("extras_no_blend"))h+=checks("เพิ่มเติม","extra",[{n:"ไข่มุกบุก",p:10},{n:"ปีโป้",p:10},{n:"โยเกิร์ต",p:10},{n:"ครีมชีส",p:15}],old);
-if(p.groups.includes("extras_soda"))h+=checks("เพิ่มเติม","extra",[{n:"ไข่มุกบุก",p:10},{n:"ปีโป้",p:10},{n:"ครีมชีส",p:15}],old);
-if(p.groups.includes("size"))h+=checks("ขนาดแก้ว","size",[{n:"อัปไซส์แก้วใหญ่",p:10}],old);
-if(!h)h="<p>เมนูนี้ไม่มีตัวเลือกเพิ่มเติม</p>";$("modifierArea").innerHTML=h;$("saveBtn").textContent=i===null?"เพิ่มลงตะกร้า":"บันทึกการแก้ไข";$("product").classList.add("show")}
+function openProduct(p,i=null){
+  current=p;editIndex=i;qty=i===null?1:cart[i].qty;$("qtyValue").textContent=qty;$("pname").textContent=p.name;
+  const old=i===null?[]:cart[i].options;let h="";
+  if(p.groups.includes("sweet")){
+    const opts=["ไม่หวาน","หวานน้อย","ปกติ","เพิ่มหวาน"];
+    h+=radios("ความหวาน","sweet",opts,old.find(x=>opts.includes(x))||"ปกติ");
+  }
+  if(p.groups.includes("sweet_no_zero")){
+    const opts=["หวานน้อย","ปกติ","เพิ่มหวาน"];
+    h+=radios("ความหวาน","sweet",opts,old.find(x=>opts.includes(x))||"ปกติ");
+  }
+  if(p.groups.includes("milk"))h+=radios("ชนิดนม","milk",["นมสด","นมโอ๊ต"],old.find(x=>["นมสด","นมโอ๊ต"].includes(x))||"นมสด");
+  if(p.groups.includes("extras_all"))h+=checks("เพิ่มเติม","extra",[{n:"ปั่น",p:10},{n:"ไข่มุกบุก",p:10},{n:"ปีโป้",p:10},{n:"โยเกิร์ต",p:10},{n:"ครีมชีส",p:15}],old);
+  if(p.groups.includes("extras_no_blend"))h+=checks("เพิ่มเติม","extra",[{n:"ไข่มุกบุก",p:10},{n:"ปีโป้",p:10},{n:"โยเกิร์ต",p:10},{n:"ครีมชีส",p:15}],old);
+  if(p.groups.includes("extras_soda"))h+=checks("เพิ่มเติม","extra",[{n:"ไข่มุกบุก",p:10},{n:"ปีโป้",p:10},{n:"ครีมชีส",p:15}],old);
+  if(p.groups.includes("size"))h+=checks("ขนาดแก้ว","size",[{n:"อัปไซส์แก้วใหญ่",p:10}],old);
+  if(!h)h="<p>เมนูนี้ไม่มีตัวเลือกเพิ่มเติม</p>";
+  $("modifierArea").innerHTML=h;$("saveBtn").textContent=i===null?"เพิ่มลงตะกร้า":"บันทึกการแก้ไข";$("product").classList.add("show")
+}
 function closeProduct(){$("product").classList.remove("show")}function changeQty(n){qty=Math.max(1,Math.min(20,qty+n));$("qtyValue").textContent=qty}
 function saveProduct(){let options=[],extra=0;["sweet","milk"].forEach(n=>{const e=document.querySelector(`input[name=${n}]:checked`);if(e)options.push(e.value)});document.querySelectorAll('input[name=extra]:checked,input[name=size]:checked').forEach(e=>{options.push(e.value);extra+=Number(e.dataset.price||0)});const item={product:current,name:current.name,qty,unit:current.price+extra,options};if(editIndex===null)cart.push(item);else cart[editIndex]=item;closeProduct();renderCart()}
 function renderCart(){$("count").textContent=cart.reduce((s,x)=>s+x.qty,0);$("items").innerHTML="";cart.forEach((x,i)=>{const d=document.createElement("div");d.className="row";d.innerHTML=`<b>${x.name} × ${x.qty}</b><div class=muted>${x.options.join(" • ")||"ไม่มีตัวเลือกเพิ่มเติม"}</div><div>฿${x.unit*x.qty}</div><div class=actions><button class=edit>แก้ไข</button><button class=remove>ลบ</button></div>`;d.querySelector(".edit").onclick=()=>{closeCart();openProduct(x.product,i)};d.querySelector(".remove").onclick=()=>{cart.splice(i,1);renderCart()};$("items").appendChild(d)});$("total").textContent="รวม ฿"+cart.reduce((s,x)=>s+x.unit*x.qty,0)}

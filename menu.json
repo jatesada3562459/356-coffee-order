@@ -70,7 +70,7 @@
       "name": "กาแฟส้ม",
       "price": 55,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_all",
         "size"
       ]
@@ -80,7 +80,7 @@
       "name": "กาแฟมะพร้าว",
       "price": 55,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_all",
         "size"
       ]
@@ -189,7 +189,7 @@
       "name": "นมสดน้ำผึ้ง",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "milk",
         "extras_all",
         "size"
@@ -230,7 +230,7 @@
       "name": "น้ำผึ้งมะนาว",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_all",
         "size"
       ]
@@ -375,7 +375,7 @@
       "name": "สตรอว์เบอร์รีโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -385,7 +385,7 @@
       "name": "กีวี่โซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -395,7 +395,7 @@
       "name": "เสาวรสโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -405,7 +405,7 @@
       "name": "บลูฮาวายโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -415,7 +415,7 @@
       "name": "ลิ้นจี่โซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -425,7 +425,7 @@
       "name": "มะม่วงโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -435,7 +435,7 @@
       "name": "มะนาวโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -445,7 +445,7 @@
       "name": "แดงมะนาวโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -455,7 +455,7 @@
       "name": "ส้มโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -465,7 +465,7 @@
       "name": "โยเกิร์ตโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
@@ -475,7 +475,7 @@
       "name": "มะพร้าวโซดา",
       "price": 35,
       "groups": [
-        "sweet",
+        "sweet_no_zero",
         "extras_soda",
         "size"
       ]
