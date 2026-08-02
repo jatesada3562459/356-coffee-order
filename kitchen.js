@@ -21,6 +21,11 @@ const activeTabCount = document.getElementById("activeTabCount");
 const readyTabCount = document.getElementById("readyTabCount");
 const historyTabCount = document.getElementById("historyTabCount");
 const tabButtons = [...document.querySelectorAll(".order-tab")];
+const checkoutModal = document.getElementById("checkoutModal");
+const closeCheckoutButton = document.getElementById("closeCheckoutButton");
+const checkoutDoneButton = document.getElementById("checkoutDoneButton");
+const checkoutOrderInfo = document.getElementById("checkoutOrderInfo");
+const checkoutTotal = document.getElementById("checkoutTotal");
 
 let firstLoadFinished = false;
 let knownOrderIds = new Set();
@@ -192,6 +197,28 @@ function orderMatchesTab(order) {
   return false;
 }
 
+function openCheckout(order) {
+  checkoutOrderInfo.innerHTML = `
+    <b>${order.order_no}</b><br>
+    ลูกค้า: ${order.customer_name || "ไม่ระบุชื่อ"}<br>
+    โต๊ะ: ${order.table_no === "counter" ? "เคาน์เตอร์" : order.table_no}
+  `;
+  checkoutTotal.textContent = numberBaht(order.total);
+  checkoutModal.classList.add("show");
+  checkoutModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeCheckout() {
+  checkoutModal.classList.remove("show");
+  checkoutModal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+closeCheckoutButton.addEventListener("click", closeCheckout);
+checkoutDoneButton.addEventListener("click", closeCheckout);
+checkoutModal.querySelector("[data-close-checkout]").addEventListener("click", closeCheckout);
+
 function renderOrders(newOrderIds = []) {
   const filteredOrders = allOrders.filter(orderMatchesTab).filter(orderMatchesSearch);
   ordersEl.innerHTML = "";
@@ -227,6 +254,10 @@ function renderOrders(newOrderIds = []) {
           <button class="making-btn">กำลังทำ</button>
           <button class="ready-btn">พร้อมเสิร์ฟ</button>
         </div>
+      ` : currentTab === "ready" ? `
+        <div class="actions">
+          <button class="checkout-btn">💰 คิดเงิน</button>
+        </div>
       ` : ""}`;
 
     const makingButton = card.querySelector(".making-btn");
@@ -238,6 +269,11 @@ function renderOrders(newOrderIds = []) {
 
     if (readyButton) {
       readyButton.addEventListener("click", () => setStatus(order.id, "ready"));
+    }
+
+    const checkoutButton = card.querySelector(".checkout-btn");
+    if (checkoutButton) {
+      checkoutButton.addEventListener("click", () => openCheckout(order));
     }
 
     ordersEl.appendChild(card);

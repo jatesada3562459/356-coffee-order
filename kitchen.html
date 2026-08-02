@@ -50,7 +50,22 @@
     </section>
 
     <div id="orders"></div>
-    <footer class="version-label">356 POS V1.1.2</footer>
+    <footer class="version-label">356 POS V1.1.3</footer>
+
+    <div id="checkoutModal" class="checkout-modal" aria-hidden="true">
+      <div class="checkout-backdrop" data-close-checkout></div>
+      <section class="checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+        <button id="closeCheckoutButton" class="checkout-close" type="button" aria-label="ปิด">×</button>
+        <h2 id="checkoutTitle">💰 คิดเงิน</h2>
+        <div id="checkoutOrderInfo" class="checkout-order-info"></div>
+        <div class="checkout-total-row">
+          <span>ยอดสินค้า</span>
+          <strong id="checkoutTotal">฿0</strong>
+        </div>
+        <p class="checkout-note">ขั้นแรกเพิ่มปุ่มคิดเงินและหน้าสรุปยอดก่อน ส่วนช่องส่วนลด เงินรับ และเงินทอนจะเพิ่มในขั้นถัดไป</p>
+        <button id="checkoutDoneButton" class="primary" type="button">ปิดหน้าคิดเงิน</button>
+      </section>
+    </div>
   </main>
 
   <audio id="dingAudio" src="notification.wav" preload="auto"></audio>
