@@ -31,6 +31,9 @@ const discountReason = document.getElementById("discountReason");
 const otherReasonWrap = document.getElementById("otherReasonWrap");
 const otherDiscountReason = document.getElementById("otherDiscountReason");
 const checkoutNetTotal = document.getElementById("checkoutNetTotal");
+const cashFields = document.getElementById("cashFields");
+const cashReceived = document.getElementById("cashReceived");
+const changeAmount = document.getElementById("changeAmount");
 const discountError = document.getElementById("discountError");
 
 let firstLoadFinished = false;
@@ -204,6 +207,10 @@ function orderMatchesTab(order) {
   return false;
 }
 
+function selectedCheckoutPayment() {
+  return document.querySelector('input[name="checkoutPayment"]:checked')?.value || "counter";
+}
+
 function calculateDiscount() {
   if (!checkoutOrder) return;
 
@@ -212,8 +219,15 @@ function calculateDiscount() {
   const net = Math.max(0, total - discount);
   const reason = discountReason.value;
   const otherReason = otherDiscountReason.value.trim();
+  const paymentMethod = selectedCheckoutPayment();
+  const received = Math.max(0, Number(cashReceived.value || 0));
+  const change = paymentMethod === "counter"
+    ? Math.max(0, received - net)
+    : 0;
 
   checkoutNetTotal.textContent = numberBaht(net);
+  changeAmount.textContent = numberBaht(change);
+  cashFields.style.display = paymentMethod === "counter" ? "block" : "none";
   discountError.textContent = "";
 
   if (discount > total) {
@@ -222,6 +236,8 @@ function calculateDiscount() {
     discountError.textContent = "กรุณาเลือกเหตุผลส่วนลด";
   } else if (reason === "อื่น ๆ" && !otherReason) {
     discountError.textContent = "กรุณาระบุเหตุผลส่วนลด";
+  } else if (paymentMethod === "counter" && received < net) {
+    discountError.textContent = "จำนวนเงินที่รับยังไม่พอยอดสุทธิ";
   }
 }
 
@@ -237,6 +253,10 @@ function openCheckout(order) {
   discountReason.value = "";
   otherDiscountReason.value = "";
   otherReasonWrap.classList.add("hidden");
+  cashReceived.value = "";
+  const defaultPayment = order.payment_method === "promptpay" ? "promptpay" : "counter";
+  const paymentRadio = document.querySelector(`input[name="checkoutPayment"][value="${defaultPayment}"]`);
+  if (paymentRadio) paymentRadio.checked = true;
   checkoutModal.classList.add("show");
   checkoutModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -258,6 +278,10 @@ discountReason.addEventListener("change", () => {
   calculateDiscount();
 });
 otherDiscountReason.addEventListener("input", calculateDiscount);
+cashReceived.addEventListener("input", calculateDiscount);
+document.querySelectorAll('input[name="checkoutPayment"]').forEach(input => {
+  input.addEventListener("change", calculateDiscount);
+});
 checkoutModal.querySelector("[data-close-checkout]").addEventListener("click", closeCheckout);
 
 function renderOrders(newOrderIds = []) {
