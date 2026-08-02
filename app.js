@@ -22,7 +22,9 @@ const itemsEl = document.getElementById("items");
 const totalEl = document.getElementById("total");
 
 tableEl.textContent =
-  tableNo === "counter" ? "สั่งที่เคาน์เตอร์ / กลับบ้าน" : `โต๊ะ ${tableNo}`;
+  tableNo === "counter"
+    ? "สั่งที่เคาน์เตอร์ / กลับบ้าน"
+    : `โต๊ะ ${tableNo}`;
 
 qtyEl.innerHTML = Array.from(
   { length: 10 },
@@ -46,42 +48,66 @@ fetch("menu.json")
 function renderTabs() {
   const categories = ["ทั้งหมด", ...new Set(products.map((x) => x.category))];
 
-  tabsEl.innerHTML = categories
-    .map(
-      (category) =>
-        `<button onclick="selectCategory(${JSON.stringify(category)})">${category}</button>`
-    )
-    .join("");
-}
+  tabsEl.innerHTML = "";
 
-function selectCategory(category) {
-  selectedCategory = category;
-  renderMenu();
+  categories.forEach((category) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = category;
+
+    if (category === selectedCategory) {
+      button.classList.add("active");
+    }
+
+    button.addEventListener("click", () => {
+      selectedCategory = category;
+      renderTabs();
+      renderMenu();
+    });
+
+    tabsEl.appendChild(button);
+  });
 }
 
 function renderMenu() {
   const visible = products.filter(
-    (x) => selectedCategory === "ทั้งหมด" || x.category === selectedCategory
+    (x) =>
+      selectedCategory === "ทั้งหมด" ||
+      x.category === selectedCategory
   );
 
-  menuEl.innerHTML = visible
-    .map(
-      (product) => `
-        <div class="card">
-          <div class="name">${product.name}</div>
-          <div class="price">฿${product.price}</div>
-          <button onclick='openProduct(${JSON.stringify(product)})'>เลือกเมนู</button>
-        </div>`
-    )
-    .join("");
+  menuEl.innerHTML = "";
+
+  visible.forEach((product) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = product.name;
+
+    const price = document.createElement("div");
+    price.className = "price";
+    price.textContent = `฿${product.price}`;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "เลือกเมนู";
+    button.addEventListener("click", () => openProduct(product));
+
+    card.append(name, price, button);
+    menuEl.appendChild(card);
+  });
 }
 
 function openProduct(product) {
   currentProduct = product;
   document.getElementById("pname").textContent = product.name;
+
   document.querySelectorAll(".add").forEach((x) => {
     x.checked = false;
   });
+
   productPanel.classList.add("show");
 }
 
@@ -93,7 +119,10 @@ function addCart() {
   const sweet = document.querySelector(
     'input[name="sweet"]:checked'
   )?.value;
-  const milk = document.querySelector('input[name="milk"]:checked')?.value;
+
+  const milk = document.querySelector(
+    'input[name="milk"]:checked'
+  )?.value;
 
   const options = [sweet, milk].filter(Boolean);
   let extraPrice = 0;
@@ -117,22 +146,40 @@ function addCart() {
 }
 
 function renderCart() {
-  countEl.textContent = cartItems.reduce((sum, x) => sum + x.qty, 0);
+  countEl.textContent = cartItems.reduce(
+    (sum, x) => sum + x.qty,
+    0
+  );
 
-  itemsEl.innerHTML = cartItems
-    .map(
-      (x, i) => `
-        <div class="row">
-          <b>${x.name} × ${x.qty}</b>
-          <div>${x.opts.join(" • ")}</div>
-          <div>฿${x.unit * x.qty}</div>
-          <button onclick="removeCartItem(${i})">ลบ</button>
-        </div>`
-    )
-    .join("");
+  itemsEl.innerHTML = "";
+
+  cartItems.forEach((item, index) => {
+    const row = document.createElement("div");
+    row.className = "row";
+
+    row.innerHTML = `
+      <b>${item.name} × ${item.qty}</b>
+      <div>${item.opts.join(" • ")}</div>
+      <div>฿${item.unit * item.qty}</div>
+    `;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "ลบ";
+    removeButton.addEventListener("click", () => {
+      removeCartItem(index);
+    });
+
+    row.appendChild(removeButton);
+    itemsEl.appendChild(row);
+  });
 
   totalEl.textContent =
-    "รวม ฿" + cartItems.reduce((sum, x) => sum + x.unit * x.qty, 0);
+    "รวม ฿" +
+    cartItems.reduce(
+      (sum, x) => sum + x.unit * x.qty,
+      0
+    );
 }
 
 function removeCartItem(index) {
@@ -156,22 +203,31 @@ async function submitOrder() {
   }
 
   const orderId = crypto.randomUUID();
-  const orderNo = "356-" + Date.now().toString().slice(-8);
+  const orderNo =
+    "356-" + Date.now().toString().slice(-8);
+
   const paymentMethod = document.querySelector(
     'input[name="pay"]:checked'
   ).value;
-  const total = cartItems.reduce((sum, x) => sum + x.unit * x.qty, 0);
+
+  const total = cartItems.reduce(
+    (sum, x) => sum + x.unit * x.qty,
+    0
+  );
+
   const customerName =
     document.getElementById("customer").value.trim() || null;
 
-  const { error: orderError } = await sb.from("orders").insert({
-    id: orderId,
-    order_no: orderNo,
-    table_no: tableNo,
-    customer_name: customerName,
-    payment_method: paymentMethod,
-    total,
-  });
+  const { error: orderError } = await sb
+    .from("orders")
+    .insert({
+      id: orderId,
+      order_no: orderNo,
+      table_no: tableNo,
+      customer_name: customerName,
+      payment_method: paymentMethod,
+      total,
+    });
 
   if (orderError) {
     alert("ส่งออร์เดอร์ไม่สำเร็จ: " + orderError.message);
@@ -187,14 +243,22 @@ async function submitOrder() {
     line_total: x.unit * x.qty,
   }));
 
-  const { error: itemError } = await sb.from("order_items").insert(rows);
+  const { error: itemError } = await sb
+    .from("order_items")
+    .insert(rows);
 
   if (itemError) {
-    alert("บันทึกรายการสินค้าไม่สำเร็จ: " + itemError.message);
+    alert(
+      "บันทึกรายการสินค้าไม่สำเร็จ: " +
+        itemError.message
+    );
     return;
   }
 
-  alert(`ส่งออร์เดอร์สำเร็จ\nเลขที่ ${orderNo}\nยอดรวม ฿${total}`);
+  alert(
+    `ส่งออร์เดอร์สำเร็จ\nเลขที่ ${orderNo}\nยอดรวม ฿${total}`
+  );
+
   cartItems = [];
   renderCart();
   closeCart();
