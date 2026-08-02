@@ -7,24 +7,18 @@ const ordersEl = document.getElementById("orders");
 const soundToggle = document.getElementById("soundToggle");
 const soundHint = document.getElementById("soundHint");
 const dingAudio = document.getElementById("dingAudio");
-const searchInput = document.getElementById("orderSearch");
-const searchResultNote = document.getElementById("searchResultNote");
+const orderSearch = document.getElementById("orderSearch");
+const searchResultCount = document.getElementById("searchResultCount");
 const todayOrderCount = document.getElementById("todayOrderCount");
-const todaySales = document.getElementById("todaySales");
-const todayCounter = document.getElementById("todayCounter");
-const todayPromptPay = document.getElementById("todayPromptPay");
+const todaySalesTotal = document.getElementById("todaySalesTotal");
+const todayCounterTotal = document.getElementById("todayCounterTotal");
+const todayPromptPayTotal = document.getElementById("todayPromptPayTotal");
 
-let allOrders = [];
 let firstLoadFinished = false;
 let knownOrderIds = new Set();
 let soundEnabled = false;
-let loadingOrders = false;
-
-const REMINDER_AFTER_MS = 60 * 1000;
-const reminderStorageKey = "356_reminded_order_ids";
-const remindedOrderIds = new Set(
-  JSON.parse(sessionStorage.getItem(reminderStorageKey) || "[]")
-);
+let allOrders = [];
+let remindedOrderIds = new Set();
 
 injectKitchenStyles();
 updateSoundButton();
@@ -84,12 +78,6 @@ function playDing() {
   }
 }
 
-function playReminderTwice() {
-  if (!soundEnabled) return;
-  playDing();
-  setTimeout(playDing, 650);
-}
-
 soundToggle.addEventListener("click", () => {
   if (soundEnabled) {
     soundEnabled = false;
@@ -102,8 +90,11 @@ soundToggle.addEventListener("click", () => {
   dingAudio.currentTime = 0;
 
   const promise = dingAudio.play();
+
   if (promise) {
-    promise.then(updateSoundButton).catch(error => {
+    promise.then(() => {
+      updateSoundButton();
+    }).catch(error => {
       soundEnabled = false;
       updateSoundButton();
       console.error(error);
@@ -114,7 +105,7 @@ soundToggle.addEventListener("click", () => {
   }
 });
 
-searchInput.addEventListener("input", renderOrders);
+orderSearch.addEventListener("input", renderOrders);
 
 function statusText(status) {
   return {
@@ -125,24 +116,28 @@ function statusText(status) {
 }
 
 function paymentText(method) {
-  return method === "promptpay" ? "พร้อมเพย์" : "จ่ายที่เคาน์เตอร์";
+  return method === "promptpay"
+    ? "พร้อมเพย์"
+    : "จ่ายที่เคาน์เตอร์";
 }
 
 function orderTime(value) {
   if (!value) return "-";
+
   return new Date(value).toLocaleTimeString("th-TH", {
     hour: "2-digit",
     minute: "2-digit"
   });
 }
 
-function currency(value) {
+function money(value) {
   return `฿${Number(value || 0).toLocaleString("th-TH", {
-    maximumFractionDigits: 0
+    maximumFractionDigits: 2
   })}`;
 }
 
 function isToday(value) {
+  if (!value) return false;
   const date = new Date(value);
   const now = new Date();
   return (
@@ -152,80 +147,83 @@ function isToday(value) {
   );
 }
 
-function updateDashboard() {
-  const todayOrders = allOrders.filter(order => isToday(order.created_at));
-  const sales = todayOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+function updateDashboard(orders) {
+  const todayOrders = orders.filter(order => isToday(order.created_at));
+  const total = todayOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
   const counter = todayOrders
     .filter(order => order.payment_method !== "promptpay")
     .reduce((sum, order) => sum + Number(order.total || 0), 0);
-  const promptPay = todayOrders
+  const promptpay = todayOrders
     .filter(order => order.payment_method === "promptpay")
     .reduce((sum, order) => sum + Number(order.total || 0), 0);
 
   todayOrderCount.textContent = todayOrders.length.toLocaleString("th-TH");
-  todaySales.textContent = currency(sales);
-  todayCounter.textContent = currency(counter);
-  todayPromptPay.textContent = currency(promptPay);
+  todaySalesTotal.textContent = money(total);
+  todayCounterTotal.textContent = money(counter);
+  todayPromptPayTotal.textContent = money(promptpay);
 }
 
-function searchableText(order) {
-  const tableText = order.table_no === "counter" ? "เคาน์เตอร์" : `โต๊ะ ${order.table_no}`;
+function orderMatchesSearch(order, query) {
+  if (!query) return true;
+
   const itemText = (order.order_items || [])
     .map(item => `${item.product_name} ${(item.options || []).join(" ")}`)
     .join(" ");
 
-  return [
+  const tableText = order.table_no === "counter"
+    ? "เคาน์เตอร์ counter"
+    : `โต๊ะ ${order.table_no} ${order.table_no}`;
+
+  const searchable = [
     order.order_no,
-    order.customer_name || "",
+    order.customer_name,
     tableText,
     paymentText(order.payment_method),
-    statusText(order.status),
     itemText
-  ].join(" ").toLocaleLowerCase("th-TH");
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase("th-TH");
+
+  return searchable.includes(query);
 }
 
-function getFilteredOrders() {
-  const query = searchInput.value.trim().toLocaleLowerCase("th-TH");
-  if (!query) return allOrders;
-  return allOrders.filter(order => searchableText(order).includes(query));
-}
+function renderOrders() {
+  const query = orderSearch.value.trim().toLocaleLowerCase("th-TH");
+  const filteredOrders = allOrders.filter(order => orderMatchesSearch(order, query));
 
-function renderOrders(newOrderIds = []) {
-  const orders = getFilteredOrders();
-  const query = searchInput.value.trim();
-
-  searchResultNote.textContent = query
-    ? `พบ ${orders.length} ออเดอร์จากทั้งหมด ${allOrders.length} ออเดอร์`
-    : `เรียงตามเวลาสั่ง: สั่งก่อนอยู่บนสุด`;
+  searchResultCount.textContent = query
+    ? `พบ ${filteredOrders.length} ออเดอร์`
+    : "";
 
   ordersEl.innerHTML = "";
 
-  if (!orders.length) {
-    ordersEl.innerHTML = `<div class="empty-orders">ไม่พบออเดอร์ที่ค้นหา</div>`;
+  if (filteredOrders.length === 0) {
+    ordersEl.innerHTML = `<div class="empty-state">ไม่พบออเดอร์ที่ค้นหา</div>`;
     return;
   }
 
-  orders.forEach(order => {
+  filteredOrders.forEach(order => {
     const card = document.createElement("section");
     card.className = "order";
 
-    if (newOrderIds.includes(order.id)) {
+    if (order.__isNewArrival) {
       card.classList.add("new-order-flash");
     }
 
-    const tableText = order.table_no === "counter" ? "เคาน์เตอร์" : order.table_no;
-    const waitingReminder =
-      order.status === "new" &&
-      Date.now() - new Date(order.created_at).getTime() >= REMINDER_AFTER_MS;
+    const tableText = order.table_no === "counter"
+      ? "เคาน์เตอร์"
+      : order.table_no;
 
     card.innerHTML = `
       <div class="order-top">
         <div>
-          <span class="status status-${order.status}">${statusText(order.status)}</span>
-          ${waitingReminder ? '<span class="reminder-badge">รอรับออเดอร์</span>' : ""}
+          <span class="status status-${order.status}">
+            ${statusText(order.status)}
+          </span>
           <h3>${order.order_no}</h3>
         </div>
-        <div class="price">${currency(order.total)}</div>
+        <div class="price">${money(order.total)}</div>
       </div>
 
       <div class="order-meta">
@@ -262,30 +260,26 @@ function renderOrders(newOrderIds = []) {
   });
 }
 
-function saveRemindedIds() {
-  sessionStorage.setItem(reminderStorageKey, JSON.stringify([...remindedOrderIds]));
-}
+function checkSecondReminder(orders) {
+  if (!firstLoadFinished || !soundEnabled) return;
 
-function checkSecondReminders() {
-  allOrders.forEach(order => {
-    const age = Date.now() - new Date(order.created_at).getTime();
-    const shouldRemind =
-      order.status === "new" &&
-      age >= REMINDER_AFTER_MS &&
-      !remindedOrderIds.has(order.id);
+  const now = Date.now();
 
-    if (shouldRemind) {
+  orders.forEach(order => {
+    if (order.status !== "new" || remindedOrderIds.has(order.id)) return;
+
+    const createdAt = new Date(order.created_at).getTime();
+    const waitingMilliseconds = now - createdAt;
+
+    if (waitingMilliseconds >= 60_000) {
       remindedOrderIds.add(order.id);
-      saveRemindedIds();
-      playReminderTwice();
+      playDing();
+      setTimeout(playDing, 500);
     }
   });
 }
 
 async function loadOrders() {
-  if (loadingOrders) return;
-  loadingOrders = true;
-
   const { data, error } = await sb
     .from("orders")
     .select(`
@@ -306,10 +300,9 @@ async function loadOrders() {
     `)
     .order("created_at", { ascending: true });
 
-  loadingOrders = false;
-
   if (error) {
-    ordersEl.innerHTML = `<p>โหลดออร์เดอร์ไม่สำเร็จ: ${error.message}</p>`;
+    ordersEl.innerHTML =
+      `<p>โหลดออร์เดอร์ไม่สำเร็จ: ${error.message}</p>`;
     return;
   }
 
@@ -319,16 +312,22 @@ async function loadOrders() {
     : [];
 
   if (newOrderIds.length > 0 && soundEnabled) {
-    newOrderIds.forEach((_, index) => setTimeout(playDing, index * 650));
+    newOrderIds.forEach((_, index) => {
+      setTimeout(playDing, index * 650);
+    });
   }
 
-  allOrders = data;
+  allOrders = data.map(order => ({
+    ...order,
+    __isNewArrival: newOrderIds.includes(order.id)
+  }));
+
+  updateDashboard(allOrders);
+  renderOrders();
+  checkSecondReminder(allOrders);
+
   knownOrderIds = currentIds;
   firstLoadFinished = true;
-
-  updateDashboard();
-  renderOrders(newOrderIds);
-  checkSecondReminders();
 }
 
 async function setStatus(id, status) {
@@ -344,7 +343,6 @@ async function setStatus(id, status) {
 
   if (status !== "new") {
     remindedOrderIds.add(id);
-    saveRemindedIds();
   }
 
   loadOrders();

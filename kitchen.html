@@ -11,49 +11,58 @@
 <body>
   <header>
     <b>356 หลังร้าน</b>
-    <div style="display:flex;gap:8px;align-items:center">
+    <div class="header-actions">
       <button id="soundToggle" type="button">🔇 เปิดเสียง</button>
       <button type="button" onclick="loadOrders()">รีเฟรช</button>
     </div>
   </header>
 
   <main>
+    <section class="dashboard" aria-label="สรุปยอดวันนี้">
+      <div class="dashboard-title">📊 สรุปยอดวันนี้</div>
+      <div class="dashboard-grid">
+        <div class="summary-card">
+          <span>ออเดอร์</span>
+          <strong id="todayOrderCount">0</strong>
+        </div>
+        <div class="summary-card">
+          <span>ยอดรวม</span>
+          <strong id="todaySalesTotal">฿0</strong>
+        </div>
+        <div class="summary-card">
+          <span>จ่ายที่เคาน์เตอร์</span>
+          <strong id="todayCounterTotal">฿0</strong>
+        </div>
+        <div class="summary-card">
+          <span>พร้อมเพย์</span>
+          <strong id="todayPromptPayTotal">฿0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="search-panel">
+      <label for="orderSearch">🔍 ค้นหาออเดอร์</label>
+      <input
+        id="orderSearch"
+        type="search"
+        placeholder="เลขออเดอร์ ชื่อลูกค้า โต๊ะ หรือชื่อเมนู"
+        autocomplete="off"
+      >
+      <div id="searchResultCount" class="search-result-count"></div>
+    </section>
+
     <div id="soundHint" class="sound-hint">
       แตะ “เปิดเสียง” 1 ครั้ง แล้วต้องได้ยินเสียงทดสอบ
     </div>
 
-    <section class="kitchen-dashboard" aria-label="สรุปยอดวันนี้">
-      <div class="dashboard-card">
-        <div class="dashboard-label">ออเดอร์วันนี้</div>
-        <div id="todayOrderCount" class="dashboard-value">0</div>
-      </div>
-      <div class="dashboard-card">
-        <div class="dashboard-label">ยอดขายวันนี้</div>
-        <div id="todaySales" class="dashboard-value">฿0</div>
-      </div>
-      <div class="dashboard-card">
-        <div class="dashboard-label">จ่ายที่เคาน์เตอร์</div>
-        <div id="todayCounter" class="dashboard-value">฿0</div>
-      </div>
-      <div class="dashboard-card">
-        <div class="dashboard-label">พร้อมเพย์</div>
-        <div id="todayPromptPay" class="dashboard-value">฿0</div>
-      </div>
-    </section>
-
-    <div class="kitchen-toolbar">
-      <input
-        id="orderSearch"
-        class="kitchen-search"
-        type="search"
-        placeholder="ค้นหาเลขออเดอร์ ชื่อลูกค้า โต๊ะ หรือชื่อเมนู"
-        autocomplete="off"
-      >
+    <div class="order-list-heading">
+      <strong>ออเดอร์ปัจจุบัน</strong>
+      <span>สั่งก่อนอยู่บนสุด</span>
     </div>
-    <div id="searchResultNote" class="search-result-note"></div>
 
     <div id="orders"></div>
-    <footer class="version-footer">356 POS V1.1 — Sprint 1</footer>
+
+    <footer class="system-version">356 POS V1.1</footer>
   </main>
 
   <audio id="dingAudio" src="notification.wav" preload="auto"></audio>
