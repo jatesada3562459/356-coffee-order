@@ -360,3 +360,17 @@ input[type=text]{
   font-size:22px;
   color:#198754;
 }
+
+
+/* V1.1.3.4 บันทึกการชำระเงินจริง */
+.paid-badge{
+  display:inline-block;
+  background:#e0f2e8;
+  color:#11623a;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  margin-left:6px;
+}
+#checkoutDoneButton:disabled{opacity:.6}
