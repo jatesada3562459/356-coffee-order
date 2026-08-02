@@ -49,8 +49,17 @@
       <div id="searchResultCount" class="search-result-count"></div>
     </section>
 
+    <section id="historyDateFilterWrap" class="history-date-filter hidden">
+      <label for="historyDateFilter">📅 วันที่ในประวัติ</label>
+      <div class="history-date-row">
+        <input id="historyDateFilter" type="date">
+        <button id="historyTodayButton" type="button">วันนี้</button>
+        <button id="historyAllButton" type="button">ทั้งหมด</button>
+      </div>
+    </section>
+
     <div id="orders"></div>
-    <footer class="version-label">356 POS V1.1.3.4</footer>
+    <footer class="version-label">356 POS V1.1.3.5</footer>
 
     <div id="checkoutModal" class="checkout-modal" aria-hidden="true">
       <div class="checkout-backdrop" data-close-checkout></div>

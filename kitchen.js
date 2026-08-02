@@ -20,6 +20,10 @@ const readyCount = document.getElementById("readyCount");
 const activeTabCount = document.getElementById("activeTabCount");
 const readyTabCount = document.getElementById("readyTabCount");
 const historyTabCount = document.getElementById("historyTabCount");
+const historyDateFilterWrap = document.getElementById("historyDateFilterWrap");
+const historyDateFilter = document.getElementById("historyDateFilter");
+const historyTodayButton = document.getElementById("historyTodayButton");
+const historyAllButton = document.getElementById("historyAllButton");
 const tabButtons = [...document.querySelectorAll(".order-tab")];
 
 const checkoutModal = document.getElementById("checkoutModal");
@@ -44,6 +48,7 @@ let soundEnabled = false;
 let allOrders = [];
 let searchText = "";
 let currentTab = "active";
+let historyDate = bangkokDateKey();
 let checkoutOrder = null;
 
 injectKitchenStyles();
@@ -124,8 +129,28 @@ tabButtons.forEach(button => {
   button.addEventListener("click", () => {
     currentTab = button.dataset.tab;
     tabButtons.forEach(item => item.classList.toggle("active", item === button));
+    historyDateFilterWrap.classList.toggle("hidden", currentTab !== "history");
     renderOrders();
   });
+});
+
+historyDateFilter.value = historyDate;
+
+historyDateFilter.addEventListener("change", () => {
+  historyDate = historyDateFilter.value || "";
+  renderOrders();
+});
+
+historyTodayButton.addEventListener("click", () => {
+  historyDate = bangkokDateKey();
+  historyDateFilter.value = historyDate;
+  renderOrders();
+});
+
+historyAllButton.addEventListener("click", () => {
+  historyDate = "";
+  historyDateFilter.value = "";
+  renderOrders();
 });
 
 function statusText(status) {
@@ -250,7 +275,9 @@ function orderMatchesTab(order) {
   }
 
   if (currentTab === "history") {
-    return isPaid(order);
+    if (!isPaid(order)) return false;
+    if (!historyDate) return true;
+    return bangkokDateKey(order.paid_at || order.created_at) === historyDate;
   }
 
   return false;
@@ -397,6 +424,10 @@ checkoutDoneButton.addEventListener("click", async () => {
   closeCheckout();
 
   currentTab = "history";
+  historyDate = bangkokDateKey();
+  historyDateFilter.value = historyDate;
+  historyDateFilterWrap.classList.remove("hidden");
+
   tabButtons.forEach(button =>
     button.classList.toggle(
       "active",
@@ -479,6 +510,14 @@ function renderOrders(newOrderIds = []) {
           </div>
         </div>
       `).join("")}
+
+      ${currentTab === "history" ? `
+        <div class="payment-summary">
+          <div><span>ยอดสินค้า</span><b>${numberBaht(order.total)}</b></div>
+          <div><span>ส่วนลด</span><b>-${numberBaht(order.discount_amount || 0)}</b></div>
+          <div class="payment-summary-net"><span>ยอดสุทธิ</span><b>${numberBaht(orderFinalTotal(order))}</b></div>
+        </div>
+      ` : ""}
 
       ${currentTab === "active" ? `
         <div class="actions">
