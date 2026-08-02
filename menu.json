@@ -300,50 +300,56 @@
     },
     {
       "category": "สมูทตี้",
-      "name": "มิกซ์เบอร์รี่ โยเกิร์ต สมูทตี้",
-      "price": 60,
+      "name": "มิกซ์เบอร์รี่ สมูทตี้",
+      "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
       "category": "สมูทตี้",
-      "name": "มะม่วง โยเกิร์ต สมูทตี้",
-      "price": 60,
+      "name": "มะม่วง สมูทตี้",
+      "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
       "category": "สมูทตี้",
-      "name": "สตรอว์เบอร์รี่ โยเกิร์ต สมูทตี้",
-      "price": 60,
+      "name": "สตรอว์เบอร์รี่ สมูทตี้",
+      "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
       "category": "สมูทตี้",
-      "name": "กีวี่ โยเกิร์ต สมูทตี้",
-      "price": 60,
+      "name": "กีวี่ สมูทตี้",
+      "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
       "category": "สมูทตี้",
-      "name": "เสาวรส โยเกิร์ต สมูทตี้",
-      "price": 60,
+      "name": "เสาวรส สมูทตี้",
+      "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
       "category": "สมูทตี้",
-      "name": "สับปะรด โยเกิร์ต สมูทตี้",
-      "price": 60,
+      "name": "สับปะรด สมูทตี้",
+      "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
@@ -351,7 +357,8 @@
       "name": "มะพร้าวนมสดสมูทตี้",
       "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
@@ -359,7 +366,8 @@
       "name": "อาโวคาโดนมสดสมูทตี้",
       "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
@@ -367,7 +375,8 @@
       "name": "แตงโมสมูทตี้",
       "price": 50,
       "groups": [
-        "sweet"
+        "sweet_no_zero",
+        "yogurt"
       ]
     },
     {
