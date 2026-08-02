@@ -26,6 +26,17 @@ function formatDate(value) {
   });
 }
 
+function memberProgressText(member) {
+  const stamps = Number(member.stamp_count || 0);
+
+  if (member.reward_available) {
+    return "🎉 สะสมครบแล้ว • ใช้ส่วนลด 30 บาทได้ในออเดอร์ถัดไป";
+  }
+
+  const remaining = Math.max(10 - stamps, 0);
+  return `⭐ เหลืออีก ${remaining} แก้ว รับส่วนลด 30 บาท`;
+}
+
 function renderMembers() {
   const query = memberSearch.value.trim().toLowerCase();
 
@@ -55,8 +66,11 @@ function renderMembers() {
       </div>
 
       <div class="member-meta">
-        🎁 สิทธิ์ลด 30 บาท: ${member.reward_available ? "มีสิทธิ์" : "ยังไม่มี"}<br>
+        ${memberProgressText(member)}<br>
         🥤 ซื้อสะสมทั้งหมด: ${member.total_cups || 0} แก้ว<br>
+        💰 ยอดซื้อสะสม: ฿${Number(member.total_spent || 0).toLocaleString("th-TH")}<br>
+        🕒 มาครั้งล่าสุด: ${formatDate(member.last_visit_at)}<br>
+        🎁 ใช้สิทธิ์ล่าสุด: ${formatDate(member.last_reward_used_at)}<br>
         📅 สมัครเมื่อ: ${formatDate(member.created_at)}
       </div>
 

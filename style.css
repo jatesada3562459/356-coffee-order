@@ -653,3 +653,9 @@ input[type=text]{
     flex-direction:column;
   }
 }
+
+
+/* ===== V1.2.2 Final: ข้อความสมาชิกอ่านง่าย ===== */
+.member-meta{
+  line-height:1.8;
+}

@@ -316,9 +316,14 @@ function countDrinkCups(order) {
 }
 
 function memberRewardText(member) {
-  return member.reward_available
-    ? "🎁 มีสิทธิ์ลด 30 บาท"
-    : "🎁 ยังไม่มีสิทธิ์ลด";
+  const stamps = Number(member.stamp_count || 0);
+
+  if (member.reward_available) {
+    return "🎉 สะสมครบ 10 แก้วแล้ว • ใช้ส่วนลด 30 บาทได้ในออเดอร์ถัดไป";
+  }
+
+  const remaining = Math.max(10 - stamps, 0);
+  return `⭐ เหลืออีก ${remaining} แก้ว รับส่วนลด 30 บาท`;
 }
 
 function renderSelectedMember() {
@@ -348,23 +353,20 @@ function updateRewardAvailability() {
     return;
   }
 
-  const currentStamps = Number(selectedMember.stamp_count || 0);
   const cupsThisOrder = countDrinkCups(checkoutOrder);
   const alreadyHasReward = Boolean(selectedMember.reward_available);
-  const reachesRewardNow = currentStamps + cupsThisOrder >= 10;
-  const canUseReward = alreadyHasReward || reachesRewardNow;
 
-  rewardUseBox.classList.toggle("hidden", !canUseReward);
+  // ใช้สิทธิ์ได้เฉพาะเมื่อสะสมครบ 10 แก้วจากออเดอร์ก่อนหน้าแล้วเท่านั้น
+  rewardUseBox.classList.toggle("hidden", !alreadyHasReward);
 
-  if (!canUseReward) {
+  if (!alreadyHasReward) {
     useMemberReward.checked = false;
     rewardDiscountApplied = false;
     return;
   }
 
-  rewardUseMessage.textContent = alreadyHasReward
-    ? `มีสิทธิ์ค้างอยู่แล้ว • ออเดอร์นี้มี ${cupsThisOrder} แก้ว`
-    : `ออเดอร์นี้ทำให้ครบ ${currentStamps + cupsThisOrder}/10 และใช้สิทธิ์ได้ทันที`;
+  rewardUseMessage.textContent =
+    `สะสมครบ 10 แก้วแล้ว • ใช้ส่วนลดกับ 1 แก้วในออเดอร์นี้ได้ • ออเดอร์นี้มี ${cupsThisOrder} แก้ว`;
 }
 
 function applyRewardDiscountState() {
@@ -711,6 +713,8 @@ function renderOrders(newOrderIds = []) {
         ${isPaid(order) ? `<br>✅ ชำระเวลา: ${orderTime(order.paid_at)} น.` : ""}
         ${order.members ? `<br>👤 สมาชิก: ${order.members.name} (${order.members.phone})` : ""}
         ${Number(order.loyalty_points_added || 0) > 0 ? `<br>☕ แต้มที่เพิ่ม: ${order.loyalty_points_added} แก้ว` : ""}
+        ${order.reward_used ? `<br>🎁 ใช้สิทธิ์ลด 30 บาท` : ""}
+        ${order.member_stamp_after != null ? `<br>⭐ แต้มหลังจบบิล: ${order.member_stamp_after}/10` : ""}
         ${Number(order.discount_amount || 0) > 0
           ? `<br>🏷️ ส่วนลด: ${numberBaht(order.discount_amount)} (${order.discount_reason || "-"})`
           : ""}
@@ -810,6 +814,8 @@ async function loadOrders() {
       paid_at,
       member_id,
       loyalty_points_added,
+      reward_used,
+      member_stamp_after,
       members (
         name,
         phone
