@@ -286,3 +286,15 @@ input[type=text]{
 @media(min-width:700px){
   .dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+
+/* ===== 356 POS V1.1.1: ออเดอร์ใหม่อยู่บนสุด + แท็บสถานะ ===== */
+.status-counts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.status-counts span{padding:7px 10px;border-radius:999px;font-size:13px;font-weight:900}
+.count-new{background:#fde4e1;color:#a61b12}
+.count-making{background:#fff2b8;color:#594700}
+.count-ready{background:#dff3e7;color:#0f5d35}
+.order-tabs{display:flex;gap:8px;overflow-x:auto;margin:12px 0;padding-bottom:2px;scrollbar-width:none}
+.order-tabs::-webkit-scrollbar{display:none}
+.order-tab{flex:0 0 auto;background:#fff;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.order-tab.active{background:var(--ink);color:#fff}
+.order-tab span{display:inline-block;min-width:22px;padding:2px 6px;margin-left:4px;border-radius:999px;background:rgba(255,255,255,.22)}
