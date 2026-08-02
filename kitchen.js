@@ -27,6 +27,9 @@ const checkoutDoneButton = document.getElementById("checkoutDoneButton");
 const checkoutOrderInfo = document.getElementById("checkoutOrderInfo");
 const checkoutTotal = document.getElementById("checkoutTotal");
 const discountAmount = document.getElementById("discountAmount");
+const discountReason = document.getElementById("discountReason");
+const otherReasonWrap = document.getElementById("otherReasonWrap");
+const otherDiscountReason = document.getElementById("otherDiscountReason");
 const checkoutNetTotal = document.getElementById("checkoutNetTotal");
 const discountError = document.getElementById("discountError");
 
@@ -203,14 +206,23 @@ function orderMatchesTab(order) {
 
 function calculateDiscount() {
   if (!checkoutOrder) return;
+
   const total = Number(checkoutOrder.total || 0);
   const discount = Math.max(0, Number(discountAmount.value || 0));
   const net = Math.max(0, total - discount);
+  const reason = discountReason.value;
+  const otherReason = otherDiscountReason.value.trim();
 
   checkoutNetTotal.textContent = numberBaht(net);
-  discountError.textContent = discount > total
-    ? "ส่วนลดต้องไม่มากกว่ายอดสินค้า"
-    : "";
+  discountError.textContent = "";
+
+  if (discount > total) {
+    discountError.textContent = "ส่วนลดต้องไม่มากกว่ายอดสินค้า";
+  } else if (discount > 0 && !reason) {
+    discountError.textContent = "กรุณาเลือกเหตุผลส่วนลด";
+  } else if (reason === "อื่น ๆ" && !otherReason) {
+    discountError.textContent = "กรุณาระบุเหตุผลส่วนลด";
+  }
 }
 
 function openCheckout(order) {
@@ -222,6 +234,9 @@ function openCheckout(order) {
   `;
   checkoutTotal.textContent = numberBaht(order.total);
   discountAmount.value = "0";
+  discountReason.value = "";
+  otherDiscountReason.value = "";
+  otherReasonWrap.classList.add("hidden");
   checkoutModal.classList.add("show");
   checkoutModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -238,6 +253,11 @@ function closeCheckout() {
 closeCheckoutButton.addEventListener("click", closeCheckout);
 checkoutDoneButton.addEventListener("click", closeCheckout);
 discountAmount.addEventListener("input", calculateDiscount);
+discountReason.addEventListener("change", () => {
+  otherReasonWrap.classList.toggle("hidden", discountReason.value !== "อื่น ๆ");
+  calculateDiscount();
+});
+otherDiscountReason.addEventListener("input", calculateDiscount);
 checkoutModal.querySelector("[data-close-checkout]").addEventListener("click", closeCheckout);
 
 function renderOrders(newOrderIds = []) {
