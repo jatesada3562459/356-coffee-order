@@ -60,7 +60,7 @@
     </section>
 
     <div id="orders"></div>
-    <footer class="version-label">356 POS V1.2.0</footer>
+    <footer class="version-label">356 POS V1.2.1</footer>
 
     <div id="checkoutModal" class="checkout-modal" aria-hidden="true">
       <div class="checkout-backdrop" data-close-checkout></div>
@@ -72,6 +72,26 @@
           <span>ยอดสินค้า</span>
           <strong id="checkoutTotal">฿0</strong>
         </div>
+
+        <section class="checkout-member-box">
+          <div class="checkout-member-title">👤 สมาชิก (ไม่บังคับ)</div>
+
+          <input
+            id="checkoutMemberSearch"
+            type="search"
+            placeholder="ค้นหาชื่อหรือเบอร์โทร"
+            autocomplete="off"
+          >
+
+          <div id="checkoutMemberResults" class="checkout-member-results"></div>
+
+          <div id="selectedMemberBox" class="selected-member-box hidden">
+            <div id="selectedMemberInfo"></div>
+            <button id="clearSelectedMember" type="button">ยกเลิกสมาชิก</button>
+          </div>
+
+          <div id="cupCountPreview" class="cup-count-preview"></div>
+        </section>
 
         <label class="checkout-field" for="discountAmount">
           <span>ส่วนลด (บาท)</span>

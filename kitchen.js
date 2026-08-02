@@ -40,6 +40,12 @@ const cashFields = document.getElementById("cashFields");
 const cashReceived = document.getElementById("cashReceived");
 const changeAmount = document.getElementById("changeAmount");
 const discountError = document.getElementById("discountError");
+const checkoutMemberSearch = document.getElementById("checkoutMemberSearch");
+const checkoutMemberResults = document.getElementById("checkoutMemberResults");
+const selectedMemberBox = document.getElementById("selectedMemberBox");
+const selectedMemberInfo = document.getElementById("selectedMemberInfo");
+const clearSelectedMember = document.getElementById("clearSelectedMember");
+const cupCountPreview = document.getElementById("cupCountPreview");
 
 let firstLoadFinished = false;
 let knownOrderIds = new Set();
@@ -50,6 +56,8 @@ let searchText = "";
 let currentTab = "active";
 let historyDate = bangkokDateKey();
 let checkoutOrder = null;
+let checkoutMembers = [];
+let selectedMember = null;
 
 injectKitchenStyles();
 updateSoundButton();
@@ -283,6 +291,103 @@ function orderMatchesTab(order) {
   return false;
 }
 
+const NON_CUP_PRODUCTS = new Set([
+  "เนยนม",
+  "เนยน้ำตาล",
+  "เนยช็อกโกแลต",
+  "เนยคาราเมล",
+  "ปั่น",
+  "ไข่มุกบุก",
+  "ปีโป้",
+  "ครีมชีส",
+  "ช็อตกาแฟ",
+  "โยเกิร์ต"
+]);
+
+function countDrinkCups(order) {
+  return (order.order_items || []).reduce((sum, item) => {
+    if (NON_CUP_PRODUCTS.has(item.product_name)) return sum;
+    return sum + Number(item.quantity || 0);
+  }, 0);
+}
+
+function memberRewardText(member) {
+  return member.reward_available
+    ? "🎁 มีสิทธิ์ลด 30 บาท"
+    : "🎁 ยังไม่มีสิทธิ์ลด";
+}
+
+function renderSelectedMember() {
+  if (!selectedMember) {
+    selectedMemberBox.classList.add("hidden");
+    selectedMemberInfo.innerHTML = "";
+    return;
+  }
+
+  selectedMemberBox.classList.remove("hidden");
+  selectedMemberInfo.innerHTML = `
+    <b>${selectedMember.name}</b><br>
+    📞 ${selectedMember.phone}<br>
+    ☕ สะสม ${selectedMember.stamp_count || 0}/10<br>
+    ${memberRewardText(selectedMember)}
+  `;
+}
+
+function renderCheckoutMemberResults() {
+  const query = checkoutMemberSearch.value.trim().toLowerCase();
+  checkoutMemberResults.innerHTML = "";
+
+  if (!query) return;
+
+  const matches = checkoutMembers
+    .filter(member =>
+      `${member.name || ""} ${member.phone || ""}`
+        .toLowerCase()
+        .includes(query)
+    )
+    .slice(0, 8);
+
+  if (matches.length === 0) {
+    checkoutMemberResults.innerHTML =
+      `<div class="member-result-empty">ไม่พบสมาชิก</div>`;
+    return;
+  }
+
+  matches.forEach(member => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "checkout-member-result";
+    button.innerHTML = `
+      <span><b>${member.name}</b><br>${member.phone}</span>
+      <span>${member.stamp_count || 0}/10</span>
+    `;
+
+    button.addEventListener("click", () => {
+      selectedMember = member;
+      checkoutMemberSearch.value = "";
+      checkoutMemberResults.innerHTML = "";
+      renderSelectedMember();
+    });
+
+    checkoutMemberResults.appendChild(button);
+  });
+}
+
+async function loadCheckoutMembers() {
+  const { data, error } = await sb
+    .from("members")
+    .select("id,name,phone,stamp_count,reward_available,total_cups,total_spent")
+    .order("name", { ascending: true });
+
+  if (error) {
+    checkoutMemberResults.innerHTML =
+      `<div class="member-result-empty">โหลดสมาชิกไม่สำเร็จ</div>`;
+    return;
+  }
+
+  checkoutMembers = data || [];
+}
+
 function selectedCheckoutPayment() {
   return document.querySelector(
     'input[name="checkoutPayment"]:checked'
@@ -339,6 +444,19 @@ function openCheckout(order) {
   `;
 
   checkoutTotal.textContent = numberBaht(order.total);
+
+  selectedMember = null;
+  checkoutMemberSearch.value = "";
+  checkoutMemberResults.innerHTML = "";
+  renderSelectedMember();
+
+  const cupCount = countDrinkCups(order);
+  cupCountPreview.textContent = cupCount > 0
+    ? `ออเดอร์นี้นับสะสมได้ ${cupCount} แก้ว`
+    : "ออเดอร์นี้ไม่มีเครื่องดื่มที่นับแต้ม";
+
+  loadCheckoutMembers();
+
   discountAmount.value = "0";
   discountReason.value = "";
   otherDiscountReason.value = "";
@@ -388,6 +506,13 @@ document
   .querySelectorAll('input[name="checkoutPayment"]')
   .forEach(input => input.addEventListener("change", calculateCheckout));
 
+checkoutMemberSearch.addEventListener("input", renderCheckoutMemberResults);
+
+clearSelectedMember.addEventListener("click", () => {
+  selectedMember = null;
+  renderSelectedMember();
+});
+
 checkoutDoneButton.addEventListener("click", async () => {
   if (!checkoutOrder) return;
 
@@ -397,21 +522,18 @@ checkoutDoneButton.addEventListener("click", async () => {
   checkoutDoneButton.disabled = true;
   checkoutDoneButton.textContent = "กำลังบันทึก...";
 
-  const { error } = await sb
-    .from("orders")
-    .update({
-      discount_amount: result.discount,
-      discount_reason: result.reason || null,
-      final_total: result.net,
-      actual_payment_method: result.paymentMethod,
-      cash_received:
-        result.paymentMethod === "counter" ? result.received : null,
-      change_amount:
-        result.paymentMethod === "counter" ? result.change : 0,
-      payment_status: "paid",
-      paid_at: new Date().toISOString()
-    })
-    .eq("id", checkoutOrder.id);
+  const { data, error } = await sb.rpc("finalize_order_payment_v1", {
+    p_order_id: checkoutOrder.id,
+    p_discount_amount: result.discount,
+    p_discount_reason: result.reason || null,
+    p_final_total: result.net,
+    p_payment_method: result.paymentMethod,
+    p_cash_received:
+      result.paymentMethod === "counter" ? result.received : null,
+    p_change_amount:
+      result.paymentMethod === "counter" ? result.change : 0,
+    p_member_id: selectedMember?.id || null
+  });
 
   checkoutDoneButton.disabled = false;
   checkoutDoneButton.textContent = "ยืนยันชำระเงิน";
@@ -420,6 +542,11 @@ checkoutDoneButton.addEventListener("click", async () => {
     alert("บันทึกการชำระเงินไม่สำเร็จ: " + error.message);
     return;
   }
+
+  const saved = Array.isArray(data) ? data[0] : data;
+  const pointsAdded = Number(saved?.points_added || 0);
+  const newStampCount = saved?.new_stamp_count;
+  const rewardAvailable = saved?.reward_available;
 
   closeCheckout();
 
@@ -437,14 +564,23 @@ checkoutDoneButton.addEventListener("click", async () => {
 
   await loadOrders();
 
-  alert(
-    `ชำระเงินเรียบร้อย\nยอดสุทธิ ${numberBaht(result.net)}` +
-    (
-      result.paymentMethod === "counter"
-        ? `\nเงินทอน ${numberBaht(result.change)}`
-        : ""
-    )
-  );
+  let message =
+    `ชำระเงินเรียบร้อย\nยอดสุทธิ ${numberBaht(result.net)}`;
+
+  if (result.paymentMethod === "counter") {
+    message += `\nเงินทอน ${numberBaht(result.change)}`;
+  }
+
+  if (selectedMember) {
+    message += `\n\nสมาชิก: ${selectedMember.name}`;
+    message += `\nเพิ่มแต้ม ${pointsAdded} แก้ว`;
+    message += `\nสะสมใหม่ ${newStampCount}/10`;
+    if (rewardAvailable) {
+      message += `\n🎁 มีสิทธิ์ลด 30 บาท`;
+    }
+  }
+
+  alert(message);
 });
 
 function renderOrders(newOrderIds = []) {
@@ -493,6 +629,8 @@ function renderOrders(newOrderIds = []) {
         )}<br>
         🕒 เวลา: ${orderTime(order.created_at)} น.
         ${isPaid(order) ? `<br>✅ ชำระเวลา: ${orderTime(order.paid_at)} น.` : ""}
+        ${order.members ? `<br>👤 สมาชิก: ${order.members.name} (${order.members.phone})` : ""}
+        ${Number(order.loyalty_points_added || 0) > 0 ? `<br>☕ แต้มที่เพิ่ม: ${order.loyalty_points_added} แก้ว` : ""}
         ${Number(order.discount_amount || 0) > 0
           ? `<br>🏷️ ส่วนลด: ${numberBaht(order.discount_amount)} (${order.discount_reason || "-"})`
           : ""}
@@ -590,6 +728,12 @@ async function loadOrders() {
       change_amount,
       payment_status,
       paid_at,
+      member_id,
+      loyalty_points_added,
+      members (
+        name,
+        phone
+      ),
       order_items (
         product_name,
         quantity,
