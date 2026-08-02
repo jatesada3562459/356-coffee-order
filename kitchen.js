@@ -19,6 +19,7 @@ const makingCount = document.getElementById("makingCount");
 const readyCount = document.getElementById("readyCount");
 const activeTabCount = document.getElementById("activeTabCount");
 const readyTabCount = document.getElementById("readyTabCount");
+const historyTabCount = document.getElementById("historyTabCount");
 const tabButtons = [...document.querySelectorAll(".order-tab")];
 
 let firstLoadFinished = false;
@@ -156,7 +157,8 @@ function updateDashboard() {
   makingCount.textContent = countMaking;
   readyCount.textContent = countReady;
   activeTabCount.textContent = countNew + countMaking;
-  readyTabCount.textContent = countReady;
+  readyTabCount.textContent = allOrders.filter(order => order.status === "ready" && bangkokDateKey(order.created_at) === todayKey).length;
+  historyTabCount.textContent = countReady;
 }
 
 function orderMatchesSearch(order) {
@@ -175,18 +177,22 @@ function orderMatchesSearch(order) {
 }
 
 function orderMatchesTab(order) {
-  if (currentTab === "active") return order.status === "new" || order.status === "making";
-  if (currentTab === "ready") return order.status === "ready";
+  if (currentTab === "active") {
+    return order.status === "new" || order.status === "making";
+  }
+
+  if (currentTab === "ready") {
+    return order.status === "ready" && bangkokDateKey(order.created_at) === bangkokDateKey();
+  }
+
+  if (currentTab === "history") {
+    return order.status === "ready";
+  }
+
   return false;
 }
 
 function renderOrders(newOrderIds = []) {
-  if (currentTab === "history") {
-    ordersEl.innerHTML = `<div class="empty-state">หน้าประวัติออเดอร์จะเพิ่มใน Sprint ถัดไป</div>`;
-    searchResultCount.textContent = "";
-    return;
-  }
-
   const filteredOrders = allOrders.filter(orderMatchesTab).filter(orderMatchesSearch);
   ordersEl.innerHTML = "";
   searchResultCount.textContent = searchText ? `พบ ${filteredOrders.length} ออเดอร์` : "";
@@ -216,13 +222,24 @@ function renderOrders(newOrderIds = []) {
       ${(order.order_items || []).map(item => `
         <div class="row"><b>${item.product_name} × ${item.quantity}</b><div class="muted">${(item.options || []).join(" • ") || "ไม่มีตัวเลือกเพิ่มเติม"}</div></div>
       `).join("")}
-      <div class="actions">
-        <button class="making-btn">กำลังทำ</button>
-        <button class="ready-btn">พร้อมเสิร์ฟ</button>
-      </div>`;
+      ${currentTab === "active" ? `
+        <div class="actions">
+          <button class="making-btn">กำลังทำ</button>
+          <button class="ready-btn">พร้อมเสิร์ฟ</button>
+        </div>
+      ` : ""}`;
 
-    card.querySelector(".making-btn").addEventListener("click", () => setStatus(order.id, "making"));
-    card.querySelector(".ready-btn").addEventListener("click", () => setStatus(order.id, "ready"));
+    const makingButton = card.querySelector(".making-btn");
+    const readyButton = card.querySelector(".ready-btn");
+
+    if (makingButton) {
+      makingButton.addEventListener("click", () => setStatus(order.id, "making"));
+    }
+
+    if (readyButton) {
+      readyButton.addEventListener("click", () => setStatus(order.id, "ready"));
+    }
+
     ordersEl.appendChild(card);
   });
 }
