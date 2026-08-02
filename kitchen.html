@@ -18,8 +18,12 @@
   </header>
 
   <main>
+    <div id="soundHint" class="sound-hint">
+      แตะ “เปิดเสียง” 1 ครั้ง แล้วต้องได้ยินเสียงทดสอบ
+    </div>
+
     <section class="dashboard" aria-label="สรุปยอดวันนี้">
-      <div class="dashboard-title">📊 สรุปยอดวันนี้</div>
+      <div class="dashboard-title">📊 สรุปวันนี้</div>
       <div class="dashboard-grid">
         <div class="summary-card">
           <span>ออเดอร์</span>
@@ -27,42 +31,27 @@
         </div>
         <div class="summary-card">
           <span>ยอดรวม</span>
-          <strong id="todaySalesTotal">฿0</strong>
+          <strong id="todaySales">฿0</strong>
         </div>
         <div class="summary-card">
           <span>จ่ายที่เคาน์เตอร์</span>
-          <strong id="todayCounterTotal">฿0</strong>
+          <strong id="todayCash">฿0</strong>
         </div>
         <div class="summary-card">
           <span>พร้อมเพย์</span>
-          <strong id="todayPromptPayTotal">฿0</strong>
+          <strong id="todayPromptPay">฿0</strong>
         </div>
       </div>
     </section>
 
     <section class="search-panel">
       <label for="orderSearch">🔍 ค้นหาออเดอร์</label>
-      <input
-        id="orderSearch"
-        type="search"
-        placeholder="เลขออเดอร์ ชื่อลูกค้า โต๊ะ หรือชื่อเมนู"
-        autocomplete="off"
-      >
+      <input id="orderSearch" type="search" placeholder="เลขออเดอร์ ชื่อลูกค้า โต๊ะ หรือชื่อเมนู">
       <div id="searchResultCount" class="search-result-count"></div>
     </section>
 
-    <div id="soundHint" class="sound-hint">
-      แตะ “เปิดเสียง” 1 ครั้ง แล้วต้องได้ยินเสียงทดสอบ
-    </div>
-
-    <div class="order-list-heading">
-      <strong>ออเดอร์ปัจจุบัน</strong>
-      <span>สั่งก่อนอยู่บนสุด</span>
-    </div>
-
     <div id="orders"></div>
-
-    <footer class="system-version">356 POS V1.1</footer>
+    <footer class="version-label">356 POS V1.1</footer>
   </main>
 
   <audio id="dingAudio" src="notification.wav" preload="auto"></audio>

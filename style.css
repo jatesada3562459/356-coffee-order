@@ -205,18 +205,15 @@ input[type=text]{
   .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 
-/* 356 POS V1.1 — Dashboard, Search, FIFO */
-.header-actions{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
+
+/* ===== 356 POS V1.1: Dashboard / Search / Version ===== */
+.header-actions{display:flex;gap:8px;align-items:center}
 .dashboard{
-  background:#241f1a;
-  color:#fff;
+  background:#fff;
+  border:1px solid var(--line);
   border-radius:18px;
-  padding:16px;
-  margin-bottom:14px;
+  padding:14px;
+  margin-bottom:12px;
 }
 .dashboard-title{
   font-size:18px;
@@ -229,17 +226,17 @@ input[type=text]{
   gap:10px;
 }
 .summary-card{
-  background:rgba(255,255,255,.1);
-  border:1px solid rgba(255,255,255,.16);
+  background:#f7f4ef;
+  border:1px solid var(--line);
   border-radius:14px;
   padding:12px;
   min-width:0;
 }
 .summary-card span{
   display:block;
-  color:#f1e8df;
+  color:var(--muted);
   font-size:13px;
-  margin-bottom:4px;
+  margin-bottom:5px;
 }
 .summary-card strong{
   display:block;
@@ -250,7 +247,7 @@ input[type=text]{
   background:#fff;
   border:1px solid var(--line);
   border-radius:16px;
-  padding:14px;
+  padding:12px;
   margin-bottom:12px;
 }
 .search-panel label{
@@ -267,36 +264,25 @@ input[type=text]{
   background:#fff;
 }
 .search-result-count{
+  min-height:18px;
   color:var(--muted);
   font-size:13px;
   margin-top:7px;
 }
-.order-list-heading{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin:15px 2px 6px;
-}
-.order-list-heading span{
-  color:var(--muted);
-  font-size:13px;
-}
 .empty-state{
-  text-align:center;
-  color:var(--muted);
   background:#fff;
   border:1px dashed var(--line);
-  border-radius:16px;
-  padding:28px 16px;
-  margin-top:12px;
+  border-radius:14px;
+  padding:24px;
+  text-align:center;
+  color:var(--muted);
 }
-.system-version{
+.version-label{
   text-align:center;
   color:var(--muted);
   font-size:13px;
-  padding:24px 0 4px;
+  padding:24px 0 8px;
 }
-@media(min-width:650px){
+@media(min-width:700px){
   .dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }

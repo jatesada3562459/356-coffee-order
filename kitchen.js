@@ -10,15 +10,16 @@ const dingAudio = document.getElementById("dingAudio");
 const orderSearch = document.getElementById("orderSearch");
 const searchResultCount = document.getElementById("searchResultCount");
 const todayOrderCount = document.getElementById("todayOrderCount");
-const todaySalesTotal = document.getElementById("todaySalesTotal");
-const todayCounterTotal = document.getElementById("todayCounterTotal");
-const todayPromptPayTotal = document.getElementById("todayPromptPayTotal");
+const todaySales = document.getElementById("todaySales");
+const todayCash = document.getElementById("todayCash");
+const todayPromptPay = document.getElementById("todayPromptPay");
 
 let firstLoadFinished = false;
 let knownOrderIds = new Set();
+let remindedOrderIds = new Set();
 let soundEnabled = false;
 let allOrders = [];
-let remindedOrderIds = new Set();
+let searchText = "";
 
 injectKitchenStyles();
 updateSoundButton();
@@ -78,6 +79,11 @@ function playDing() {
   }
 }
 
+function playDoubleDing() {
+  playDing();
+  window.setTimeout(playDing, 600);
+}
+
 soundToggle.addEventListener("click", () => {
   if (soundEnabled) {
     soundEnabled = false;
@@ -105,7 +111,10 @@ soundToggle.addEventListener("click", () => {
   }
 });
 
-orderSearch.addEventListener("input", renderOrders);
+orderSearch.addEventListener("input", event => {
+  searchText = event.target.value.trim().toLowerCase();
+  renderOrders();
+});
 
 function statusText(status) {
   return {
@@ -130,76 +139,74 @@ function orderTime(value) {
   });
 }
 
-function money(value) {
+function bangkokDateKey(value = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(value));
+}
+
+function numberBaht(value) {
   return `฿${Number(value || 0).toLocaleString("th-TH", {
     maximumFractionDigits: 2
   })}`;
 }
 
-function isToday(value) {
-  if (!value) return false;
-  const date = new Date(value);
-  const now = new Date();
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
+function updateDashboard() {
+  const todayKey = bangkokDateKey();
+  const todayOrders = allOrders.filter(order =>
+    bangkokDateKey(order.created_at) === todayKey
   );
-}
 
-function updateDashboard(orders) {
-  const todayOrders = orders.filter(order => isToday(order.created_at));
   const total = todayOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-  const counter = todayOrders
+  const cash = todayOrders
     .filter(order => order.payment_method !== "promptpay")
     .reduce((sum, order) => sum + Number(order.total || 0), 0);
-  const promptpay = todayOrders
+  const promptPay = todayOrders
     .filter(order => order.payment_method === "promptpay")
     .reduce((sum, order) => sum + Number(order.total || 0), 0);
 
   todayOrderCount.textContent = todayOrders.length.toLocaleString("th-TH");
-  todaySalesTotal.textContent = money(total);
-  todayCounterTotal.textContent = money(counter);
-  todayPromptPayTotal.textContent = money(promptpay);
+  todaySales.textContent = numberBaht(total);
+  todayCash.textContent = numberBaht(cash);
+  todayPromptPay.textContent = numberBaht(promptPay);
 }
 
-function orderMatchesSearch(order, query) {
-  if (!query) return true;
+function orderMatchesSearch(order) {
+  if (!searchText) return true;
 
-  const itemText = (order.order_items || [])
+  const productText = (order.order_items || [])
     .map(item => `${item.product_name} ${(item.options || []).join(" ")}`)
     .join(" ");
 
-  const tableText = order.table_no === "counter"
-    ? "เคาน์เตอร์ counter"
-    : `โต๊ะ ${order.table_no} ${order.table_no}`;
-
-  const searchable = [
+  const searchableText = [
     order.order_no,
     order.customer_name,
-    tableText,
+    order.table_no,
+    order.table_no === "counter" ? "เคาน์เตอร์ counter" : "",
     paymentText(order.payment_method),
-    itemText
+    statusText(order.status),
+    productText
   ]
     .filter(Boolean)
     .join(" ")
-    .toLocaleLowerCase("th-TH");
+    .toLowerCase();
 
-  return searchable.includes(query);
+  return searchableText.includes(searchText);
 }
 
-function renderOrders() {
-  const query = orderSearch.value.trim().toLocaleLowerCase("th-TH");
-  const filteredOrders = allOrders.filter(order => orderMatchesSearch(order, query));
+function renderOrders(newOrderIds = []) {
+  const filteredOrders = allOrders.filter(orderMatchesSearch);
+  ordersEl.innerHTML = "";
 
-  searchResultCount.textContent = query
+  searchResultCount.textContent = searchText
     ? `พบ ${filteredOrders.length} ออเดอร์`
     : "";
 
-  ordersEl.innerHTML = "";
-
   if (filteredOrders.length === 0) {
-    ordersEl.innerHTML = `<div class="empty-state">ไม่พบออเดอร์ที่ค้นหา</div>`;
+    ordersEl.innerHTML = `<div class="empty-state">ไม่พบออเดอร์</div>`;
     return;
   }
 
@@ -207,7 +214,7 @@ function renderOrders() {
     const card = document.createElement("section");
     card.className = "order";
 
-    if (order.__isNewArrival) {
+    if (newOrderIds.includes(order.id)) {
       card.classList.add("new-order-flash");
     }
 
@@ -223,7 +230,7 @@ function renderOrders() {
           </span>
           <h3>${order.order_no}</h3>
         </div>
-        <div class="price">${money(order.total)}</div>
+        <div class="price">${numberBaht(order.total)}</div>
       </div>
 
       <div class="order-meta">
@@ -260,21 +267,20 @@ function renderOrders() {
   });
 }
 
-function checkSecondReminder(orders) {
+function checkSecondReminders() {
   if (!firstLoadFinished || !soundEnabled) return;
 
   const now = Date.now();
+  allOrders.forEach(order => {
+    const ageMs = now - new Date(order.created_at).getTime();
+    const shouldRemind =
+      order.status === "new" &&
+      ageMs >= 60_000 &&
+      !remindedOrderIds.has(order.id);
 
-  orders.forEach(order => {
-    if (order.status !== "new" || remindedOrderIds.has(order.id)) return;
-
-    const createdAt = new Date(order.created_at).getTime();
-    const waitingMilliseconds = now - createdAt;
-
-    if (waitingMilliseconds >= 60_000) {
+    if (shouldRemind) {
       remindedOrderIds.add(order.id);
-      playDing();
-      setTimeout(playDing, 500);
+      playDoubleDing();
     }
   });
 }
@@ -301,8 +307,7 @@ async function loadOrders() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    ordersEl.innerHTML =
-      `<p>โหลดออร์เดอร์ไม่สำเร็จ: ${error.message}</p>`;
+    ordersEl.innerHTML = `<p>โหลดออร์เดอร์ไม่สำเร็จ: ${error.message}</p>`;
     return;
   }
 
@@ -313,21 +318,17 @@ async function loadOrders() {
 
   if (newOrderIds.length > 0 && soundEnabled) {
     newOrderIds.forEach((_, index) => {
-      setTimeout(playDing, index * 650);
+      window.setTimeout(playDing, index * 650);
     });
   }
 
-  allOrders = data.map(order => ({
-    ...order,
-    __isNewArrival: newOrderIds.includes(order.id)
-  }));
-
-  updateDashboard(allOrders);
-  renderOrders();
-  checkSecondReminder(allOrders);
+  allOrders = data;
+  updateDashboard();
+  renderOrders(newOrderIds);
 
   knownOrderIds = currentIds;
   firstLoadFinished = true;
+  checkSecondReminders();
 }
 
 async function setStatus(id, status) {
