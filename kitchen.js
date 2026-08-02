@@ -353,20 +353,26 @@ function updateRewardAvailability() {
     return;
   }
 
+  const currentStamps = Number(selectedMember.stamp_count || 0);
   const cupsThisOrder = countDrinkCups(checkoutOrder);
+  const totalProgress = currentStamps + cupsThisOrder;
   const alreadyHasReward = Boolean(selectedMember.reward_available);
 
-  // ใช้สิทธิ์ได้เฉพาะเมื่อสะสมครบ 10 แก้วจากออเดอร์ก่อนหน้าแล้วเท่านั้น
-  rewardUseBox.classList.toggle("hidden", !alreadyHasReward);
+  // ใช้ได้เมื่อมีสิทธิ์ค้างอยู่แล้ว
+  // หรือออเดอร์นี้มีแก้วมากพอให้ครบ 10 และมีแก้วที่ 11 สำหรับใช้ส่วนลด
+  const canUseRewardNow = alreadyHasReward || totalProgress >= 11;
 
-  if (!alreadyHasReward) {
+  rewardUseBox.classList.toggle("hidden", !canUseRewardNow);
+
+  if (!canUseRewardNow) {
     useMemberReward.checked = false;
     rewardDiscountApplied = false;
     return;
   }
 
-  rewardUseMessage.textContent =
-    `สะสมครบ 10 แก้วแล้ว • ใช้ส่วนลดกับ 1 แก้วในออเดอร์นี้ได้ • ออเดอร์นี้มี ${cupsThisOrder} แก้ว`;
+  rewardUseMessage.textContent = alreadyHasReward
+    ? `มีสิทธิ์ค้างอยู่แล้ว • แก้วแรกที่ใช้ส่วนลดไม่นับแต้ม • ออเดอร์นี้มี ${cupsThisOrder} แก้ว`
+    : `ออเดอร์นี้รวมเป็น ${totalProgress} แก้ว • ใช้ส่วนลดกับแก้วที่ 11 ได้ทันที • แก้วหลังจากนั้นเริ่มนับรอบใหม่`;
 }
 
 function applyRewardDiscountState() {
