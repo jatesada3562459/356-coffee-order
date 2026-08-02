@@ -6,11 +6,11 @@ const sb = supabase.createClient(
 const ordersEl = document.getElementById("orders");
 const soundToggle = document.getElementById("soundToggle");
 const soundHint = document.getElementById("soundHint");
+const dingAudio = document.getElementById("dingAudio");
 
 let firstLoadFinished = false;
 let knownOrderIds = new Set();
-let soundEnabled = localStorage.getItem("356_sound_enabled") === "true";
-let audioContext = null;
+let soundEnabled = false;
 
 injectKitchenStyles();
 updateSoundButton();
@@ -27,9 +27,7 @@ function injectKitchenStyles() {
       font-size:14px;
     }
     .sound-hint.hidden{display:none}
-    .new-order-flash{
-      animation:newOrderFlash 2s ease-in-out;
-    }
+    .new-order-flash{animation:newOrderFlash 2s ease-in-out}
     @keyframes newOrderFlash{
       0%,100%{box-shadow:none}
       20%,60%{
@@ -37,13 +35,71 @@ function injectKitchenStyles() {
         background:#fff1f0;
       }
     }
-    #soundToggle.sound-on{
-      background:#171513;
-      color:white;
-    }
+    #soundToggle.sound-on{background:#171513;color:#fff}
   `;
   document.head.appendChild(style);
 }
+
+function updateSoundButton() {
+  soundToggle.textContent = soundEnabled
+    ? "🔊 เปิดเสียงอยู่"
+    : "🔇 เปิดเสียง";
+
+  soundToggle.classList.toggle("sound-on", soundEnabled);
+  soundHint.classList.toggle("hidden", soundEnabled);
+}
+
+function playDing() {
+  if (!soundEnabled) return;
+
+  try {
+    dingAudio.pause();
+    dingAudio.currentTime = 0;
+    const promise = dingAudio.play();
+
+    if (promise) {
+      promise.catch(error => {
+        console.error("Safari ไม่อนุญาตให้เล่นเสียง", error);
+        soundEnabled = false;
+        updateSoundButton();
+        alert("Safari ยังไม่อนุญาตเสียง กรุณากดปุ่ม “เปิดเสียง” อีกครั้ง");
+      });
+    }
+  } catch (error) {
+    console.error("เล่นเสียงไม่ได้", error);
+  }
+}
+
+/*
+  สำคัญสำหรับ iPhone/iPad:
+  ต้องเรียก audio.play() โดยตรงภายในเหตุการณ์แตะ
+*/
+soundToggle.addEventListener("click", () => {
+  if (soundEnabled) {
+    soundEnabled = false;
+    dingAudio.pause();
+    updateSoundButton();
+    return;
+  }
+
+  soundEnabled = true;
+  dingAudio.currentTime = 0;
+
+  const promise = dingAudio.play();
+
+  if (promise) {
+    promise.then(() => {
+      updateSoundButton();
+    }).catch(error => {
+      soundEnabled = false;
+      updateSoundButton();
+      console.error(error);
+      alert("เปิดเสียงไม่สำเร็จ กรุณาเพิ่มระดับเสียงของ iPad และลองกดอีกครั้ง");
+    });
+  } else {
+    updateSoundButton();
+  }
+});
 
 function statusText(status) {
   return {
@@ -54,72 +110,18 @@ function statusText(status) {
 }
 
 function paymentText(method) {
-  return method === "promptpay" ? "พร้อมเพย์" : "จ่ายที่เคาน์เตอร์";
+  return method === "promptpay"
+    ? "พร้อมเพย์"
+    : "จ่ายที่เคาน์เตอร์";
 }
 
 function orderTime(value) {
   if (!value) return "-";
+
   return new Date(value).toLocaleTimeString("th-TH", {
     hour: "2-digit",
     minute: "2-digit"
   });
-}
-
-function updateSoundButton() {
-  soundToggle.textContent = soundEnabled ? "🔊 เปิดเสียงอยู่" : "🔇 เปิดเสียง";
-  soundToggle.classList.toggle("sound-on", soundEnabled);
-  soundHint.classList.toggle("hidden", soundEnabled);
-}
-
-soundToggle.addEventListener("click", async () => {
-  soundEnabled = !soundEnabled;
-  localStorage.setItem("356_sound_enabled", String(soundEnabled));
-
-  if (soundEnabled) {
-    await ensureAudioContext();
-    playDing(); // เสียงทดสอบ 1 ครั้งเมื่อเปิด
-  }
-
-  updateSoundButton();
-});
-
-async function ensureAudioContext() {
-  if (!audioContext) {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    audioContext = new AudioContextClass();
-  }
-
-  if (audioContext.state === "suspended") {
-    await audioContext.resume();
-  }
-}
-
-function playDing() {
-  if (!soundEnabled) return;
-
-  try {
-    ensureAudioContext().then(() => {
-      const now = audioContext.currentTime;
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(880, now);
-      oscillator.frequency.exponentialRampToValueAtTime(660, now + 0.18);
-
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.28, now + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
-
-      oscillator.connect(gain);
-      gain.connect(audioContext.destination);
-
-      oscillator.start(now);
-      oscillator.stop(now + 0.34);
-    });
-  } catch (error) {
-    console.error("เล่นเสียงไม่ได้", error);
-  }
 }
 
 async function loadOrders() {
@@ -144,21 +146,22 @@ async function loadOrders() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    ordersEl.innerHTML = `<p>โหลดออร์เดอร์ไม่สำเร็จ: ${error.message}</p>`;
+    ordersEl.innerHTML =
+      `<p>โหลดออร์เดอร์ไม่สำเร็จ: ${error.message}</p>`;
     return;
   }
 
   const currentIds = new Set(data.map(order => order.id));
+
   const newOrderIds = firstLoadFinished
     ? data
         .filter(order => !knownOrderIds.has(order.id))
         .map(order => order.id)
     : [];
 
-  if (newOrderIds.length > 0) {
-    // ดัง 1 ครั้งต่อออร์เดอร์ใหม่
+  if (newOrderIds.length > 0 && soundEnabled) {
     newOrderIds.forEach((_, index) => {
-      setTimeout(playDing, index * 450);
+      setTimeout(playDing, index * 650);
     });
   }
 
@@ -173,7 +176,9 @@ async function loadOrders() {
     }
 
     const tableText =
-      order.table_no === "counter" ? "เคาน์เตอร์" : order.table_no;
+      order.table_no === "counter"
+        ? "เคาน์เตอร์"
+        : order.table_no;
 
     card.innerHTML = `
       <div class="order-top">
@@ -197,7 +202,8 @@ async function loadOrders() {
         <div class="row">
           <b>${item.product_name} × ${item.quantity}</b>
           <div class="muted">
-            ${(item.options || []).join(" • ") || "ไม่มีตัวเลือกเพิ่มเติม"}
+            ${(item.options || []).join(" • ")
+              || "ไม่มีตัวเลือกเพิ่มเติม"}
           </div>
         </div>
       `).join("")}
@@ -237,6 +243,5 @@ async function setStatus(id, status) {
   loadOrders();
 }
 
-// โหลดทันที และตรวจออร์เดอร์ใหม่ทุก 3 วินาที
 loadOrders();
 setInterval(loadOrders, 3000);
