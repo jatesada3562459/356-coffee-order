@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>สมาชิก 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header>
+    <b>👤 สมาชิก 356</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="kitchen.html">← กลับหลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="member-panel">
+      <h2>เพิ่มสมาชิกใหม่</h2>
+
+      <label class="member-field">
+        <span>ชื่อลูกค้า</span>
+        <input id="memberName" type="text" maxlength="80" placeholder="เช่น คุณนา">
+      </label>
+
+      <label class="member-field">
+        <span>เบอร์โทร</span>
+        <input id="memberPhone" type="tel" inputmode="tel" maxlength="20" placeholder="เช่น 0812345678">
+      </label>
+
+      <div id="memberFormError" class="member-error"></div>
+      <button id="saveMemberButton" class="primary" type="button">บันทึกสมาชิก</button>
+    </section>
+
+    <section class="member-panel">
+      <label class="member-search-label" for="memberSearch">🔍 ค้นหาสมาชิก</label>
+      <input id="memberSearch" type="search" placeholder="ค้นหาจากชื่อหรือเบอร์โทร">
+      <div id="memberCount" class="member-count"></div>
+    </section>
+
+    <section id="memberList" class="member-list"></section>
+
+    <footer class="version-label">356 POS V1.2.0 — Members Step 1</footer>
+  </main>
+
+  <script src="members.js"></script>
+</body>
+</html>

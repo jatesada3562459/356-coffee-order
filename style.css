@@ -439,3 +439,106 @@ input[type=text]{
   max-height:none;
   padding-bottom:36px;
 }
+
+
+/* ===== V1.2.0 ระบบสมาชิก ขั้นที่ 1 ===== */
+.header-link-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color:#0878de;
+  background:#efefef;
+  border-radius:13px;
+  padding:11px 14px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.member-panel{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+}
+.member-panel h2{
+  margin:0 0 14px;
+}
+.member-field{
+  display:block;
+  margin:12px 0;
+}
+.member-field span,
+.member-search-label{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.member-field input,
+#memberSearch{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  padding:12px;
+  border:1px solid #cfc6bd;
+  border-radius:13px;
+  font:inherit;
+  background:#fff;
+}
+.member-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+  margin:8px 0;
+}
+.member-count{
+  margin-top:9px;
+  color:#6f655d;
+  font-weight:700;
+}
+.member-list{
+  display:grid;
+  gap:12px;
+}
+.member-card{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:18px;
+  padding:15px;
+}
+.member-card-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.member-card h3{
+  margin:0 0 5px;
+  font-size:20px;
+}
+.member-phone{
+  color:#5f5750;
+}
+.member-stamp{
+  background:#fff3cd;
+  color:#7a5200;
+  border-radius:999px;
+  padding:7px 11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.member-meta{
+  margin-top:12px;
+  line-height:1.7;
+}
+.edit-member-button{
+  width:100%;
+  margin-top:12px;
+  min-height:44px;
+  border:0;
+  border-radius:12px;
+  color:#0878de;
+  background:#eeeeee;
+  font-weight:900;
+  font-size:16px;
+}
