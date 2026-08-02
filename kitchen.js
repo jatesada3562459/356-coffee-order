@@ -26,6 +26,9 @@ const closeCheckoutButton = document.getElementById("closeCheckoutButton");
 const checkoutDoneButton = document.getElementById("checkoutDoneButton");
 const checkoutOrderInfo = document.getElementById("checkoutOrderInfo");
 const checkoutTotal = document.getElementById("checkoutTotal");
+const discountAmount = document.getElementById("discountAmount");
+const checkoutNetTotal = document.getElementById("checkoutNetTotal");
+const discountError = document.getElementById("discountError");
 
 let firstLoadFinished = false;
 let knownOrderIds = new Set();
@@ -34,6 +37,7 @@ let soundEnabled = false;
 let allOrders = [];
 let searchText = "";
 let currentTab = "active";
+let checkoutOrder = null;
 
 injectKitchenStyles();
 updateSoundButton();
@@ -197,19 +201,35 @@ function orderMatchesTab(order) {
   return false;
 }
 
+function calculateDiscount() {
+  if (!checkoutOrder) return;
+  const total = Number(checkoutOrder.total || 0);
+  const discount = Math.max(0, Number(discountAmount.value || 0));
+  const net = Math.max(0, total - discount);
+
+  checkoutNetTotal.textContent = numberBaht(net);
+  discountError.textContent = discount > total
+    ? "ส่วนลดต้องไม่มากกว่ายอดสินค้า"
+    : "";
+}
+
 function openCheckout(order) {
+  checkoutOrder = order;
   checkoutOrderInfo.innerHTML = `
     <b>${order.order_no}</b><br>
     ลูกค้า: ${order.customer_name || "ไม่ระบุชื่อ"}<br>
     โต๊ะ: ${order.table_no === "counter" ? "เคาน์เตอร์" : order.table_no}
   `;
   checkoutTotal.textContent = numberBaht(order.total);
+  discountAmount.value = "0";
   checkoutModal.classList.add("show");
   checkoutModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+  calculateDiscount();
 }
 
 function closeCheckout() {
+  checkoutOrder = null;
   checkoutModal.classList.remove("show");
   checkoutModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
@@ -217,6 +237,7 @@ function closeCheckout() {
 
 closeCheckoutButton.addEventListener("click", closeCheckout);
 checkoutDoneButton.addEventListener("click", closeCheckout);
+discountAmount.addEventListener("input", calculateDiscount);
 checkoutModal.querySelector("[data-close-checkout]").addEventListener("click", closeCheckout);
 
 function renderOrders(newOrderIds = []) {
