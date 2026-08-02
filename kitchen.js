@@ -4,6 +4,46 @@ const sb = supabase.createClient(
 );
 
 const ordersEl = document.getElementById("orders");
+const soundToggle = document.getElementById("soundToggle");
+const soundHint = document.getElementById("soundHint");
+
+let firstLoadFinished = false;
+let knownOrderIds = new Set();
+let soundEnabled = localStorage.getItem("356_sound_enabled") === "true";
+let audioContext = null;
+
+injectKitchenStyles();
+updateSoundButton();
+
+function injectKitchenStyles() {
+  const style = document.createElement("style");
+  style.textContent = `
+    .sound-hint{
+      background:#fff8d8;
+      border:1px solid #ead98b;
+      border-radius:12px;
+      padding:10px 12px;
+      margin-bottom:12px;
+      font-size:14px;
+    }
+    .sound-hint.hidden{display:none}
+    .new-order-flash{
+      animation:newOrderFlash 2s ease-in-out;
+    }
+    @keyframes newOrderFlash{
+      0%,100%{box-shadow:none}
+      20%,60%{
+        box-shadow:0 0 0 5px rgba(217,45,32,.35);
+        background:#fff1f0;
+      }
+    }
+    #soundToggle.sound-on{
+      background:#171513;
+      color:white;
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 function statusText(status) {
   return {
@@ -14,9 +54,7 @@ function statusText(status) {
 }
 
 function paymentText(method) {
-  return method === "promptpay"
-    ? "พร้อมเพย์"
-    : "จ่ายที่เคาน์เตอร์";
+  return method === "promptpay" ? "พร้อมเพย์" : "จ่ายที่เคาน์เตอร์";
 }
 
 function orderTime(value) {
@@ -25,6 +63,63 @@ function orderTime(value) {
     hour: "2-digit",
     minute: "2-digit"
   });
+}
+
+function updateSoundButton() {
+  soundToggle.textContent = soundEnabled ? "🔊 เปิดเสียงอยู่" : "🔇 เปิดเสียง";
+  soundToggle.classList.toggle("sound-on", soundEnabled);
+  soundHint.classList.toggle("hidden", soundEnabled);
+}
+
+soundToggle.addEventListener("click", async () => {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem("356_sound_enabled", String(soundEnabled));
+
+  if (soundEnabled) {
+    await ensureAudioContext();
+    playDing(); // เสียงทดสอบ 1 ครั้งเมื่อเปิด
+  }
+
+  updateSoundButton();
+});
+
+async function ensureAudioContext() {
+  if (!audioContext) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    audioContext = new AudioContextClass();
+  }
+
+  if (audioContext.state === "suspended") {
+    await audioContext.resume();
+  }
+}
+
+function playDing() {
+  if (!soundEnabled) return;
+
+  try {
+    ensureAudioContext().then(() => {
+      const now = audioContext.currentTime;
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(880, now);
+      oscillator.frequency.exponentialRampToValueAtTime(660, now + 0.18);
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.28, now + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+
+      oscillator.start(now);
+      oscillator.stop(now + 0.34);
+    });
+  } catch (error) {
+    console.error("เล่นเสียงไม่ได้", error);
+  }
 }
 
 async function loadOrders() {
@@ -53,16 +148,32 @@ async function loadOrders() {
     return;
   }
 
+  const currentIds = new Set(data.map(order => order.id));
+  const newOrderIds = firstLoadFinished
+    ? data
+        .filter(order => !knownOrderIds.has(order.id))
+        .map(order => order.id)
+    : [];
+
+  if (newOrderIds.length > 0) {
+    // ดัง 1 ครั้งต่อออร์เดอร์ใหม่
+    newOrderIds.forEach((_, index) => {
+      setTimeout(playDing, index * 450);
+    });
+  }
+
   ordersEl.innerHTML = "";
 
-  data.forEach((order) => {
+  data.forEach(order => {
     const card = document.createElement("section");
     card.className = "order";
 
+    if (newOrderIds.includes(order.id)) {
+      card.classList.add("new-order-flash");
+    }
+
     const tableText =
-      order.table_no === "counter"
-        ? "เคาน์เตอร์"
-        : order.table_no;
+      order.table_no === "counter" ? "เคาน์เตอร์" : order.table_no;
 
     card.innerHTML = `
       <div class="order-top">
@@ -82,7 +193,7 @@ async function loadOrders() {
         🕒 เวลา: ${orderTime(order.created_at)} น.
       </div>
 
-      ${(order.order_items || []).map((item) => `
+      ${(order.order_items || []).map(item => `
         <div class="row">
           <b>${item.product_name} × ${item.quantity}</b>
           <div class="muted">
@@ -107,6 +218,9 @@ async function loadOrders() {
 
     ordersEl.appendChild(card);
   });
+
+  knownOrderIds = currentIds;
+  firstLoadFinished = true;
 }
 
 async function setStatus(id, status) {
@@ -123,5 +237,6 @@ async function setStatus(id, status) {
   loadOrders();
 }
 
+// โหลดทันที และตรวจออร์เดอร์ใหม่ทุก 3 วินาที
 loadOrders();
 setInterval(loadOrders, 3000);

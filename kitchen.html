@@ -1,1 +1,29 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>356 หลังร้าน</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body><header><b>356 หลังร้าน</b><button onclick="loadOrders()">รีเฟรช</button></header><main><div id="orders"></div></main><script src="kitchen.js"></script></body></html>
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>356 หลังร้าน</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header>
+    <b>356 หลังร้าน</b>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="soundToggle" type="button">🔇 เปิดเสียง</button>
+      <button type="button" onclick="loadOrders()">รีเฟรช</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="soundHint" class="sound-hint">
+      แตะ “เปิดเสียง” 1 ครั้ง เพื่ออนุญาตเสียงแจ้งเตือนบน iPhone/iPad
+    </div>
+    <div id="orders"></div>
+  </main>
+
+  <script src="kitchen.js"></script>
+</body>
+</html>
