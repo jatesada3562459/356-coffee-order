@@ -204,3 +204,68 @@ input[type=text]{
 @media(min-width:650px){
   .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+/* ===== 356 POS V1.1 Sprint 1: Dashboard / Search / FIFO ===== */
+.kitchen-dashboard{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:12px 0 14px;
+}
+.dashboard-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+}
+.dashboard-label{
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:5px;
+}
+.dashboard-value{
+  font-size:22px;
+  font-weight:900;
+}
+.kitchen-toolbar{
+  display:flex;
+  gap:8px;
+  margin:12px 0;
+}
+.kitchen-search{
+  width:100%;
+  padding:12px 14px;
+  border:1px solid #ccc;
+  border-radius:12px;
+  font:inherit;
+  background:#fff;
+}
+.search-result-note{
+  color:var(--muted);
+  font-size:13px;
+  margin:4px 0 10px;
+}
+.empty-orders{
+  background:#fff;
+  border:1px dashed var(--line);
+  border-radius:14px;
+  padding:24px 14px;
+  text-align:center;
+  color:var(--muted);
+}
+.version-footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  padding:26px 0 10px;
+}
+.reminder-badge{
+  display:inline-block;
+  margin-left:6px;
+  color:var(--red);
+  font-size:12px;
+  font-weight:900;
+}
+@media(min-width:650px){
+  .kitchen-dashboard{grid-template-columns:repeat(4,minmax(0,1fr))}
+}

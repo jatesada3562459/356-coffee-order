@@ -21,7 +21,39 @@
     <div id="soundHint" class="sound-hint">
       แตะ “เปิดเสียง” 1 ครั้ง แล้วต้องได้ยินเสียงทดสอบ
     </div>
+
+    <section class="kitchen-dashboard" aria-label="สรุปยอดวันนี้">
+      <div class="dashboard-card">
+        <div class="dashboard-label">ออเดอร์วันนี้</div>
+        <div id="todayOrderCount" class="dashboard-value">0</div>
+      </div>
+      <div class="dashboard-card">
+        <div class="dashboard-label">ยอดขายวันนี้</div>
+        <div id="todaySales" class="dashboard-value">฿0</div>
+      </div>
+      <div class="dashboard-card">
+        <div class="dashboard-label">จ่ายที่เคาน์เตอร์</div>
+        <div id="todayCounter" class="dashboard-value">฿0</div>
+      </div>
+      <div class="dashboard-card">
+        <div class="dashboard-label">พร้อมเพย์</div>
+        <div id="todayPromptPay" class="dashboard-value">฿0</div>
+      </div>
+    </section>
+
+    <div class="kitchen-toolbar">
+      <input
+        id="orderSearch"
+        class="kitchen-search"
+        type="search"
+        placeholder="ค้นหาเลขออเดอร์ ชื่อลูกค้า โต๊ะ หรือชื่อเมนู"
+        autocomplete="off"
+      >
+    </div>
+    <div id="searchResultNote" class="search-result-note"></div>
+
     <div id="orders"></div>
+    <footer class="version-footer">356 POS V1.1 — Sprint 1</footer>
   </main>
 
   <audio id="dingAudio" src="notification.wav" preload="auto"></audio>

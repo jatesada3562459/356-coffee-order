@@ -7,10 +7,24 @@ const ordersEl = document.getElementById("orders");
 const soundToggle = document.getElementById("soundToggle");
 const soundHint = document.getElementById("soundHint");
 const dingAudio = document.getElementById("dingAudio");
+const searchInput = document.getElementById("orderSearch");
+const searchResultNote = document.getElementById("searchResultNote");
+const todayOrderCount = document.getElementById("todayOrderCount");
+const todaySales = document.getElementById("todaySales");
+const todayCounter = document.getElementById("todayCounter");
+const todayPromptPay = document.getElementById("todayPromptPay");
 
+let allOrders = [];
 let firstLoadFinished = false;
 let knownOrderIds = new Set();
 let soundEnabled = false;
+let loadingOrders = false;
+
+const REMINDER_AFTER_MS = 60 * 1000;
+const reminderStorageKey = "356_reminded_order_ids";
+const remindedOrderIds = new Set(
+  JSON.parse(sessionStorage.getItem(reminderStorageKey) || "[]")
+);
 
 injectKitchenStyles();
 updateSoundButton();
@@ -70,10 +84,12 @@ function playDing() {
   }
 }
 
-/*
-  สำคัญสำหรับ iPhone/iPad:
-  ต้องเรียก audio.play() โดยตรงภายในเหตุการณ์แตะ
-*/
+function playReminderTwice() {
+  if (!soundEnabled) return;
+  playDing();
+  setTimeout(playDing, 650);
+}
+
 soundToggle.addEventListener("click", () => {
   if (soundEnabled) {
     soundEnabled = false;
@@ -86,11 +102,8 @@ soundToggle.addEventListener("click", () => {
   dingAudio.currentTime = 0;
 
   const promise = dingAudio.play();
-
   if (promise) {
-    promise.then(() => {
-      updateSoundButton();
-    }).catch(error => {
+    promise.then(updateSoundButton).catch(error => {
       soundEnabled = false;
       updateSoundButton();
       console.error(error);
@@ -101,6 +114,8 @@ soundToggle.addEventListener("click", () => {
   }
 });
 
+searchInput.addEventListener("input", renderOrders);
+
 function statusText(status) {
   return {
     new: "NEW",
@@ -110,64 +125,87 @@ function statusText(status) {
 }
 
 function paymentText(method) {
-  return method === "promptpay"
-    ? "พร้อมเพย์"
-    : "จ่ายที่เคาน์เตอร์";
+  return method === "promptpay" ? "พร้อมเพย์" : "จ่ายที่เคาน์เตอร์";
 }
 
 function orderTime(value) {
   if (!value) return "-";
-
   return new Date(value).toLocaleTimeString("th-TH", {
     hour: "2-digit",
     minute: "2-digit"
   });
 }
 
-async function loadOrders() {
-  const { data, error } = await sb
-    .from("orders")
-    .select(`
-      id,
-      order_no,
-      table_no,
-      customer_name,
-      payment_method,
-      total,
-      status,
-      created_at,
-      order_items (
-        product_name,
-        quantity,
-        options,
-        line_total
-      )
-    `)
-    .order("created_at", { ascending: false });
+function currency(value) {
+  return `฿${Number(value || 0).toLocaleString("th-TH", {
+    maximumFractionDigits: 0
+  })}`;
+}
 
-  if (error) {
-    ordersEl.innerHTML =
-      `<p>โหลดออร์เดอร์ไม่สำเร็จ: ${error.message}</p>`;
-    return;
-  }
+function isToday(value) {
+  const date = new Date(value);
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
 
-  const currentIds = new Set(data.map(order => order.id));
+function updateDashboard() {
+  const todayOrders = allOrders.filter(order => isToday(order.created_at));
+  const sales = todayOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const counter = todayOrders
+    .filter(order => order.payment_method !== "promptpay")
+    .reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const promptPay = todayOrders
+    .filter(order => order.payment_method === "promptpay")
+    .reduce((sum, order) => sum + Number(order.total || 0), 0);
 
-  const newOrderIds = firstLoadFinished
-    ? data
-        .filter(order => !knownOrderIds.has(order.id))
-        .map(order => order.id)
-    : [];
+  todayOrderCount.textContent = todayOrders.length.toLocaleString("th-TH");
+  todaySales.textContent = currency(sales);
+  todayCounter.textContent = currency(counter);
+  todayPromptPay.textContent = currency(promptPay);
+}
 
-  if (newOrderIds.length > 0 && soundEnabled) {
-    newOrderIds.forEach((_, index) => {
-      setTimeout(playDing, index * 650);
-    });
-  }
+function searchableText(order) {
+  const tableText = order.table_no === "counter" ? "เคาน์เตอร์" : `โต๊ะ ${order.table_no}`;
+  const itemText = (order.order_items || [])
+    .map(item => `${item.product_name} ${(item.options || []).join(" ")}`)
+    .join(" ");
+
+  return [
+    order.order_no,
+    order.customer_name || "",
+    tableText,
+    paymentText(order.payment_method),
+    statusText(order.status),
+    itemText
+  ].join(" ").toLocaleLowerCase("th-TH");
+}
+
+function getFilteredOrders() {
+  const query = searchInput.value.trim().toLocaleLowerCase("th-TH");
+  if (!query) return allOrders;
+  return allOrders.filter(order => searchableText(order).includes(query));
+}
+
+function renderOrders(newOrderIds = []) {
+  const orders = getFilteredOrders();
+  const query = searchInput.value.trim();
+
+  searchResultNote.textContent = query
+    ? `พบ ${orders.length} ออเดอร์จากทั้งหมด ${allOrders.length} ออเดอร์`
+    : `เรียงตามเวลาสั่ง: สั่งก่อนอยู่บนสุด`;
 
   ordersEl.innerHTML = "";
 
-  data.forEach(order => {
+  if (!orders.length) {
+    ordersEl.innerHTML = `<div class="empty-orders">ไม่พบออเดอร์ที่ค้นหา</div>`;
+    return;
+  }
+
+  orders.forEach(order => {
     const card = document.createElement("section");
     card.className = "order";
 
@@ -175,20 +213,19 @@ async function loadOrders() {
       card.classList.add("new-order-flash");
     }
 
-    const tableText =
-      order.table_no === "counter"
-        ? "เคาน์เตอร์"
-        : order.table_no;
+    const tableText = order.table_no === "counter" ? "เคาน์เตอร์" : order.table_no;
+    const waitingReminder =
+      order.status === "new" &&
+      Date.now() - new Date(order.created_at).getTime() >= REMINDER_AFTER_MS;
 
     card.innerHTML = `
       <div class="order-top">
         <div>
-          <span class="status status-${order.status}">
-            ${statusText(order.status)}
-          </span>
+          <span class="status status-${order.status}">${statusText(order.status)}</span>
+          ${waitingReminder ? '<span class="reminder-badge">รอรับออเดอร์</span>' : ""}
           <h3>${order.order_no}</h3>
         </div>
-        <div class="price">฿${Number(order.total).toFixed(0)}</div>
+        <div class="price">${currency(order.total)}</div>
       </div>
 
       <div class="order-meta">
@@ -202,8 +239,7 @@ async function loadOrders() {
         <div class="row">
           <b>${item.product_name} × ${item.quantity}</b>
           <div class="muted">
-            ${(item.options || []).join(" • ")
-              || "ไม่มีตัวเลือกเพิ่มเติม"}
+            ${(item.options || []).join(" • ") || "ไม่มีตัวเลือกเพิ่มเติม"}
           </div>
         </div>
       `).join("")}
@@ -224,9 +260,75 @@ async function loadOrders() {
 
     ordersEl.appendChild(card);
   });
+}
 
+function saveRemindedIds() {
+  sessionStorage.setItem(reminderStorageKey, JSON.stringify([...remindedOrderIds]));
+}
+
+function checkSecondReminders() {
+  allOrders.forEach(order => {
+    const age = Date.now() - new Date(order.created_at).getTime();
+    const shouldRemind =
+      order.status === "new" &&
+      age >= REMINDER_AFTER_MS &&
+      !remindedOrderIds.has(order.id);
+
+    if (shouldRemind) {
+      remindedOrderIds.add(order.id);
+      saveRemindedIds();
+      playReminderTwice();
+    }
+  });
+}
+
+async function loadOrders() {
+  if (loadingOrders) return;
+  loadingOrders = true;
+
+  const { data, error } = await sb
+    .from("orders")
+    .select(`
+      id,
+      order_no,
+      table_no,
+      customer_name,
+      payment_method,
+      total,
+      status,
+      created_at,
+      order_items (
+        product_name,
+        quantity,
+        options,
+        line_total
+      )
+    `)
+    .order("created_at", { ascending: true });
+
+  loadingOrders = false;
+
+  if (error) {
+    ordersEl.innerHTML = `<p>โหลดออร์เดอร์ไม่สำเร็จ: ${error.message}</p>`;
+    return;
+  }
+
+  const currentIds = new Set(data.map(order => order.id));
+  const newOrderIds = firstLoadFinished
+    ? data.filter(order => !knownOrderIds.has(order.id)).map(order => order.id)
+    : [];
+
+  if (newOrderIds.length > 0 && soundEnabled) {
+    newOrderIds.forEach((_, index) => setTimeout(playDing, index * 650));
+  }
+
+  allOrders = data;
   knownOrderIds = currentIds;
   firstLoadFinished = true;
+
+  updateDashboard();
+  renderOrders(newOrderIds);
+  checkSecondReminders();
 }
 
 async function setStatus(id, status) {
@@ -238,6 +340,11 @@ async function setStatus(id, status) {
   if (error) {
     alert("เปลี่ยนสถานะไม่สำเร็จ: " + error.message);
     return;
+  }
+
+  if (status !== "new") {
+    remindedOrderIds.add(id);
+    saveRemindedIds();
   }
 
   loadOrders();
