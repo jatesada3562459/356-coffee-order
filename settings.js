@@ -315,13 +315,13 @@ function updateImagePreview(url = null) {
   }
 }
 
-function safeFilePart(value) {
-  return String(value || "menu")
-    .normalize("NFKD")
-    .replace(/[^\w\u0E00-\u0E7F-]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 60) || "menu";
+function makeSafeStorageFileName(extension = "jpg") {
+  const randomPart =
+    (globalThis.crypto?.randomUUID?.() ||
+      `${Date.now()}-${Math.random().toString(36).slice(2)}`)
+      .replace(/[^a-zA-Z0-9-]/g, "");
+
+  return `${Date.now()}-${randomPart}.${extension}`;
 }
 
 async function uploadMenuImage(file, itemType, itemName) {
@@ -336,7 +336,7 @@ async function uploadMenuImage(file, itemType, itemName) {
     .replace(/[^a-z0-9]/g, "") || "jpg";
 
   const path =
-    `${itemType}/${Date.now()}-${safeFilePart(itemName)}.${extension}`;
+    `${itemType}/${makeSafeStorageFileName(extension)}`;
 
   const { error: uploadError } = await sb.storage
     .from("menu-images")
