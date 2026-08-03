@@ -781,3 +781,197 @@ input[type=text]{
     align-self:flex-start;
   }
 }
+
+
+/* ===== V1.4.0 เงินในเก๊ะและปิดยอด ===== */
+.cash-panel{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+}
+.cash-panel h2{
+  margin:0 0 12px;
+}
+.cash-field{
+  display:block;
+  margin:12px 0;
+}
+.cash-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.cash-field input,
+.cash-field select{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  padding:12px;
+  border:1px solid #cfc6bd;
+  border-radius:13px;
+  font:inherit;
+  background:#fff;
+}
+.cash-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+  margin:8px 0;
+}
+.cash-heading-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.cash-status-badge{
+  background:#e9f7ee;
+  color:#187143;
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:13px;
+  font-weight:900;
+}
+.cash-status-badge.closed{
+  background:#eee;
+  color:#666;
+}
+.cash-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+.cash-summary-card{
+  background:#faf7f2;
+  border-radius:14px;
+  padding:12px;
+}
+.cash-summary-card span{
+  display:block;
+  color:#6a6159;
+  font-size:13px;
+}
+.cash-summary-card strong{
+  display:block;
+  margin-top:6px;
+  font-size:20px;
+}
+.cash-summary-card.highlight{
+  background:#fff4cf;
+}
+.cash-action-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.cash-action-button{
+  min-height:48px;
+  border:0;
+  border-radius:13px;
+  font-weight:900;
+  font-size:16px;
+}
+.cash-action-button.cash-in{
+  background:#e8f7ee;
+  color:#166c41;
+}
+.cash-action-button.cash-out{
+  background:#fff0ef;
+  color:#a33229;
+}
+.cash-movement-form{
+  margin-top:14px;
+  border-top:1px solid #e2dbd3;
+  padding-top:14px;
+}
+.cash-movement-form.hidden{display:none}
+.cash-form-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.cash-form-actions button{
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  font-weight:900;
+}
+.cash-movement-list{
+  display:grid;
+  gap:9px;
+  margin-top:14px;
+}
+.cash-movement-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  border-radius:13px;
+  padding:12px;
+}
+.cash-movement-item.in{
+  background:#eef8f2;
+}
+.cash-movement-item.out{
+  background:#fff2f1;
+}
+.cash-movement-item div div{
+  margin-top:3px;
+}
+.cash-movement-item small{
+  color:#756b63;
+}
+.cash-movement-item > strong{
+  white-space:nowrap;
+}
+.reconcile-grid{
+  display:grid;
+  gap:10px;
+  margin:14px 0;
+}
+.reconcile-card{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  background:#faf7f2;
+  border-radius:13px;
+  padding:12px;
+}
+.reconcile-card.total{
+  border:2px solid #cfc6bd;
+}
+.difference-positive{color:#187143}
+.difference-negative{color:#b42318}
+.difference-zero{color:#171513}
+.reconcile-message{
+  border-radius:12px;
+  padding:11px;
+  margin:10px 0;
+  font-weight:800;
+}
+.reconcile-message:empty{display:none}
+.reconcile-ok{background:#e8f7ee;color:#166c41}
+.reconcile-warning{background:#fff5cf;color:#775b00}
+.reconcile-error{background:#fff0ef;color:#a33229}
+.danger-primary{
+  background:#b42318!important;
+}
+@media (min-width:760px){
+  .cash-summary-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .reconcile-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .reconcile-card{
+    display:block;
+  }
+  .reconcile-card strong{
+    display:block;
+    margin-top:7px;
+    font-size:22px;
+  }
+}

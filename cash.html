@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>เงินในเก๊ะ 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header>
+    <b>💰 เงินในเก๊ะ</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="kitchen.html">← กลับหลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section id="openSessionPanel" class="cash-panel">
+      <h2>เปิดเก๊ะวันนี้</h2>
+      <p class="muted">กรอกเงินทอนตั้งต้นก่อนเริ่มรับเงินสด</p>
+      <label class="cash-field">
+        <span>เงินทอนตั้งต้น (บาท)</span>
+        <input id="openingFloat" type="number" min="0" step="1" inputmode="decimal" placeholder="เช่น 500">
+      </label>
+      <div id="openSessionError" class="cash-error"></div>
+      <button id="openSessionButton" class="primary" type="button">เปิดเก๊ะวันนี้</button>
+    </section>
+
+    <section id="activeSessionPanel" class="hidden">
+      <section class="cash-panel">
+        <div class="cash-heading-row">
+          <div>
+            <h2>สรุปเงินวันนี้</h2>
+            <div id="cashBusinessDate" class="muted">-</div>
+          </div>
+          <span id="sessionStatusBadge" class="cash-status-badge">เปิดอยู่</span>
+        </div>
+
+        <div class="cash-summary-grid">
+          <div class="cash-summary-card"><span>เงินทอนตั้งต้น</span><strong id="summaryOpening">฿0</strong></div>
+          <div class="cash-summary-card"><span>ยอดขายเงินสด</span><strong id="summaryCashSales">฿0</strong></div>
+          <div class="cash-summary-card"><span>เงินเข้าอื่น ๆ</span><strong id="summaryCashIn">฿0</strong></div>
+          <div class="cash-summary-card"><span>เงินออก</span><strong id="summaryCashOut">฿0</strong></div>
+          <div class="cash-summary-card highlight"><span>เงินสดที่ควรมี</span><strong id="summaryExpectedCash">฿0</strong></div>
+          <div class="cash-summary-card"><span>พร้อมเพย์ตามระบบ</span><strong id="summaryPromptPay">฿0</strong></div>
+        </div>
+      </section>
+
+      <section class="cash-panel">
+        <h2>รายการเงินเข้า–ออก</h2>
+
+        <div class="cash-action-grid">
+          <button id="showCashInButton" class="cash-action-button cash-in" type="button">➕ เงินเข้า</button>
+          <button id="showCashOutButton" class="cash-action-button cash-out" type="button">➖ เงินออก</button>
+        </div>
+
+        <form id="movementForm" class="cash-movement-form hidden">
+          <input id="movementType" type="hidden">
+
+          <label class="cash-field">
+            <span>จำนวนเงิน (บาท)</span>
+            <input id="movementAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
+          </label>
+
+          <label class="cash-field">
+            <span>หมวดหมู่</span>
+            <select id="movementCategory">
+              <option value="">เลือกหมวด</option>
+              <option value="เติมเงินทอน">เติมเงินทอน</option>
+              <option value="น้ำแข็ง">น้ำแข็ง</option>
+              <option value="แก้ว/ฝา/หลอด">แก้ว/ฝา/หลอด</option>
+              <option value="วัตถุดิบ">วัตถุดิบ</option>
+              <option value="อุปกรณ์ทำความสะอาด">อุปกรณ์ทำความสะอาด</option>
+              <option value="ค่าขนส่ง">ค่าขนส่ง</option>
+              <option value="ค่าอาหาร">ค่าอาหาร</option>
+              <option value="ค่าน้ำ/ค่าไฟ">ค่าน้ำ/ค่าไฟ</option>
+              <option value="อื่น ๆ">อื่น ๆ</option>
+            </select>
+          </label>
+
+          <label class="cash-field">
+            <span>หมายเหตุ</span>
+            <input id="movementNote" type="text" maxlength="200" placeholder="เช่น ซื้อน้ำแข็ง">
+          </label>
+
+          <div id="movementError" class="cash-error"></div>
+
+          <div class="cash-form-actions">
+            <button id="cancelMovementButton" type="button">ยกเลิก</button>
+            <button class="primary" type="submit">บันทึก</button>
+          </div>
+        </form>
+
+        <div id="movementList" class="cash-movement-list"></div>
+      </section>
+
+      <section class="cash-panel close-day-panel">
+        <h2>ปิดยอดวันนี้</h2>
+
+        <label class="cash-field">
+          <span>เงินสดจริงที่นับได้ (บาท)</span>
+          <input id="actualCash" type="number" min="0" step="0.01" inputmode="decimal">
+        </label>
+
+        <label class="cash-field">
+          <span>พร้อมเพย์จริงจากแอปธนาคาร (บาท)</span>
+          <input id="actualPromptPay" type="number" min="0" step="0.01" inputmode="decimal">
+        </label>
+
+        <div class="reconcile-grid">
+          <div class="reconcile-card">
+            <span>ผลต่างเงินสด</span>
+            <strong id="cashDifference">฿0</strong>
+          </div>
+          <div class="reconcile-card">
+            <span>ผลต่างพร้อมเพย์</span>
+            <strong id="promptPayDifference">฿0</strong>
+          </div>
+          <div class="reconcile-card total">
+            <span>ผลต่างสุทธิรวม</span>
+            <strong id="netDifference">฿0</strong>
+          </div>
+        </div>
+
+        <div id="reconcileMessage" class="reconcile-message"></div>
+
+        <label class="cash-field">
+          <span>หมายเหตุการปิดยอด</span>
+          <input id="closingNote" type="text" maxlength="250" placeholder="ใส่เมื่อยอดไม่ตรง หรือหมายเหตุอื่น">
+        </label>
+
+        <div id="closeDayError" class="cash-error"></div>
+        <button id="closeDayButton" class="primary danger-primary" type="button">ปิดยอดวันนี้</button>
+      </section>
+    </section>
+
+    <footer class="version-label">356 POS V1.4.0 — เงินในเก๊ะและปิดยอด</footer>
+  </main>
+
+  <script src="cash.js"></script>
+</body>
+</html>
