@@ -114,13 +114,37 @@
     </section>
 
     <section class="report-section">
+      <div class="report-section-title">📊 เปรียบเทียบช่วงก่อนหน้า</div>
+      <div id="comparisonSummary" class="comparison-summary-grid">
+        <article class="comparison-card">
+          <span>ยอดขายช่วงนี้</span>
+          <strong id="comparisonCurrentSales">฿0</strong>
+        </article>
+        <article class="comparison-card">
+          <span>ยอดขายช่วงก่อนหน้า</span>
+          <strong id="comparisonPreviousSales">฿0</strong>
+        </article>
+        <article class="comparison-card full">
+          <span>การเปลี่ยนแปลง</span>
+          <strong id="comparisonChange">0%</strong>
+          <small id="comparisonDetail">ยังไม่มีข้อมูลเปรียบเทียบ</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="report-section">
       <div class="report-section-title">📅 ยอดขายแยกตามวัน</div>
       <div id="dailySalesList" class="report-list"></div>
     </section>
 
+    <section class="report-section">
+      <div class="report-section-title">🗓️ สรุปยอดขายรายเดือน</div>
+      <div id="monthlySalesList" class="report-list"></div>
+    </section>
+
     <div id="reportError" class="report-error"></div>
 
-    <footer class="version-label">356 POS V1.6.2 — Top Menu & Category</footer>
+    <footer class="version-label">356 POS V1.6.3 — Period Comparison</footer>
   </main>
 
   <script src="reports.js"></script>

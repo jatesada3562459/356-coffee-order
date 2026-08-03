@@ -27,6 +27,11 @@ const reportLoadStatus = document.getElementById("reportLoadStatus");
 const reportSummarySection = document.getElementById("reportSummarySection");
 const topSellingSort = document.getElementById("topSellingSort");
 const categorySalesGrid = document.getElementById("categorySalesGrid");
+const comparisonCurrentSales = document.getElementById("comparisonCurrentSales");
+const comparisonPreviousSales = document.getElementById("comparisonPreviousSales");
+const comparisonChange = document.getElementById("comparisonChange");
+const comparisonDetail = document.getElementById("comparisonDetail");
+const monthlySalesList = document.getElementById("monthlySalesList");
 
 const BREAD_PRODUCTS = new Set([
   "เนยนม",
@@ -75,6 +80,38 @@ function dateRangeIso(startKey, endKey) {
   const endDate = new Date(`${endKey}T00:00:00+07:00`);
   endDate.setDate(endDate.getDate() + 1);
   return { start, end: endDate.toISOString() };
+}
+
+function previousPeriodKeys(startKey, endKey) {
+  const start = new Date(`${startKey}T12:00:00+07:00`);
+  const end = new Date(`${endKey}T12:00:00+07:00`);
+  const days = Math.round((end - start) / 86400000) + 1;
+
+  const previousEnd = new Date(start);
+  previousEnd.setDate(previousEnd.getDate() - 1);
+
+  const previousStart = new Date(previousEnd);
+  previousStart.setDate(previousStart.getDate() - days + 1);
+
+  return {
+    startKey: bangkokDateKey(previousStart),
+    endKey: bangkokDateKey(previousEnd)
+  };
+}
+
+function bangkokMonthKey(value) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit"
+  }).format(new Date(value));
+}
+
+function thaiMonth(monthKey) {
+  return new Intl.DateTimeFormat("th-TH", {
+    month: "long",
+    year: "numeric"
+  }).format(new Date(`${monthKey}-15T12:00:00+07:00`));
 }
 
 function setToday() {
@@ -244,6 +281,56 @@ function renderDailySales(items) {
   });
 }
 
+function renderMonthlySales(items) {
+  monthlySalesList.innerHTML = "";
+
+  if (!items.length) {
+    monthlySalesList.innerHTML =
+      '<div class="empty-state">ยังไม่มีข้อมูลรายเดือนในช่วงที่เลือก</div>';
+    return;
+  }
+
+  items.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "report-row";
+    row.innerHTML = `
+      <div class="report-row-main">
+        <strong>${thaiMonth(item.month)}</strong>
+        <small>
+          ${item.orders.toLocaleString("th-TH")} ออเดอร์
+          • เฉลี่ย ${numberBaht(item.orders ? item.sales / item.orders : 0)} ต่อบิล
+        </small>
+      </div>
+      <b>${numberBaht(item.sales)}</b>
+    `;
+    monthlySalesList.appendChild(row);
+  });
+}
+
+function renderComparison(currentSales, previousSales, previousStartKey, previousEndKey) {
+  comparisonCurrentSales.textContent = numberBaht(currentSales);
+  comparisonPreviousSales.textContent = numberBaht(previousSales);
+
+  let percent = 0;
+  if (previousSales > 0) {
+    percent = ((currentSales - previousSales) / previousSales) * 100;
+  } else if (currentSales > 0) {
+    percent = 100;
+  }
+
+  const difference = currentSales - previousSales;
+  const direction = difference > 0 ? "เพิ่มขึ้น" : difference < 0 ? "ลดลง" : "เท่าเดิม";
+
+  comparisonChange.textContent =
+    `${difference > 0 ? "▲ " : difference < 0 ? "▼ " : ""}${Math.abs(percent).toFixed(1)}%`;
+
+  comparisonChange.classList.toggle("positive", difference > 0);
+  comparisonChange.classList.toggle("negative", difference < 0);
+
+  comparisonDetail.textContent =
+    `${direction} ${numberBaht(Math.abs(difference))} เมื่อเทียบกับ ${thaiDate(previousStartKey)} – ${thaiDate(previousEndKey)}`;
+}
+
 async function loadReport() {
   const startKey = startDateInput.value;
   const endKey = endDateInput.value;
@@ -272,7 +359,10 @@ async function loadReport() {
     await loadMenuCategoryMap();
   }
 
-  const [ordersResult, membersResult] = await Promise.all([
+  const previousKeys = previousPeriodKeys(startKey, endKey);
+  const previousRange = dateRangeIso(previousKeys.startKey, previousKeys.endKey);
+
+  const [ordersResult, membersResult, previousOrdersResult] = await Promise.all([
     sb
       .from("orders")
       .select(`
@@ -302,7 +392,19 @@ async function loadReport() {
       .from("members")
       .select("id", { count: "exact", head: true })
       .gte("created_at", start)
-      .lt("created_at", end)
+      .lt("created_at", end),
+    sb
+      .from("orders")
+      .select(`
+        final_total,
+        total,
+        refund_amount,
+        payment_status,
+        cancelled
+      `)
+      .eq("payment_status", "paid")
+      .gte("paid_at", previousRange.start)
+      .lt("paid_at", previousRange.end)
   ]);
 
   loadReportButton.disabled = false;
@@ -320,7 +422,14 @@ async function loadReport() {
     return;
   }
 
+  if (previousOrdersResult.error) {
+    reportError.textContent = "โหลดข้อมูลเปรียบเทียบไม่สำเร็จ: " + previousOrdersResult.error.message;
+    setReportStatus("โหลดข้อมูลเปรียบเทียบไม่สำเร็จ", "error");
+    return;
+  }
+
   const orders = (ordersResult.data || []).filter(order => !order.cancelled);
+  const previousOrders = (previousOrdersResult.data || []).filter(order => !order.cancelled);
 
   let netSales = 0;
   let cashSales = 0;
@@ -334,6 +443,7 @@ async function loadReport() {
   const productMap = new Map();
   const categoryMap = new Map();
   const dailyMap = new Map();
+  const monthlyMap = new Map();
 
   orders.forEach(order => {
     const gross = Number(order.final_total ?? order.total ?? 0);
@@ -359,6 +469,16 @@ async function loadReport() {
     daily.orders += 1;
     daily.sales += net;
     dailyMap.set(dateKey, daily);
+
+    const monthKey = bangkokMonthKey(order.paid_at);
+    const monthly = monthlyMap.get(monthKey) || {
+      month: monthKey,
+      orders: 0,
+      sales: 0
+    };
+    monthly.orders += 1;
+    monthly.sales += net;
+    monthlyMap.set(monthKey, monthly);
 
     (order.order_items || []).forEach(item => {
       const name = item.product_name;
@@ -432,10 +552,26 @@ async function loadReport() {
   const dailyItems = [...dailyMap.values()]
     .sort((a, b) => b.date.localeCompare(a.date));
 
+  const monthlyItems = [...monthlyMap.values()]
+    .sort((a, b) => b.month.localeCompare(a.month));
+
+  const previousSales = previousOrders.reduce((sum, order) => {
+    const gross = Number(order.final_total ?? order.total ?? 0);
+    const refund = Number(order.refund_amount || 0);
+    return sum + Math.max(0, gross - refund);
+  }, 0);
+
   latestTopItems = topItems;
   renderTopSelling(latestTopItems);
   renderCategorySales(categoryItems);
   renderDailySales(dailyItems);
+  renderMonthlySales(monthlyItems);
+  renderComparison(
+    netSales,
+    previousSales,
+    previousKeys.startKey,
+    previousKeys.endKey
+  );
 
   const rangeText = startKey === endKey
     ? thaiDate(startKey)

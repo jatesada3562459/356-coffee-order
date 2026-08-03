@@ -2533,3 +2533,52 @@ input[type=text]{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== V1.6.3 เปรียบเทียบช่วงเวลาและสรุปรายเดือน ===== */
+.comparison-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.comparison-card{
+  background:#faf7f2;
+  border:1px solid #e2dbd3;
+  border-radius:13px;
+  padding:11px;
+}
+.comparison-card.full{
+  grid-column:1 / -1;
+}
+.comparison-card span,
+.comparison-card small{
+  display:block;
+}
+.comparison-card span{
+  color:#6d645c;
+  font-size:13px;
+}
+.comparison-card strong{
+  display:block;
+  margin-top:6px;
+  font-size:22px;
+}
+.comparison-card small{
+  margin-top:5px;
+  line-height:1.4;
+  color:#6d645c;
+}
+#comparisonChange.positive{
+  color:#158047;
+}
+#comparisonChange.negative{
+  color:#b42318;
+}
+@media(max-width:600px){
+  .comparison-summary-grid{
+    grid-template-columns:1fr;
+  }
+  .comparison-card.full{
+    grid-column:auto;
+  }
+}
