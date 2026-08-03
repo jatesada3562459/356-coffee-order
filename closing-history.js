@@ -168,6 +168,9 @@ async function loadAnomalies(businessDate) {
       payment_method,
       actual_payment_method,
       reward_used,
+      refund_status,
+      refund_amount,
+      refund_reason,
       final_total,
       paid_at
     `)
@@ -199,6 +202,15 @@ async function loadAnomalies(businessDate) {
         type: "ใช้สิทธิ์สมาชิก",
         order,
         detail: "ใช้สิทธิ์ลด 30 บาท"
+      });
+    }
+
+    if (order.refund_status === "refunded") {
+      anomalies.push({
+        type: "คืนเงิน",
+        order,
+        detail:
+          `${numberBaht(order.refund_amount)} • ${order.refund_reason || "ไม่ระบุเหตุผล"}`
       });
     }
 

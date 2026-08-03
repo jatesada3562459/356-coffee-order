@@ -198,7 +198,7 @@ async function loadSystemSales() {
 
   const { data, error } = await sb
     .from("orders")
-    .select("final_total,total,actual_payment_method,payment_method,payment_status,paid_at")
+    .select("final_total,total,refund_amount,refund_status,actual_payment_method,payment_method,payment_status,paid_at")
     .eq("payment_status", "paid")
     .gte("paid_at", start)
     .lt("paid_at", end);
@@ -212,7 +212,9 @@ async function loadSystemSales() {
   systemPromptPay = 0;
 
   (data || []).forEach(order => {
-    const total = Number(order.final_total ?? order.total ?? 0);
+    const gross = Number(order.final_total ?? order.total ?? 0);
+    const refunded = Number(order.refund_amount || 0);
+    const total = Math.max(0, gross - refunded);
     const method = order.actual_payment_method || order.payment_method;
 
     if (method === "promptpay") systemPromptPay += total;

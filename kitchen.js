@@ -175,7 +175,12 @@ historyAllButton.addEventListener("click", () => {
 });
 
 function statusText(status) {
-  return { new: "NEW", making: "กำลังทำ", ready: "พร้อมเสิร์ฟ" }[status] || status;
+  return {
+    new: "NEW",
+    making: "กำลังทำ",
+    ready: "พร้อมเสิร์ฟ",
+    cancelled: "ยกเลิก"
+  }[status] || status;
 }
 
 function paymentText(method) {
@@ -205,12 +210,111 @@ function numberBaht(value) {
   })}`;
 }
 
+async function askManagerApproval(title, detail) {
+  return new Promise(resolve => {
+    const overlay = document.createElement("div");
+    overlay.className = "approval-overlay";
+    overlay.innerHTML = `
+      <div class="approval-card">
+        <div class="approval-icon">🔐</div>
+        <h2>${title}</h2>
+        <p>${detail}</p>
+
+        <label class="approval-field">
+          <span>PIN ผู้จัดการ 4 หลัก</span>
+          <input class="approval-pin" type="password" inputmode="numeric"
+            maxlength="4" pattern="[0-9]*" placeholder="••••" autocomplete="off">
+        </label>
+
+        <div class="approval-error"></div>
+
+        <div class="approval-actions">
+          <button class="approval-cancel" type="button">ยกเลิก</button>
+          <button class="approval-confirm primary" type="button">อนุมัติ</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const input = overlay.querySelector(".approval-pin");
+    const errorEl = overlay.querySelector(".approval-error");
+    const confirmButton = overlay.querySelector(".approval-confirm");
+    const cancelButton = overlay.querySelector(".approval-cancel");
+
+    function finish(value) {
+      overlay.remove();
+      resolve(value);
+    }
+
+    cancelButton.addEventListener("click", () => finish(null));
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) finish(null);
+    });
+
+    async function verify() {
+      const pin = input.value.trim();
+      errorEl.textContent = "";
+
+      if (!/^\d{4}$/.test(pin)) {
+        errorEl.textContent = "กรุณากรอก PIN 4 หลัก";
+        return;
+      }
+
+      confirmButton.disabled = true;
+      confirmButton.textContent = "กำลังตรวจสอบ...";
+
+      const { data, error } = await sb.rpc("verify_manager_pin", {
+        p_pin: pin
+      });
+
+      confirmButton.disabled = false;
+      confirmButton.textContent = "อนุมัติ";
+
+      if (error) {
+        errorEl.textContent = "ตรวจสอบ PIN ไม่สำเร็จ: " + error.message;
+        return;
+      }
+
+      if (!data) {
+        errorEl.textContent = "PIN ไม่ถูกต้อง";
+        input.value = "";
+        input.focus();
+        return;
+      }
+
+      finish(pin);
+    }
+
+    confirmButton.addEventListener("click", verify);
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter") verify();
+    });
+
+    setTimeout(() => input.focus(), 80);
+  });
+}
+
+async function writeManagerAudit(action, details = {}) {
+  const { error } = await sb.rpc("write_audit_log", {
+    p_action: action,
+    p_details: details,
+    p_actor: "manager"
+  });
+
+  if (error) {
+    console.error("บันทึก Audit Log ไม่สำเร็จ", error);
+  }
+}
+
 function isPaid(order) {
   return order.payment_status === "paid";
 }
 
 function orderFinalTotal(order) {
-  return Number(order.final_total ?? order.total ?? 0);
+  const paid = Number(order.final_total ?? order.total ?? 0);
+  const refunded = Number(order.refund_amount || 0);
+  return Math.max(0, paid - refunded);
 }
 
 const BREAD_PRODUCTS = new Set([
@@ -320,6 +424,7 @@ function updateDashboard() {
   const todayKey = bangkokDateKey();
   const todayPaidOrders = allOrders.filter(order =>
     isPaid(order) &&
+    !order.cancelled &&
     bangkokDateKey(order.paid_at || order.created_at) === todayKey
   );
 
@@ -409,16 +514,16 @@ function orderMatchesSearch(order) {
 
 function orderMatchesTab(order) {
   if (currentTab === "active") {
-    return !isPaid(order) &&
+    return !order.cancelled && !isPaid(order) &&
       (order.status === "new" || order.status === "making");
   }
 
   if (currentTab === "ready") {
-    return !isPaid(order) && order.status === "ready";
+    return !order.cancelled && !isPaid(order) && order.status === "ready";
   }
 
   if (currentTab === "history") {
-    if (!isPaid(order)) return false;
+    if (!isPaid(order) && !order.cancelled) return false;
     if (!historyDate) return true;
     return bangkokDateKey(order.paid_at || order.created_at) === historyDate;
   }
@@ -734,6 +839,22 @@ checkoutDoneButton.addEventListener("click", async () => {
   const result = calculateCheckout();
   if (!result || discountError.textContent) return;
 
+  const needsManagerApproval =
+    result.discount > 0 || Boolean(useMemberReward.checked);
+
+  if (needsManagerApproval) {
+    const actionText = useMemberReward.checked
+      ? "อนุมัติใช้สิทธิ์สมาชิกและส่วนลด 30 บาท"
+      : `อนุมัติส่วนลด ${numberBaht(result.discount)}`;
+
+    const approvedPin = await askManagerApproval(
+      "ขออนุมัติผู้จัดการ",
+      `${checkoutOrder.order_no}<br>${actionText}`
+    );
+
+    if (!approvedPin) return;
+  }
+
   checkoutDoneButton.disabled = true;
   checkoutDoneButton.textContent = "กำลังบันทึก...";
 
@@ -764,6 +885,22 @@ checkoutDoneButton.addEventListener("click", async () => {
   const newStampCount = saved?.new_stamp_count;
   const rewardAvailable = saved?.reward_available;
   const rewardUsed = Boolean(saved?.reward_used);
+
+  if (result.discount > 0 || rewardUsed) {
+    await writeManagerAudit(
+      rewardUsed
+        ? "อนุมัติใช้สิทธิ์สมาชิก"
+        : "อนุมัติส่วนลด",
+      {
+        order_no: checkoutOrder.order_no,
+        customer: checkoutOrder.customer_name || "ไม่ระบุชื่อ",
+        discount_amount: result.discount,
+        discount_reason: result.reason || "",
+        final_total: result.net,
+        member: selectedMember?.name || ""
+      }
+    );
+  }
 
   closeCheckout();
 
@@ -802,6 +939,79 @@ checkoutDoneButton.addEventListener("click", async () => {
   alert(message);
 });
 
+async function cancelOrderWithApproval(order) {
+  const reason = prompt("เหตุผลที่ยกเลิกออเดอร์");
+  if (reason === null) return;
+
+  const cleanReason = reason.trim();
+  if (!cleanReason) {
+    alert("กรุณาระบุเหตุผลที่ยกเลิก");
+    return;
+  }
+
+  const pin = await askManagerApproval(
+    "อนุมัติยกเลิกออเดอร์",
+    `${order.order_no}<br>ลูกค้า: ${order.customer_name || "ไม่ระบุชื่อ"}`
+  );
+
+  if (!pin) return;
+
+  const { error } = await sb.rpc("manager_cancel_order", {
+    p_order_id: order.id,
+    p_pin: pin,
+    p_reason: cleanReason
+  });
+
+  if (error) {
+    alert("ยกเลิกออเดอร์ไม่สำเร็จ: " + error.message);
+    return;
+  }
+
+  alert("ยกเลิกออเดอร์เรียบร้อย");
+  await loadOrders();
+}
+
+async function refundOrderWithApproval(order) {
+  const refundable = orderFinalTotal(order);
+
+  if (refundable <= 0 || order.refund_status === "refunded") {
+    alert("บิลนี้คืนเงินแล้ว");
+    return;
+  }
+
+  const reason = prompt(
+    `คืนเงินเต็มจำนวน ${numberBaht(refundable)}\\nกรุณาระบุเหตุผล`
+  );
+  if (reason === null) return;
+
+  const cleanReason = reason.trim();
+  if (!cleanReason) {
+    alert("กรุณาระบุเหตุผลการคืนเงิน");
+    return;
+  }
+
+  const pin = await askManagerApproval(
+    "อนุมัติคืนเงิน",
+    `${order.order_no}<br>คืนเงิน ${numberBaht(refundable)}`
+  );
+
+  if (!pin) return;
+
+  const { error } = await sb.rpc("manager_refund_order", {
+    p_order_id: order.id,
+    p_pin: pin,
+    p_reason: cleanReason
+  });
+
+  if (error) {
+    alert("คืนเงินไม่สำเร็จ: " + error.message);
+    return;
+  }
+
+  alert(`บันทึกคืนเงิน ${numberBaht(refundable)} เรียบร้อย`);
+  await loadOrders();
+}
+
 function renderOrders(newOrderIds = []) {
   const filteredOrders = allOrders
     .filter(orderMatchesTab)
@@ -835,6 +1045,8 @@ function renderOrders(newOrderIds = []) {
             ${statusText(order.status)}
           </span>
           ${isPaid(order) ? '<span class="paid-badge">ชำระแล้ว</span>' : ""}
+          ${order.cancelled ? '<span class="cancelled-badge">ยกเลิกแล้ว</span>' : ""}
+          ${order.refund_status === "refunded" ? '<span class="refund-badge">คืนเงินแล้ว</span>' : ""}
           <h3>${order.order_no}</h3>
         </div>
         <div class="price">${numberBaht(orderFinalTotal(order))}</div>
@@ -859,6 +1071,8 @@ function renderOrders(newOrderIds = []) {
           order.cash_received != null
           ? `<br>💵 รับเงิน: ${numberBaht(order.cash_received)} • ทอน: ${numberBaht(order.change_amount)}`
           : ""}
+        ${order.cancelled ? `<br>❌ ยกเลิก: ${order.cancel_reason || "-"}` : ""}
+        ${order.refund_status === "refunded" ? `<br>↩️ คืนเงิน: ${numberBaht(order.refund_amount)} (${order.refund_reason || "-"})` : ""}
       </div>
 
       ${(order.order_items || []).map(item => `
@@ -882,10 +1096,16 @@ function renderOrders(newOrderIds = []) {
         <div class="actions">
           <button class="making-btn">กำลังทำ</button>
           <button class="ready-btn">พร้อมเสิร์ฟ</button>
+          <button class="cancel-order-btn danger-action">❌ ยกเลิก</button>
         </div>
       ` : currentTab === "ready" ? `
         <div class="actions">
           <button class="checkout-btn">💰 คิดเงิน</button>
+          <button class="cancel-order-btn danger-action">❌ ยกเลิก</button>
+        </div>
+      ` : currentTab === "history" && isPaid(order) && order.refund_status !== "refunded" ? `
+        <div class="actions">
+          <button class="refund-order-btn refund-action">↩️ คืนเงินเต็มจำนวน</button>
         </div>
       ` : ""}
     `;
@@ -903,6 +1123,16 @@ function renderOrders(newOrderIds = []) {
     card.querySelector(".checkout-btn")
       ?.addEventListener("click", () =>
         openCheckout(order)
+      );
+
+    card.querySelector(".cancel-order-btn")
+      ?.addEventListener("click", () =>
+        cancelOrderWithApproval(order)
+      );
+
+    card.querySelector(".refund-order-btn")
+      ?.addEventListener("click", () =>
+        refundOrderWithApproval(order)
       );
 
     ordersEl.appendChild(card);
@@ -953,6 +1183,13 @@ async function loadOrders() {
       loyalty_points_added,
       reward_used,
       member_stamp_after,
+      cancelled,
+      cancel_reason,
+      cancelled_at,
+      refund_status,
+      refund_amount,
+      refund_reason,
+      refunded_at,
       members (
         name,
         phone

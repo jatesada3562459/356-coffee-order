@@ -1294,3 +1294,98 @@ input[type=text]{
 .audit-details span{
   color:#6d645c;
 }
+
+
+/* ===== V1.4.3 Manager Approval ===== */
+.approval-overlay{
+  position:fixed;
+  inset:0;
+  z-index:100000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(20,17,15,.78);
+  backdrop-filter:blur(5px);
+}
+.approval-card{
+  width:min(100%,400px);
+  background:#fff;
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.approval-icon{
+  text-align:center;
+  font-size:42px;
+}
+.approval-card h2{
+  text-align:center;
+  margin:7px 0;
+}
+.approval-card p{
+  text-align:center;
+  color:#665d55;
+  line-height:1.5;
+}
+.approval-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.approval-pin{
+  width:100%;
+  box-sizing:border-box;
+  min-height:58px;
+  border:1px solid #cbc2b9;
+  border-radius:14px;
+  padding:12px;
+  font-size:28px;
+  text-align:center;
+  letter-spacing:10px;
+}
+.approval-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+  margin:8px 0;
+}
+.approval-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.approval-actions button{
+  min-height:48px;
+  border:0;
+  border-radius:12px;
+  font-weight:900;
+}
+.approval-cancel{
+  background:#eee;
+}
+.danger-action{
+  background:#fff0ef!important;
+  color:#a33229!important;
+}
+.refund-action{
+  background:#fff5cf!important;
+  color:#775b00!important;
+}
+.cancelled-badge,
+.refund-badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  margin-left:6px;
+}
+.cancelled-badge{
+  background:#eee;
+  color:#666;
+}
+.refund-badge{
+  background:#fff0d6;
+  color:#855d00;
+}
