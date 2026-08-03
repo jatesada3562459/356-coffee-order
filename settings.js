@@ -236,21 +236,81 @@ async function loadSettings() {
 }
 
 function selectedGroups() {
-  return [...editorOptionsWrap.querySelectorAll('input[type="checkbox"]:checked')]
-    .map(input => input.value);
+  const groups = [];
+
+  const sweetMode = editorOptionsWrap.querySelector(
+    'input[name="editorSweetMode"]:checked'
+  )?.value;
+  const extrasMode = editorOptionsWrap.querySelector(
+    'input[name="editorExtrasMode"]:checked'
+  )?.value;
+
+  if (sweetMode) groups.push(sweetMode);
+  if (document.getElementById("editorMilkOption").checked) groups.push("milk");
+  if (extrasMode) groups.push(extrasMode);
+  if (document.getElementById("editorYogurtOption").checked) groups.push("yogurt");
+  if (document.getElementById("editorSizeOption").checked) groups.push("size");
+
+  return groups;
 }
 
 function setSelectedGroups(groups = []) {
-  editorOptionsWrap.querySelectorAll('input[type="checkbox"]')
-    .forEach(input => {
-      input.checked = groups.includes(input.value);
-    });
+  const sweetMode = groups.includes("sweet")
+    ? "sweet"
+    : groups.includes("sweet_no_zero")
+      ? "sweet_no_zero"
+      : "";
+
+  const extrasMode = groups.includes("extras_all")
+    ? "extras_all"
+    : groups.includes("extras_no_blend")
+      ? "extras_no_blend"
+      : groups.includes("extras_soda")
+        ? "extras_soda"
+        : "";
+
+  const sweetInput = editorOptionsWrap.querySelector(
+    `input[name="editorSweetMode"][value="${sweetMode}"]`
+  );
+  const extrasInput = editorOptionsWrap.querySelector(
+    `input[name="editorExtrasMode"][value="${extrasMode}"]`
+  );
+
+  if (sweetInput) sweetInput.checked = true;
+  if (extrasInput) extrasInput.checked = true;
+
+  document.getElementById("editorMilkOption").checked = groups.includes("milk");
+  document.getElementById("editorYogurtOption").checked = groups.includes("yogurt");
+  document.getElementById("editorSizeOption").checked = groups.includes("size");
 }
 
 function updateEditorTypeUI() {
   const isAddon = editorItemType.value === "addon";
   editorCategoryWrap.classList.toggle("hidden", isAddon);
   editorOptionsWrap.classList.toggle("hidden", isAddon);
+}
+
+function applySuggestedOptionsForCategory() {
+  if (editingItem || editorItemType.value === "addon") return;
+
+  const category = editorCategory.value;
+  let groups = [];
+
+  if (category === "กาแฟ") {
+    groups = ["sweet", "milk", "extras_all", "size"];
+  } else if (category === "ชา & นม") {
+    groups = ["sweet", "milk", "extras_all", "size"];
+  } else if (category === "สมูทตี้") {
+    groups = ["sweet", "yogurt", "size"];
+  } else if (category === "โซดา") {
+    groups = ["sweet_no_zero", "extras_soda", "size"];
+  } else if (category === "ปังเย็น") {
+    groups = ["sweet", "extras_no_blend"];
+  } else if (category === "ขนมปังปิ้ง") {
+    groups = [];
+  }
+
+  setSelectedGroups(groups);
 }
 
 function openMenuEditor(item = null) {
@@ -509,6 +569,7 @@ closeMenuEditorButton.addEventListener("click", closeMenuEditor);
 menuEditorModal.querySelector("[data-close-menu-editor]")
   .addEventListener("click", closeMenuEditor);
 editorItemType.addEventListener("change", updateEditorTypeUI);
+editorCategory.addEventListener("change", applySuggestedOptionsForCategory);
 
 menuSettingsSearch.addEventListener("input", renderItems);
 menuSettingsCategory.addEventListener("change", renderItems);

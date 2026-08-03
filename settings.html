@@ -42,7 +42,7 @@
       </button>
     </div>
 
-    <footer class="version-label">356 POS V1.5.1 — Add Menu</footer>
+    <footer class="version-label">356 POS V1.5.2 — Easy Menu Options</footer>
   </main>
 
 
@@ -69,7 +69,16 @@
 
       <label id="editorCategoryWrap" class="menu-editor-field">
         <span>หมวดหมู่</span>
-        <input id="editorCategory" type="text" maxlength="80" placeholder="เช่น ชา & นม">
+        <select id="editorCategory">
+          <option value="">เลือกหมวดหมู่</option>
+          <option value="ชา & นม">ชา & นม</option>
+          <option value="กาแฟ">กาแฟ</option>
+          <option value="สมูทตี้">สมูทตี้</option>
+          <option value="โซดา">โซดา</option>
+          <option value="ขนมปังปิ้ง">ขนมปังปิ้ง</option>
+          <option value="ปังเย็น">ปังเย็น</option>
+          <option value="อื่น ๆ">อื่น ๆ</option>
+        </select>
       </label>
 
       <label class="menu-editor-field">
@@ -79,14 +88,62 @@
 
       <section id="editorOptionsWrap" class="menu-option-panel">
         <h3>ตัวเลือกของเมนู</h3>
-        <label><input type="checkbox" value="sweet"> ความหวาน 4 ระดับ</label>
-        <label><input type="checkbox" value="sweet_no_zero"> ความหวาน 3 ระดับ</label>
-        <label><input type="checkbox" value="milk"> เลือกชนิดนม</label>
-        <label><input type="checkbox" value="extras_all"> ท็อปปิ้งทั้งหมด</label>
-        <label><input type="checkbox" value="extras_no_blend"> ท็อปปิ้งไม่รวมปั่น</label>
-        <label><input type="checkbox" value="extras_soda"> ตัวเลือกโซดา</label>
-        <label><input type="checkbox" value="yogurt"> เพิ่มโยเกิร์ต</label>
-        <label><input type="checkbox" value="size"> อัปไซส์แก้วใหญ่</label>
+
+        <div class="editor-option-group">
+          <div class="editor-option-title">ความหวาน</div>
+          <label>
+            <input type="radio" name="editorSweetMode" value="" checked>
+            ไม่มีตัวเลือกความหวาน
+          </label>
+          <label>
+            <input type="radio" name="editorSweetMode" value="sweet">
+            ไม่หวาน / หวานน้อย / ปกติ / เพิ่มหวาน
+          </label>
+          <label>
+            <input type="radio" name="editorSweetMode" value="sweet_no_zero">
+            หวานน้อย / ปกติ / เพิ่มหวาน
+          </label>
+        </div>
+
+        <div class="editor-option-group">
+          <div class="editor-option-title">ชนิดนม</div>
+          <label>
+            <input id="editorMilkOption" type="checkbox" value="milk">
+            นมสด / นมโอ๊ต
+          </label>
+        </div>
+
+        <div class="editor-option-group">
+          <div class="editor-option-title">เพิ่มเติม</div>
+          <label>
+            <input type="radio" name="editorExtrasMode" value="" checked>
+            ไม่มีรายการเพิ่มเติม
+          </label>
+          <label>
+            <input type="radio" name="editorExtrasMode" value="extras_all">
+            ปั่น +10 / ไข่มุกบุก +10 / ปีโป้ +10 / โยเกิร์ต +10 / ครีมชีส +15
+          </label>
+          <label>
+            <input type="radio" name="editorExtrasMode" value="extras_no_blend">
+            ไข่มุกบุก +10 / ปีโป้ +10 / โยเกิร์ต +10 / ครีมชีส +15
+          </label>
+          <label>
+            <input type="radio" name="editorExtrasMode" value="extras_soda">
+            ตัวเลือกเพิ่มเติมสำหรับโซดา
+          </label>
+          <label>
+            <input id="editorYogurtOption" type="checkbox" value="yogurt">
+            ใส่โยเกิร์ต +10
+          </label>
+        </div>
+
+        <div class="editor-option-group">
+          <div class="editor-option-title">ขนาดแก้ว</div>
+          <label>
+            <input id="editorSizeOption" type="checkbox" value="size">
+            อัปไซส์แก้วใหญ่ +10
+          </label>
+        </div>
       </section>
 
       <label class="menu-active-editor">

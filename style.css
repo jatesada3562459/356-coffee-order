@@ -1682,3 +1682,33 @@ input[type=text]{
 @media(max-width:600px){
   .menu-editor-actions{grid-template-columns:1fr}
 }
+
+
+/* ===== V1.5.2 หมวดหมู่และตัวเลือกแบบอ่านง่าย ===== */
+.editor-option-group{
+  background:#fff;
+  border:1px solid #e1d9d1;
+  border-radius:13px;
+  padding:11px;
+  margin-top:10px;
+}
+.editor-option-title{
+  font-weight:900;
+  font-size:17px;
+  margin-bottom:5px;
+}
+.editor-option-group label{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  line-height:1.45;
+  padding:8px 2px;
+}
+.editor-option-group input[type="radio"],
+.editor-option-group input[type="checkbox"]{
+  flex:0 0 auto;
+  width:21px;
+  height:21px;
+  margin:0;
+  margin-top:1px;
+}
