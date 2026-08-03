@@ -34,6 +34,10 @@ const comparisonDetail = document.getElementById("comparisonDetail");
 const monthlySalesList = document.getElementById("monthlySalesList");
 const exportCsvButton = document.getElementById("exportCsvButton");
 const printReportButton = document.getElementById("printReportButton");
+const dailySalesChartCanvas = document.getElementById("dailySalesChart");
+const paymentChartCanvas = document.getElementById("paymentChart");
+const topMenuChartCanvas = document.getElementById("topMenuChart");
+const categoryChartCanvas = document.getElementById("categoryChart");
 
 const BREAD_PRODUCTS = new Set([
   "เนยนม",
@@ -55,6 +59,11 @@ let latestTopItems = [];
 let latestReportOrders = [];
 let latestReportRange = { startKey: "", endKey: "" };
 let menuCategoryMap = new Map();
+
+let dailySalesChartInstance = null;
+let paymentChartInstance = null;
+let topMenuChartInstance = null;
+let categoryChartInstance = null;
 
 function bangkokDateKey(value = new Date()) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -443,6 +452,171 @@ function printReport() {
   }, 100);
 }
 
+function destroyChart(instance) {
+  if (instance) instance.destroy();
+}
+
+function chartMoneyLabel(value) {
+  return Number(value || 0).toLocaleString("th-TH");
+}
+
+function renderCharts({
+  dailyItems,
+  cashSales,
+  promptPaySales,
+  topItems,
+  categoryItems
+}) {
+  if (typeof Chart === "undefined") {
+    console.warn("Chart.js ยังโหลดไม่สำเร็จ");
+    return;
+  }
+
+  destroyChart(dailySalesChartInstance);
+  destroyChart(paymentChartInstance);
+  destroyChart(topMenuChartInstance);
+  destroyChart(categoryChartInstance);
+
+  const dailyAsc = [...dailyItems].sort((a, b) =>
+    a.date.localeCompare(b.date)
+  );
+
+  dailySalesChartInstance = new Chart(dailySalesChartCanvas, {
+    type: "line",
+    data: {
+      labels: dailyAsc.map(item => thaiDate(item.date)),
+      datasets: [{
+        label: "ยอดขายสุทธิ",
+        data: dailyAsc.map(item => item.sales),
+        borderWidth: 3,
+        tension: 0.3,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: "index"
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: context => `ยอดขาย ${numberBaht(context.raw)}`
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => `฿${chartMoneyLabel(value)}`
+          }
+        }
+      }
+    }
+  });
+
+  paymentChartInstance = new Chart(paymentChartCanvas, {
+    type: "doughnut",
+    data: {
+      labels: ["เงินสด", "พร้อมเพย์"],
+      datasets: [{
+        data: [cashSales, promptPaySales],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "62%",
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: context =>
+              `${context.label}: ${numberBaht(context.raw)}`
+          }
+        }
+      }
+    }
+  });
+
+  const topFive = [...topItems]
+    .sort((a, b) => b.quantity - a.quantity || b.sales - a.sales)
+    .slice(0, 5)
+    .reverse();
+
+  topMenuChartInstance = new Chart(topMenuChartCanvas, {
+    type: "bar",
+    data: {
+      labels: topFive.map(item => item.name),
+      datasets: [{
+        label: "จำนวนขาย",
+        data: topFive.map(item => item.quantity),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: context =>
+              `${context.raw.toLocaleString("th-TH")} รายการ`
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
+      }
+    }
+  });
+
+  const categories = [...categoryItems]
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 8);
+
+  categoryChartInstance = new Chart(categoryChartCanvas, {
+    type: "bar",
+    data: {
+      labels: categories.map(item => item.category),
+      datasets: [{
+        label: "ยอดขาย",
+        data: categories.map(item => item.sales),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: context => numberBaht(context.raw)
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => `฿${chartMoneyLabel(value)}`
+          }
+        }
+      }
+    }
+  });
+}
+
 async function loadReport() {
   const startKey = startDateInput.value;
   const endKey = endDateInput.value;
@@ -688,6 +862,14 @@ async function loadReport() {
     previousKeys.startKey,
     previousKeys.endKey
   );
+
+  renderCharts({
+    dailyItems,
+    cashSales,
+    promptPaySales,
+    topItems,
+    categoryItems
+  });
 
   const rangeText = startKey === endKey
     ? thaiDate(startKey)

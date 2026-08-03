@@ -2654,3 +2654,67 @@ input[type=text]{
     background:#000 !important;
   }
 }
+
+
+/* ===== V1.6.5 กราฟรายงานยอดขาย ===== */
+.report-chart-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.report-chart-card{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:17px;
+  padding:14px;
+  min-width:0;
+}
+
+.report-chart-wrap{
+  position:relative;
+  width:100%;
+  height:280px;
+  margin-top:8px;
+}
+
+.report-chart-wrap.small{
+  height:260px;
+}
+
+.report-chart-wrap canvas{
+  width:100% !important;
+  height:100% !important;
+}
+
+@media(min-width:900px){
+  .report-chart-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:600px){
+  .report-chart-wrap{
+    height:240px;
+  }
+
+  .report-chart-wrap.small{
+    height:230px;
+  }
+}
+
+@media print{
+  .report-chart-grid{
+    grid-template-columns:1fr 1fr;
+    break-inside:auto;
+  }
+
+  .report-chart-card{
+    break-inside:avoid;
+  }
+
+  .report-chart-wrap{
+    height:220px;
+  }
+}
