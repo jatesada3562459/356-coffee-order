@@ -975,3 +975,160 @@ input[type=text]{
     font-size:22px;
   }
 }
+
+
+/* ===== V1.4.1 ประวัติปิดยอดและรายการผิดปกติ ===== */
+.closing-filter-panel{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:end;
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.closing-filter-panel label{
+  grid-column:1 / -1;
+  font-weight:900;
+}
+.closing-filter-panel input,
+.closing-filter-panel button{
+  min-height:46px;
+  border:1px solid #d6cec6;
+  border-radius:12px;
+  padding:10px;
+  background:#fff;
+  font:inherit;
+}
+.closing-summary-panel{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+.closing-summary-card{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:15px;
+  padding:12px;
+}
+.closing-summary-card span{
+  display:block;
+  color:#6d645c;
+  font-size:13px;
+}
+.closing-summary-card strong{
+  display:block;
+  margin-top:6px;
+  font-size:20px;
+}
+.closing-list{
+  display:grid;
+  gap:12px;
+}
+.closing-card{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:17px;
+  padding:14px;
+}
+.closing-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+}
+.closing-card h3{
+  margin:0 0 5px;
+}
+.closing-card-meta{
+  margin:11px 0;
+  line-height:1.7;
+}
+.view-closing-button{
+  width:100%;
+  min-height:44px;
+  border:0;
+  border-radius:12px;
+  background:#eeeeee;
+  color:#0878de;
+  font-weight:900;
+}
+.closing-detail-panel{
+  background:#fff;
+  border:2px solid #d7cec5;
+  border-radius:18px;
+  padding:15px;
+  margin-top:16px;
+}
+.closing-detail-panel.hidden{display:none}
+.closing-detail-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.closing-detail-header h2{
+  margin:0 0 5px;
+}
+.closing-detail-header button{
+  border:0;
+  border-radius:10px;
+  padding:9px 12px;
+}
+.closing-detail-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:14px 0;
+}
+.closing-detail-grid > div{
+  background:#faf7f2;
+  border-radius:12px;
+  padding:11px;
+}
+.closing-detail-grid span{
+  display:block;
+  color:#6d645c;
+  font-size:13px;
+}
+.closing-detail-grid strong{
+  display:block;
+  margin-top:5px;
+}
+.closing-note{
+  background:#fff8d8;
+  border-radius:11px;
+  padding:10px;
+  margin:10px 0 16px;
+}
+.anomaly-list{
+  display:grid;
+  gap:8px;
+}
+.anomaly-item{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  background:#fff3f1;
+  border-radius:12px;
+  padding:11px;
+}
+.anomaly-item small{
+  display:block;
+  color:#765f5b;
+  margin-top:3px;
+}
+.anomaly-ok{
+  background:#eaf7ef;
+  color:#166c41;
+  border-radius:12px;
+  padding:11px;
+  font-weight:800;
+}
+@media (max-width:600px){
+  .closing-summary-panel{
+    grid-template-columns:1fr;
+  }
+}

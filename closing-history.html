@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ประวัติปิดยอด 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header>
+    <b>📜 ประวัติปิดยอด</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="cash.html">← กลับเงินในเก๊ะ</a>
+      <a class="header-link-button" href="kitchen.html">หลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="closing-filter-panel">
+      <label for="closingMonthFilter">📅 เลือกเดือน</label>
+      <input id="closingMonthFilter" type="month">
+      <button id="showAllClosingsButton" type="button">ทั้งหมด</button>
+    </section>
+
+    <section class="closing-summary-panel">
+      <div class="closing-summary-card">
+        <span>วันที่ปิดยอด</span>
+        <strong id="closingDaysCount">0</strong>
+      </div>
+      <div class="closing-summary-card">
+        <span>ยอดขายรวม</span>
+        <strong id="closingTotalSales">฿0</strong>
+      </div>
+      <div class="closing-summary-card">
+        <span>ผลต่างสุทธิรวม</span>
+        <strong id="closingNetDifference">฿0</strong>
+      </div>
+    </section>
+
+    <section id="closingList" class="closing-list"></section>
+
+    <section id="closingDetailPanel" class="closing-detail-panel hidden">
+      <div class="closing-detail-header">
+        <div>
+          <h2 id="closingDetailTitle">รายละเอียดปิดยอด</h2>
+          <div id="closingDetailDate" class="muted"></div>
+        </div>
+        <button id="closeDetailButton" type="button">ปิด</button>
+      </div>
+
+      <div class="closing-detail-grid">
+        <div><span>เงินทอนตั้งต้น</span><strong id="detailOpening">฿0</strong></div>
+        <div><span>เงินสดตามระบบ</span><strong id="detailCashSystem">฿0</strong></div>
+        <div><span>พร้อมเพย์ตามระบบ</span><strong id="detailPromptSystem">฿0</strong></div>
+        <div><span>เงินสดจริง</span><strong id="detailActualCash">฿0</strong></div>
+        <div><span>พร้อมเพย์จริง</span><strong id="detailActualPrompt">฿0</strong></div>
+        <div><span>ผลต่างสุทธิ</span><strong id="detailNetDifference">฿0</strong></div>
+      </div>
+
+      <div id="detailNote" class="closing-note"></div>
+
+      <h3>⚠️ รายการที่ควรตรวจสอบ</h3>
+      <div id="anomalyList" class="anomaly-list"></div>
+    </section>
+
+    <footer class="version-label">356 POS V1.4.1 — Closing History</footer>
+  </main>
+
+  <script src="closing-history.js"></script>
+</body>
+</html>
