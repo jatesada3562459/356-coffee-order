@@ -1,6 +1,34 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>356 Coffee & Drink</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body>
 <header><b>356 Coffee & Drink</b><button onclick="openCart()">ตะกร้า <span id="count">0</span></button></header>
-<main><div class="hero"><h1>สั่งเครื่องดื่มและขนม</h1><div id="table"></div></div><div class="tabs" id="tabs"></div><div class="grid" id="menu"></div></main>
+<main>
+  <section class="store-hero">
+    <div id="storeCoverWrap" class="store-cover-wrap">
+      <div id="storeCoverPlaceholder" class="store-cover-placeholder">356 Coffee & Drink</div>
+      <img id="storeCoverImage" class="store-cover-image hidden" alt="รูปหน้าปกร้าน">
+    </div>
+
+    <div class="store-profile-row">
+      <div id="storeLogoWrap" class="store-logo-wrap">
+        <div id="storeLogoPlaceholder" class="store-logo-placeholder">356</div>
+        <img id="storeLogoImage" class="store-logo-image hidden" alt="โลโก้ร้าน">
+      </div>
+
+      <div class="store-profile-text">
+        <h1 id="storeName">356 Coffee & Drink</h1>
+        <p id="storeDescription">เครื่องดื่มและขนมจากร้าน 356</p>
+        <div class="store-meta">
+          <span id="storeStatusBadge" class="store-status-badge">กำลังตรวจสอบสถานะร้าน</span>
+          <span id="storeHours">09:00–16:00</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="table" class="store-order-location"></div>
+  </section>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="grid" id="menu"></div>
+</main>
 <div class="panel" id="product"><div class="wrap"><button onclick="closeProduct()">← กลับ</button><h2 id="pname"></h2><div id="modifierArea" class="opts"></div><h3>จำนวน</h3><div class="qty"><button onclick="changeQty(-1)">−</button><span id="qtyValue">1</span><button onclick="changeQty(1)">+</button></div><br><button class="primary" id="saveBtn" onclick="saveProduct()">เพิ่มลงตะกร้า</button></div></div>
 <div class="panel" id="addonPanel"><div class="wrap"><button onclick="closeAddon()">← กลับ</button><h2 id="addonTitle"></h2><div id="addonTargets"></div></div></div>
 <div class="panel" id="cart"><div class="wrap"><button onclick="closeCart()">← กลับ</button><h2>ตะกร้า</h2><div id="items"></div><div class="total" id="total"></div><h3>ชื่อลูกค้า</h3><input id="customer" type="text" placeholder="กรอกชื่อลูกค้า"><h3>ชำระเงิน</h3><label><input type="radio" name="pay" value="counter" checked> จ่ายที่เคาน์เตอร์</label><br><label><input type="radio" name="pay" value="promptpay"> พร้อมเพย์</label><br><br><button class="primary" onclick="submitOrder()">ยืนยันออร์เดอร์</button></div></div>

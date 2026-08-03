@@ -5,6 +5,79 @@ const $=id=>document.getElementById(id),tableNo=new URLSearchParams(location.sea
 $("table").textContent=tableNo==="counter"?"สั่งที่เคาน์เตอร์ / กลับบ้าน":`โต๊ะ ${tableNo}`;
 $("customer").value=localStorage.getItem("356_customer_name")||"";
 
+function setImageState(imageEl, placeholderEl, url){
+  if(url){
+    imageEl.src=url;
+    imageEl.classList.remove("hidden");
+    placeholderEl.classList.add("hidden");
+  }else{
+    imageEl.removeAttribute("src");
+    imageEl.classList.add("hidden");
+    placeholderEl.classList.remove("hidden");
+  }
+}
+
+function calculateStoreStatus(settings){
+  if(settings.accepting_orders===false){
+    return {open:false,text:"ปิดรับออเดอร์ชั่วคราว"};
+  }
+
+  const now=new Date();
+  const bangkokTime=new Intl.DateTimeFormat("en-GB",{
+    timeZone:"Asia/Bangkok",
+    hour:"2-digit",
+    minute:"2-digit",
+    hour12:false
+  }).format(now);
+
+  const openTime=settings.open_time||"09:00";
+  const closeTime=settings.close_time||"16:00";
+  const open=bangkokTime>=openTime&&bangkokTime<closeTime;
+
+  return {
+    open,
+    text:open?"เปิดรับออเดอร์":"ปิดร้าน"
+  };
+}
+
+async function loadStoreSettings(){
+  const {data,error}=await sb
+    .from("store_settings")
+    .select("*")
+    .eq("id",1)
+    .maybeSingle();
+
+  if(error){
+    console.warn("โหลดข้อมูลหน้าร้านไม่สำเร็จ",error);
+    return;
+  }
+
+  const settings=data||{};
+  $("storeName").textContent=settings.store_name||"356 Coffee & Drink";
+  $("storeDescription").textContent=
+    settings.description||"เครื่องดื่มและขนมจากร้าน 356";
+
+  const openTime=settings.open_time||"09:00";
+  const closeTime=settings.close_time||"16:00";
+  $("storeHours").textContent=`${openTime}–${closeTime}`;
+
+  setImageState(
+    $("storeCoverImage"),
+    $("storeCoverPlaceholder"),
+    settings.cover_url
+  );
+
+  setImageState(
+    $("storeLogoImage"),
+    $("storeLogoPlaceholder"),
+    settings.logo_url
+  );
+
+  const status=calculateStoreStatus(settings);
+  $("storeStatusBadge").textContent=status.text;
+  $("storeStatusBadge").classList.toggle("closed",!status.open);
+}
+
 async function loadMenu(){
   try{
     const response=await fetch("menu.json",{cache:"no-store"});
@@ -37,8 +110,7 @@ async function loadMenu(){
                 price:Number(setting.price),
                 is_active:setting.is_active,
                 is_custom:Boolean(setting.is_custom),
-                image_url:setting.image_url||addon.image_url||null,
-                image_url:setting.image_url||product.image_url||null
+                image_url:setting.image_url||addon.image_url||null
               }
             : {...product,is_active:true,is_custom:false,image_url:product.image_url||null};
         });
@@ -93,6 +165,7 @@ async function loadMenu(){
   }
 }
 
+loadStoreSettings();
 loadMenu();
 
 function renderTabs(){

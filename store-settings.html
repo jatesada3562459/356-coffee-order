@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ตั้งค่าหน้าร้าน 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>🏪 ตั้งค่าหน้าร้าน</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="kitchen.html">← กลับหลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="store-settings-panel">
+      <h2>รูปหน้าปกร้าน</h2>
+      <p class="muted">แนะนำภาพแนวนอน 16:9 หรือ 3:1</p>
+
+      <div class="store-cover-editor">
+        <div id="coverPlaceholder" class="store-cover-edit-placeholder">ยังไม่มีรูปหน้าปก</div>
+        <img id="coverPreview" class="store-cover-edit-preview hidden" alt="ตัวอย่างรูปหน้าปก">
+      </div>
+
+      <input id="coverFileInput" class="hidden-file-input" type="file"
+        accept="image/jpeg,image/png,image/webp">
+
+      <div class="store-image-buttons">
+        <label for="coverFileInput" class="choose-image-button">เลือกรูปหน้าปก</label>
+        <button id="removeCoverButton" class="remove-image-button" type="button">ลบรูป</button>
+      </div>
+    </section>
+
+    <section class="store-settings-panel">
+      <h2>โลโก้ร้าน</h2>
+      <p class="muted">แนะนำภาพสี่เหลี่ยม 1:1</p>
+
+      <div class="store-logo-editor">
+        <div id="logoPlaceholder" class="store-logo-edit-placeholder">356</div>
+        <img id="logoPreview" class="store-logo-edit-preview hidden" alt="ตัวอย่างโลโก้">
+      </div>
+
+      <input id="logoFileInput" class="hidden-file-input" type="file"
+        accept="image/jpeg,image/png,image/webp">
+
+      <div class="store-image-buttons">
+        <label for="logoFileInput" class="choose-image-button">เลือกโลโก้</label>
+        <button id="removeLogoButton" class="remove-image-button" type="button">ลบโลโก้</button>
+      </div>
+    </section>
+
+    <section class="store-settings-panel">
+      <h2>ข้อมูลหน้าร้าน</h2>
+
+      <label class="store-settings-field">
+        <span>ชื่อร้าน</span>
+        <input id="storeNameInput" type="text" maxlength="100">
+      </label>
+
+      <label class="store-settings-field">
+        <span>ข้อความแนะนำร้าน</span>
+        <textarea id="storeDescriptionInput" maxlength="250"
+          placeholder="เช่น กาแฟ ชา และเครื่องดื่มสดใหม่ทุกแก้ว"></textarea>
+      </label>
+
+      <div class="store-time-grid">
+        <label class="store-settings-field">
+          <span>เวลาเปิด</span>
+          <input id="storeOpenTime" type="time">
+        </label>
+
+        <label class="store-settings-field">
+          <span>เวลาปิด</span>
+          <input id="storeCloseTime" type="time">
+        </label>
+      </div>
+
+      <label class="store-accepting-toggle">
+        <input id="storeAcceptingOrders" type="checkbox">
+        <span>เปิดรับออเดอร์</span>
+      </label>
+    </section>
+
+    <div id="storeSettingsError" class="store-settings-error"></div>
+
+    <button id="saveStoreSettingsButton" class="primary store-save-button" type="button">
+      บันทึกหน้าร้าน
+    </button>
+
+    <footer class="version-label">356 POS V1.5.4 — Store Cover & Logo</footer>
+  </main>
+
+  <script src="store-settings.js"></script>
+</body>
+</html>
