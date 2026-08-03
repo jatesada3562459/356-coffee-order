@@ -679,3 +679,105 @@ input[type=text]{
     grid-template-columns:repeat(4, minmax(0, 1fr));
   }
 }
+
+
+/* ===== Step 9.1 Dashboard เต็ม ===== */
+.dashboard-full{
+  padding:16px;
+}
+.dashboard-heading-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:14px;
+}
+.dashboard-date{
+  margin-top:4px;
+  color:#6b625b;
+  font-size:14px;
+}
+.dashboard-live-badge{
+  background:#e9f7ee;
+  color:#187143;
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.dashboard-hero{
+  background:linear-gradient(135deg,#171513,#4b4036);
+  color:#fff;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:14px;
+}
+.dashboard-hero span,
+.dashboard-hero small{
+  display:block;
+}
+.dashboard-hero strong{
+  display:block;
+  margin:5px 0 6px;
+  font-size:34px;
+  line-height:1.1;
+}
+.dashboard-hero small{
+  color:#e8e1db;
+}
+.top-products-panel{
+  margin-top:14px;
+  background:#fff;
+  border:1px solid #e1d9d1;
+  border-radius:16px;
+  padding:14px;
+}
+.top-products-title{
+  font-weight:900;
+  margin-bottom:10px;
+}
+.top-products-list{
+  display:grid;
+  gap:8px;
+}
+.top-product-row{
+  display:grid;
+  grid-template-columns:32px minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  background:#faf7f2;
+  border-radius:12px;
+  padding:10px;
+}
+.top-product-rank{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#171513;
+  color:#fff;
+  font-weight:900;
+}
+.top-product-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight:800;
+}
+.top-product-empty{
+  color:#776d65;
+  padding:8px 2px;
+}
+@media (max-width:560px){
+  .dashboard-heading-row{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .dashboard-live-badge{
+    align-self:flex-start;
+  }
+}

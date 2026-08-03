@@ -18,6 +18,10 @@ const todayDrinkCount = document.getElementById("todayDrinkCount");
 const todayBreadCount = document.getElementById("todayBreadCount");
 const todayNewMemberCount = document.getElementById("todayNewMemberCount");
 const todayDiscountTotal = document.getElementById("todayDiscountTotal");
+const todayMemberOrderCount = document.getElementById("todayMemberOrderCount");
+const averageOrderValue = document.getElementById("averageOrderValue");
+const dashboardDate = document.getElementById("dashboardDate");
+const topProductsList = document.getElementById("topProductsList");
 const newCount = document.getElementById("newCount");
 const makingCount = document.getElementById("makingCount");
 const readyCount = document.getElementById("readyCount");
@@ -244,6 +248,52 @@ function classifySoldItems(orders) {
   return { drinks, breads };
 }
 
+function formatThaiDashboardDate() {
+  return new Intl.DateTimeFormat("th-TH", {
+    timeZone: "Asia/Bangkok",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  }).format(new Date());
+}
+
+function getTopProducts(orders, limit = 5) {
+  const totals = new Map();
+
+  orders.forEach(order => {
+    (order.order_items || []).forEach(item => {
+      if (ADDON_PRODUCTS.has(item.product_name)) return;
+
+      const quantity = Number(item.quantity || 0);
+      totals.set(
+        item.product_name,
+        (totals.get(item.product_name) || 0) + quantity
+      );
+    });
+  });
+
+  return [...totals.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "th"))
+    .slice(0, limit);
+}
+
+function renderTopProducts(products) {
+  if (!products.length) {
+    topProductsList.innerHTML =
+      '<div class="top-product-empty">ยังไม่มีข้อมูลการขายวันนี้</div>';
+    return;
+  }
+
+  topProductsList.innerHTML = products.map(([name, quantity], index) => `
+    <div class="top-product-row">
+      <span class="top-product-rank">${index + 1}</span>
+      <span class="top-product-name">${name}</span>
+      <strong>${quantity.toLocaleString("th-TH")} ${BREAD_PRODUCTS.has(name) ? "ชิ้น" : "แก้ว"}</strong>
+    </div>
+  `).join("");
+}
+
 async function loadTodayNewMemberCount() {
   const todayKey = bangkokDateKey();
   const start = new Date(`${todayKey}T00:00:00+07:00`).toISOString();
@@ -295,6 +345,11 @@ function updateDashboard() {
     (sum, order) => sum + Number(order.discount_amount || 0),
     0
   );
+  const memberOrderCount = todayPaidOrders.filter(order => order.member_id).length;
+  const averageValue = todayPaidOrders.length > 0
+    ? total / todayPaidOrders.length
+    : 0;
+  const topProducts = getTopProducts(todayPaidOrders);
 
   const countNew = allOrders.filter(
     order => !isPaid(order) && order.status === "new"
@@ -314,6 +369,10 @@ function updateDashboard() {
   todayBreadCount.textContent = soldItems.breads.toLocaleString("th-TH");
   todayNewMemberCount.textContent = todayNewMembers.toLocaleString("th-TH");
   todayDiscountTotal.textContent = numberBaht(discountTotal);
+  todayMemberOrderCount.textContent = memberOrderCount.toLocaleString("th-TH");
+  averageOrderValue.textContent = numberBaht(averageValue);
+  dashboardDate.textContent = formatThaiDashboardDate();
+  renderTopProducts(topProducts);
   newCount.textContent = countNew;
   makingCount.textContent = countMaking;
   readyCount.textContent = countReady;
