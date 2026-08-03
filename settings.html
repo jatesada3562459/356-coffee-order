@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ตั้งค่าเมนู 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>⚙️ ตั้งค่าเมนู</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="kitchen.html">← กลับหลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="menu-settings-toolbar">
+      <label for="menuSettingsSearch">🔍 ค้นหาเมนู</label>
+      <input id="menuSettingsSearch" type="search" placeholder="ชื่อเมนูหรือหมวดหมู่">
+      <select id="menuSettingsCategory">
+        <option value="ทั้งหมด">ทุกหมวดหมู่</option>
+      </select>
+    </section>
+
+    <section class="menu-settings-summary">
+      <div><span>รายการทั้งหมด</span><strong id="allMenuCount">0</strong></div>
+      <div><span>เปิดขาย</span><strong id="activeMenuCount">0</strong></div>
+      <div><span>ปิดขาย</span><strong id="inactiveMenuCount">0</strong></div>
+    </section>
+
+    <section id="menuSettingsList" class="menu-settings-list"></section>
+
+    <div class="menu-settings-save-bar">
+      <div id="menuSettingsStatus">ยังไม่มีการแก้ไข</div>
+      <button id="saveMenuSettingsButton" class="primary" type="button" disabled>
+        บันทึกการเปลี่ยนแปลง
+      </button>
+    </div>
+
+    <footer class="version-label">356 POS V1.5.0 — Menu Settings</footer>
+  </main>
+
+  <script src="settings.js"></script>
+</body>
+</html>

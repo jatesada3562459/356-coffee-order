@@ -5,16 +5,55 @@ const $=id=>document.getElementById(id),tableNo=new URLSearchParams(location.sea
 $("table").textContent=tableNo==="counter"?"สั่งที่เคาน์เตอร์ / กลับบ้าน":`โต๊ะ ${tableNo}`;
 $("customer").value=localStorage.getItem("356_customer_name")||"";
 
-fetch("menu.json")
-  .then(r=>{
-    if(!r.ok) throw new Error("โหลดเมนูไม่สำเร็จ");
-    return r.json();
-  })
-  .then(d=>{db=d;renderTabs();renderMenu()})
-  .catch(e=>{$("menu").innerHTML=`<p>${e.message}</p>`});
+async function loadMenu(){
+  try{
+    const response=await fetch("menu.json",{cache:"no-store"});
+    if(!response.ok) throw new Error("โหลดเมนูไม่สำเร็จ");
+
+    db=await response.json();
+
+    const {data:settings,error}=await sb
+      .from("menu_settings")
+      .select("item_type,item_name,price,is_active");
+
+    if(error){
+      console.warn("โหลดการตั้งค่าเมนูไม่สำเร็จ ใช้ราคาในไฟล์เดิมแทน",error);
+    }else{
+      const settingMap=new Map(
+        (settings||[]).map(item=>[
+          `${item.item_type}:${item.item_name}`,
+          item
+        ])
+      );
+
+      db.products=db.products
+        .map(product=>{
+          const setting=settingMap.get(`product:${product.name}`);
+          return setting
+            ? {...product,price:Number(setting.price),is_active:setting.is_active}
+            : {...product,is_active:true};
+        });
+
+      db.addons=db.addons
+        .map(addon=>{
+          const setting=settingMap.get(`addon:${addon.name}`);
+          return setting
+            ? {...addon,price:Number(setting.price),is_active:setting.is_active}
+            : {...addon,is_active:true};
+        });
+    }
+
+    renderTabs();
+    renderMenu();
+  }catch(error){
+    $("menu").innerHTML=`<p>${error.message}</p>`;
+  }
+}
+
+loadMenu();
 
 function renderTabs(){
-  const cats=["ทั้งหมด",...new Set(db.products.map(x=>x.category)),"ADD-ON"];
+  const cats=["ทั้งหมด",...new Set(db.products.filter(x=>x.is_active!==false).map(x=>x.category)),"ADD-ON"];
   $("tabs").innerHTML="";
   cats.forEach(c=>{
     const b=document.createElement("button");
@@ -28,7 +67,7 @@ function renderTabs(){
 function renderMenu(){
   $("menu").innerHTML="";
   if(cat==="ADD-ON"){
-    db.addons.forEach(a=>{
+    db.addons.filter(a=>a.is_active!==false).forEach(a=>{
       const d=document.createElement("div");
       d.className="card";
       d.innerHTML=`<div class="name">${a.name}</div><div class="price">+฿${a.price}</div><button>เพิ่ม</button>`;
@@ -39,7 +78,7 @@ function renderMenu(){
   }
 
   db.products
-    .filter(x=>cat==="ทั้งหมด"||x.category===cat)
+    .filter(x=>x.is_active!==false&&(cat==="ทั้งหมด"||x.category===cat))
     .forEach(p=>{
       const d=document.createElement("div");
       d.className="card";
