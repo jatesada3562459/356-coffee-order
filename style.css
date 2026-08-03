@@ -2582,3 +2582,75 @@ input[type=text]{
     grid-column:auto;
   }
 }
+
+
+/* ===== V1.6.4 ส่งออกรายงาน ===== */
+.report-export-panel{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.report-export-panel button{
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  padding:10px;
+  font-weight:900;
+  background:#171513;
+  color:#fff;
+}
+.report-export-panel button:last-child{
+  background:#e9ecef;
+  color:#171513;
+}
+
+@media(max-width:600px){
+  .report-export-panel{
+    grid-template-columns:1fr;
+  }
+}
+
+@media print{
+  body{
+    background:#fff !important;
+  }
+
+  body > header,
+  .report-export-panel,
+  .report-filter-panel,
+  .report-load-status,
+  .report-error,
+  .version-label{
+    display:none !important;
+  }
+
+  main{
+    max-width:none !important;
+    padding:0 !important;
+  }
+
+  .report-summary-grid,
+  .report-section,
+  .comparison-summary-grid{
+    break-inside:avoid;
+  }
+
+  .report-summary-card,
+  .report-section,
+  .comparison-card,
+  .category-sales-card{
+    box-shadow:none !important;
+    border:1px solid #aaa !important;
+  }
+
+  .report-summary-card.hero{
+    background:#fff !important;
+    color:#000 !important;
+  }
+
+  .report-progress span,
+  .category-progress span{
+    background:#000 !important;
+  }
+}

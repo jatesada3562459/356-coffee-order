@@ -32,6 +32,8 @@ const comparisonPreviousSales = document.getElementById("comparisonPreviousSales
 const comparisonChange = document.getElementById("comparisonChange");
 const comparisonDetail = document.getElementById("comparisonDetail");
 const monthlySalesList = document.getElementById("monthlySalesList");
+const exportCsvButton = document.getElementById("exportCsvButton");
+const printReportButton = document.getElementById("printReportButton");
 
 const BREAD_PRODUCTS = new Set([
   "เนยนม",
@@ -50,6 +52,8 @@ const ADDON_PRODUCTS = new Set([
 ]);
 
 let latestTopItems = [];
+let latestReportOrders = [];
+let latestReportRange = { startKey: "", endKey: "" };
 let menuCategoryMap = new Map();
 
 function bangkokDateKey(value = new Date()) {
@@ -331,6 +335,114 @@ function renderComparison(currentSales, previousSales, previousStartKey, previou
     `${direction} ${numberBaht(Math.abs(difference))} เมื่อเทียบกับ ${thaiDate(previousStartKey)} – ${thaiDate(previousEndKey)}`;
 }
 
+function csvEscape(value) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function paymentMethodText(method) {
+  return method === "promptpay" ? "พร้อมเพย์" : "เงินสด";
+}
+
+function downloadCsvFile() {
+  if (!latestReportOrders.length) {
+    alert("ยังไม่มีข้อมูลรายงานให้ดาวน์โหลด");
+    return;
+  }
+
+  const rows = [
+    [
+      "วันที่",
+      "เวลา",
+      "เลขบิล",
+      "ลูกค้า",
+      "ช่องทางชำระ",
+      "ยอดก่อนส่วนลด",
+      "ส่วนลด",
+      "ยอดชำระ",
+      "คืนเงิน",
+      "ยอดสุทธิ",
+      "สมาชิก"
+    ]
+  ];
+
+  latestReportOrders.forEach(order => {
+    const paidAt = new Date(order.paid_at);
+    const grossBeforeDiscount =
+      Number(order.total ?? order.final_total ?? 0);
+    const discount = Number(order.discount_amount || 0);
+    const paid = Number(order.final_total ?? order.total ?? 0);
+    const refund = Number(order.refund_amount || 0);
+    const net = Math.max(0, paid - refund);
+
+    rows.push([
+      bangkokDateKey(order.paid_at),
+      paidAt.toLocaleTimeString("th-TH", {
+        hour: "2-digit",
+        minute: "2-digit"
+      }),
+      order.order_no || "",
+      order.customer_name || "",
+      paymentMethodText(order.actual_payment_method || order.payment_method),
+      grossBeforeDiscount,
+      discount,
+      paid,
+      refund,
+      net,
+      order.member_id ? "สมาชิก" : "ทั่วไป"
+    ]);
+  });
+
+  const csv =
+    "\uFEFF" +
+    rows.map(row => row.map(csvEscape).join(",")).join("\r\n");
+
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const rangeName =
+    latestReportRange.startKey === latestReportRange.endKey
+      ? latestReportRange.startKey
+      : `${latestReportRange.startKey}_to_${latestReportRange.endKey}`;
+
+  link.href = url;
+  link.download = `356-sales-report-${rangeName}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+
+  setReportStatus("✅ ดาวน์โหลดไฟล์ CSV เรียบร้อย", "success");
+}
+
+function printReport() {
+  if (!latestReportOrders.length) {
+    alert("ยังไม่มีข้อมูลรายงานให้พิมพ์");
+    return;
+  }
+
+  const oldTitle = document.title;
+  const rangeText =
+    latestReportRange.startKey === latestReportRange.endKey
+      ? thaiDate(latestReportRange.startKey)
+      : `${thaiDate(latestReportRange.startKey)} – ${thaiDate(latestReportRange.endKey)}`;
+
+  document.title = `356 Coffee & Drink รายงาน ${rangeText}`;
+  document.body.classList.add("printing-report");
+
+  setTimeout(() => {
+    window.print();
+
+    setTimeout(() => {
+      document.body.classList.remove("printing-report");
+      document.title = oldTitle;
+    }, 500);
+  }, 100);
+}
+
 async function loadReport() {
   const startKey = startDateInput.value;
   const endKey = endDateInput.value;
@@ -368,6 +480,7 @@ async function loadReport() {
       .select(`
         id,
         order_no,
+        customer_name,
         final_total,
         total,
         discount_amount,
@@ -430,6 +543,9 @@ async function loadReport() {
 
   const orders = (ordersResult.data || []).filter(order => !order.cancelled);
   const previousOrders = (previousOrdersResult.data || []).filter(order => !order.cancelled);
+
+  latestReportOrders = orders;
+  latestReportRange = { startKey, endKey };
 
   let netSales = 0;
   let cashSales = 0;
@@ -599,6 +715,9 @@ thisMonthReportButton.addEventListener("click", () => {
 });
 
 loadReportButton.addEventListener("click", loadReport);
+exportCsvButton.addEventListener("click", downloadCsvFile);
+printReportButton.addEventListener("click", printReport);
+
 topSellingSort.addEventListener("change", () => {
   renderTopSelling(latestTopItems);
 });
