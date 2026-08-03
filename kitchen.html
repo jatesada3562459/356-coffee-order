@@ -25,11 +25,15 @@
 
     <section class="dashboard" aria-label="สรุปยอดวันนี้">
       <div class="dashboard-title">📊 สรุปวันนี้</div>
-      <div class="dashboard-grid">
-        <div class="summary-card"><span>ออเดอร์</span><strong id="todayOrderCount">0</strong></div>
-        <div class="summary-card"><span>ยอดรวม</span><strong id="todaySales">฿0</strong></div>
-        <div class="summary-card"><span>จ่ายที่เคาน์เตอร์</span><strong id="todayCash">฿0</strong></div>
-        <div class="summary-card"><span>พร้อมเพย์</span><strong id="todayPromptPay">฿0</strong></div>
+      <div class="dashboard-grid dashboard-grid-step9">
+        <div class="summary-card"><span>🧾 ออเดอร์</span><strong id="todayOrderCount">0</strong></div>
+        <div class="summary-card"><span>💰 ยอดขาย</span><strong id="todaySales">฿0</strong></div>
+        <div class="summary-card"><span>💵 เงินสด</span><strong id="todayCash">฿0</strong></div>
+        <div class="summary-card"><span>📱 พร้อมเพย์</span><strong id="todayPromptPay">฿0</strong></div>
+        <div class="summary-card"><span>🥤 เครื่องดื่ม</span><strong id="todayDrinkCount">0</strong></div>
+        <div class="summary-card"><span>🍞 ขนมปัง</span><strong id="todayBreadCount">0</strong></div>
+        <div class="summary-card"><span>👤 สมาชิกใหม่</span><strong id="todayNewMemberCount">0</strong></div>
+        <div class="summary-card"><span>🏷️ ส่วนลดรวม</span><strong id="todayDiscountTotal">฿0</strong></div>
       </div>
       <div class="status-counts">
         <span class="count-new">NEW <b id="newCount">0</b></span>
@@ -60,7 +64,7 @@
     </section>
 
     <div id="orders"></div>
-    <footer class="version-label">356 POS V1.2.2 Final</footer>
+    <footer class="version-label">356 POS V1.3.0 — Step 9</footer>
 
     <div id="checkoutModal" class="checkout-modal" aria-hidden="true">
       <div class="checkout-backdrop" data-close-checkout></div>

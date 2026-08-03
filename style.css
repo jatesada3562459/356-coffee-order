@@ -659,3 +659,23 @@ input[type=text]{
 .member-meta{
   line-height:1.8;
 }
+
+
+/* ===== Step 9 Dashboard สรุปยอดขาย ===== */
+.dashboard-grid-step9{
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+.dashboard-grid-step9 .summary-card{
+  min-height:88px;
+}
+.dashboard-grid-step9 .summary-card span{
+  line-height:1.35;
+}
+.dashboard-grid-step9 .summary-card strong{
+  font-size:23px;
+}
+@media (min-width:760px){
+  .dashboard-grid-step9{
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+  }
+}

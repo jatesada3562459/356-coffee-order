@@ -14,6 +14,10 @@ const todayOrderCount = document.getElementById("todayOrderCount");
 const todaySales = document.getElementById("todaySales");
 const todayCash = document.getElementById("todayCash");
 const todayPromptPay = document.getElementById("todayPromptPay");
+const todayDrinkCount = document.getElementById("todayDrinkCount");
+const todayBreadCount = document.getElementById("todayBreadCount");
+const todayNewMemberCount = document.getElementById("todayNewMemberCount");
+const todayDiscountTotal = document.getElementById("todayDiscountTotal");
 const newCount = document.getElementById("newCount");
 const makingCount = document.getElementById("makingCount");
 const readyCount = document.getElementById("readyCount");
@@ -62,6 +66,7 @@ let checkoutOrder = null;
 let checkoutMembers = [];
 let selectedMember = null;
 let rewardDiscountApplied = false;
+let todayNewMembers = 0;
 
 injectKitchenStyles();
 updateSoundButton();
@@ -204,6 +209,63 @@ function orderFinalTotal(order) {
   return Number(order.final_total ?? order.total ?? 0);
 }
 
+const BREAD_PRODUCTS = new Set([
+  "เนยนม",
+  "เนยน้ำตาล",
+  "เนยช็อกโกแลต",
+  "เนยคาราเมล"
+]);
+
+const ADDON_PRODUCTS = new Set([
+  "ปั่น",
+  "ไข่มุกบุก",
+  "ปีโป้",
+  "ครีมชีส",
+  "ช็อตกาแฟ",
+  "โยเกิร์ต"
+]);
+
+function classifySoldItems(orders) {
+  let drinks = 0;
+  let breads = 0;
+
+  orders.forEach(order => {
+    (order.order_items || []).forEach(item => {
+      const quantity = Number(item.quantity || 0);
+
+      if (BREAD_PRODUCTS.has(item.product_name)) {
+        breads += quantity;
+      } else if (!ADDON_PRODUCTS.has(item.product_name)) {
+        drinks += quantity;
+      }
+    });
+  });
+
+  return { drinks, breads };
+}
+
+async function loadTodayNewMemberCount() {
+  const todayKey = bangkokDateKey();
+  const start = new Date(`${todayKey}T00:00:00+07:00`).toISOString();
+  const endDate = new Date(`${todayKey}T00:00:00+07:00`);
+  endDate.setDate(endDate.getDate() + 1);
+  const end = endDate.toISOString();
+
+  const { count, error } = await sb
+    .from("members")
+    .select("id", { count: "exact", head: true })
+    .gte("created_at", start)
+    .lt("created_at", end);
+
+  if (error) {
+    console.error("โหลดจำนวนสมาชิกใหม่ไม่สำเร็จ", error);
+    todayNewMembers = 0;
+    return;
+  }
+
+  todayNewMembers = Number(count || 0);
+}
+
 function updateDashboard() {
   const todayKey = bangkokDateKey();
   const todayPaidOrders = allOrders.filter(order =>
@@ -228,6 +290,12 @@ function updateDashboard() {
     )
     .reduce((sum, order) => sum + orderFinalTotal(order), 0);
 
+  const soldItems = classifySoldItems(todayPaidOrders);
+  const discountTotal = todayPaidOrders.reduce(
+    (sum, order) => sum + Number(order.discount_amount || 0),
+    0
+  );
+
   const countNew = allOrders.filter(
     order => !isPaid(order) && order.status === "new"
   ).length;
@@ -242,6 +310,10 @@ function updateDashboard() {
   todaySales.textContent = numberBaht(total);
   todayCash.textContent = numberBaht(cash);
   todayPromptPay.textContent = numberBaht(promptPay);
+  todayDrinkCount.textContent = soldItems.drinks.toLocaleString("th-TH");
+  todayBreadCount.textContent = soldItems.breads.toLocaleString("th-TH");
+  todayNewMemberCount.textContent = todayNewMembers.toLocaleString("th-TH");
+  todayDiscountTotal.textContent = numberBaht(discountTotal);
   newCount.textContent = countNew;
   makingCount.textContent = countMaking;
   readyCount.textContent = countReady;
@@ -856,6 +928,7 @@ async function loadOrders() {
   }
 
   allOrders = data;
+  await loadTodayNewMemberCount();
   updateDashboard();
   renderOrders(newOrderIds);
 
