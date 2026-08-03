@@ -54,42 +54,112 @@ function updatePreview(imageEl,placeholderEl,url){
 
 function validateImage(file){
   if(!file) return "ไม่พบไฟล์รูป";
-  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
-    return "รองรับเฉพาะ JPG, PNG และ WebP";
+
+  const type=String(file.type||"");
+  if(type && !type.startsWith("image/")){
+    return "กรุณาเลือกไฟล์รูปภาพ";
   }
-  if(file.size>10*1024*1024){
-    return "รูปมีขนาดเกิน 10 MB";
+
+  if(file.size>20*1024*1024){
+    return "รูปมีขนาดเกิน 20 MB";
   }
+
   return "";
 }
 
-function safeStorageName(extension){
+function safeStorageName(extension="jpg"){
   const id=(globalThis.crypto?.randomUUID?.()||
     `${Date.now()}-${Math.random().toString(36).slice(2)}`)
     .replace(/[^a-zA-Z0-9-]/g,"");
+
   return `${Date.now()}-${id}.${extension}`;
 }
 
-async function uploadStoreImage(file,type){
-  const extension=(file.name.split(".").pop()||"jpg")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g,"")||"jpg";
+function readFileAsDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(new Error("อ่านไฟล์รูปไม่สำเร็จ"));
+    reader.readAsDataURL(file);
+  });
+}
 
-  const path=`${type}/${safeStorageName(extension)}`;
+async function imageFileToJpeg(file,maxSize=2200,quality=.9){
+  const dataUrl=await readFileAsDataUrl(file);
+
+  const image=await new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=()=>reject(
+      new Error("เปิดรูปไม่สำเร็จ กรุณาเลือกภาพจากแอปรูปภาพอีกครั้ง")
+    );
+    img.src=dataUrl;
+  });
+
+  const naturalWidth=image.naturalWidth||image.width;
+  const naturalHeight=image.naturalHeight||image.height;
+
+  if(!naturalWidth||!naturalHeight){
+    throw new Error("ไม่สามารถอ่านขนาดรูปได้");
+  }
+
+  const scale=Math.min(1,maxSize/Math.max(naturalWidth,naturalHeight));
+  const width=Math.max(1,Math.round(naturalWidth*scale));
+  const height=Math.max(1,Math.round(naturalHeight*scale));
+
+  const canvas=document.createElement("canvas");
+  canvas.width=width;
+  canvas.height=height;
+
+  const context=canvas.getContext("2d");
+  context.fillStyle="#ffffff";
+  context.fillRect(0,0,width,height);
+  context.drawImage(image,0,0,width,height);
+
+  const blob=await new Promise(resolve=>
+    canvas.toBlob(resolve,"image/jpeg",quality)
+  );
+
+  if(!blob){
+    throw new Error("แปลงรูปเป็น JPG ไม่สำเร็จ");
+  }
+
+  return {
+    blob,
+    previewUrl:dataUrl
+  };
+}
+
+async function prepareSelectedImage(file){
+  const error=validateImage(file);
+  if(error) throw new Error(error);
+
+  return imageFileToJpeg(file);
+}
+
+async function uploadStoreImage(file,type){
+  const prepared=await imageFileToJpeg(file);
+  const path=`${type}/${safeStorageName("jpg")}`;
 
   const {error}=await sb.storage
     .from("store-images")
-    .upload(path,file,{
+    .upload(path,prepared.blob,{
       cacheControl:"3600",
       upsert:false,
-      contentType:file.type||undefined
+      contentType:"image/jpeg"
     });
 
-  if(error) throw new Error(error.message);
+  if(error){
+    throw new Error("อัปโหลดรูปไม่สำเร็จ: "+error.message);
+  }
 
   const {data}=sb.storage
     .from("store-images")
     .getPublicUrl(path);
+
+  if(!data?.publicUrl){
+    throw new Error("ไม่สามารถสร้างลิงก์รูปได้");
+  }
 
   return data.publicUrl;
 }
@@ -193,32 +263,40 @@ async function loadStoreSettings(){
   updatePreview(logoPreview,logoPlaceholder,currentLogoUrl);
 }
 
-coverFileInput.addEventListener("change",()=>{
+coverFileInput.addEventListener("change",async()=>{
   const file=coverFileInput.files?.[0]||null;
-  const error=validateImage(file);
-  storeSettingsError.textContent=error;
-  if(error){
-    coverFileInput.value="";
-    return;
-  }
+  storeSettingsError.textContent="";
 
-  coverFile=file;
-  removeCover=false;
-  updatePreview(coverPreview,coverPlaceholder,URL.createObjectURL(file));
+  if(!file) return;
+
+  try{
+    const prepared=await prepareSelectedImage(file);
+    coverFile=file;
+    removeCover=false;
+    updatePreview(coverPreview,coverPlaceholder,prepared.previewUrl);
+  }catch(error){
+    coverFile=null;
+    coverFileInput.value="";
+    storeSettingsError.textContent=error.message;
+  }
 });
 
-logoFileInput.addEventListener("change",()=>{
+logoFileInput.addEventListener("change",async()=>{
   const file=logoFileInput.files?.[0]||null;
-  const error=validateImage(file);
-  storeSettingsError.textContent=error;
-  if(error){
-    logoFileInput.value="";
-    return;
-  }
+  storeSettingsError.textContent="";
 
-  logoFile=file;
-  removeLogo=false;
-  updatePreview(logoPreview,logoPlaceholder,URL.createObjectURL(file));
+  if(!file) return;
+
+  try{
+    const prepared=await prepareSelectedImage(file);
+    logoFile=file;
+    removeLogo=false;
+    updatePreview(logoPreview,logoPlaceholder,prepared.previewUrl);
+  }catch(error){
+    logoFile=null;
+    logoFileInput.value="";
+    storeSettingsError.textContent=error.message;
+  }
 });
 
 removeCoverButton.addEventListener("click",()=>{
