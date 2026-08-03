@@ -1712,3 +1712,125 @@ input[type=text]{
   margin:0;
   margin-top:1px;
 }
+
+
+/* ===== V1.5.3 รูปภาพเมนู ===== */
+.menu-card-image{
+  display:block;
+  width:100%;
+  aspect-ratio:1 / 1;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:10px;
+  background:#f1ede8;
+}
+.menu-card-placeholder{
+  width:100%;
+  aspect-ratio:1 / 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  margin-bottom:10px;
+  background:linear-gradient(135deg,#eee8e1,#faf8f5);
+  color:#9b8f84;
+  font-size:25px;
+  font-weight:900;
+}
+.menu-setting-thumb,
+.menu-setting-thumb-placeholder{
+  display:block;
+  width:100%;
+  aspect-ratio:16 / 7;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:11px;
+  background:#f2eee9;
+}
+.menu-setting-thumb-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#9b8f84;
+  font-size:24px;
+  font-weight:900;
+}
+.menu-image-editor{
+  background:#faf7f2;
+  border:1px solid #e0d8d0;
+  border-radius:14px;
+  padding:12px;
+  margin:14px 0;
+}
+.menu-image-editor-title{
+  font-weight:900;
+  font-size:17px;
+  margin-bottom:9px;
+}
+.menu-image-preview-wrap{
+  width:min(100%,320px);
+  margin:0 auto 10px;
+}
+.menu-image-preview,
+.menu-image-placeholder{
+  display:block;
+  width:100%;
+  aspect-ratio:1 / 1;
+  object-fit:cover;
+  border-radius:14px;
+  background:#eee9e3;
+}
+.menu-image-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#877b70;
+  font-weight:900;
+}
+.menu-image-preview.hidden,
+.menu-image-placeholder.hidden{
+  display:none;
+}
+.menu-image-file{
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+}
+.menu-image-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.choose-image-button,
+.remove-image-button{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  border:0;
+  border-radius:11px;
+  padding:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+.choose-image-button{
+  background:#171513;
+  color:#fff;
+}
+.remove-image-button{
+  background:#fff0ef;
+  color:#a33229;
+}
+.remove-image-button:disabled{
+  opacity:.45;
+}
+.menu-image-editor small{
+  display:block;
+  margin-top:9px;
+  color:#70665e;
+  line-height:1.45;
+}

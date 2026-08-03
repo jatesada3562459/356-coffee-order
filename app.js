@@ -14,7 +14,7 @@ async function loadMenu(){
 
     const {data:settings,error}=await sb
       .from("menu_settings")
-      .select("item_type,item_name,category,price,is_active,is_custom,item_data");
+      .select("item_type,item_name,category,price,is_active,is_custom,item_data,image_url");
 
     if(error){
       console.warn("โหลดการตั้งค่าเมนูไม่สำเร็จ ใช้ราคาในไฟล์เดิมแทน",error);
@@ -36,9 +36,11 @@ async function loadMenu(){
                 category:setting.category||product.category,
                 price:Number(setting.price),
                 is_active:setting.is_active,
-                is_custom:Boolean(setting.is_custom)
+                is_custom:Boolean(setting.is_custom),
+                image_url:setting.image_url||addon.image_url||null,
+                image_url:setting.image_url||product.image_url||null
               }
-            : {...product,is_active:true,is_custom:false};
+            : {...product,is_active:true,is_custom:false,image_url:product.image_url||null};
         });
 
       db.addons=db.addons
@@ -50,9 +52,10 @@ async function loadMenu(){
                 ...(setting.item_data||{}),
                 price:Number(setting.price),
                 is_active:setting.is_active,
-                is_custom:Boolean(setting.is_custom)
+                is_custom:Boolean(setting.is_custom),
+                image_url:setting.image_url||product.image_url||null
               }
-            : {...addon,is_active:true,is_custom:false};
+            : {...addon,is_active:true,is_custom:false,image_url:addon.image_url||null};
         });
 
       const customProducts=(settings||[])
@@ -64,7 +67,8 @@ async function loadMenu(){
           price:Number(item.price),
           groups:Array.isArray(item.item_data?.groups)?item.item_data.groups:[],
           is_active:item.is_active,
-          is_custom:true
+          is_custom:true,
+          image_url:item.image_url||null
         }));
 
       const customAddons=(settings||[])
@@ -74,7 +78,8 @@ async function loadMenu(){
           name:item.item_name,
           price:Number(item.price),
           is_active:item.is_active,
-          is_custom:true
+          is_custom:true,
+          image_url:item.image_url||null
         }));
 
       db.products.push(...customProducts);
@@ -108,7 +113,14 @@ function renderMenu(){
     db.addons.filter(a=>a.is_active!==false).forEach(a=>{
       const d=document.createElement("div");
       d.className="card";
-      d.innerHTML=`<div class="name">${a.name}</div><div class="price">+฿${a.price}</div><button>เพิ่ม</button>`;
+      d.innerHTML=`
+        ${a.image_url
+          ? `<img class="menu-card-image" src="${a.image_url}" alt="${a.name}" loading="lazy">`
+          : `<div class="menu-card-placeholder">356</div>`}
+        <div class="name">${a.name}</div>
+        <div class="price">+฿${a.price}</div>
+        <button>เพิ่ม</button>
+      `;
       d.onclick=()=>openAddon(a);
       $("menu").appendChild(d);
     });
@@ -120,7 +132,14 @@ function renderMenu(){
     .forEach(p=>{
       const d=document.createElement("div");
       d.className="card";
-      d.innerHTML=`<div class="name">${p.name}</div><div class="price">฿${p.price}</div><button>เลือกเมนู</button>`;
+      d.innerHTML=`
+        ${p.image_url
+          ? `<img class="menu-card-image" src="${p.image_url}" alt="${p.name}" loading="lazy">`
+          : `<div class="menu-card-placeholder">356</div>`}
+        <div class="name">${p.name}</div>
+        <div class="price">฿${p.price}</div>
+        <button>เลือกเมนู</button>
+      `;
       d.onclick=()=>openProduct(p);
       $("menu").appendChild(d);
     });

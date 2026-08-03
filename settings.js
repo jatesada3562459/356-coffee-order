@@ -26,11 +26,18 @@ const editorIsActive = document.getElementById("editorIsActive");
 const menuEditorError = document.getElementById("menuEditorError");
 const saveMenuEditorButton = document.getElementById("saveMenuEditorButton");
 const deleteCustomMenuButton = document.getElementById("deleteCustomMenuButton");
+const editorImageFile = document.getElementById("editorImageFile");
+const editorImagePreview = document.getElementById("editorImagePreview");
+const editorImagePlaceholder = document.getElementById("editorImagePlaceholder");
+const removeEditorImageButton = document.getElementById("removeEditorImageButton");
 
 let items = [];
 let originalItems = [];
 let dirty = false;
 let editingItem = null;
+let pendingImageFile = null;
+let editorImageUrl = null;
+let removeCurrentImage = false;
 
 function itemKey(item) {
   return `${item.item_type}:${item.item_name}`;
@@ -102,6 +109,10 @@ function renderItems() {
     const card = document.createElement("article");
     card.className = `menu-setting-card ${item.is_active ? "" : "inactive"}`;
     card.innerHTML = `
+      ${item.image_url
+        ? `<img class="menu-setting-thumb" src="${item.image_url}" alt="${item.item_name}" loading="lazy">`
+        : `<div class="menu-setting-thumb-placeholder">356</div>`}
+
       <div class="menu-setting-info">
         <div>
           <span class="menu-setting-category">
@@ -173,7 +184,8 @@ async function loadSettings() {
       price: Number(product.price),
       is_active: true,
       is_custom: false,
-      item_data: { groups: Array.isArray(product.groups) ? product.groups : [] }
+      item_data: { groups: Array.isArray(product.groups) ? product.groups : [] },
+      image_url: product.image_url || null
     })),
     ...menu.addons.map(addon => ({
       item_type: "addon",
@@ -182,13 +194,14 @@ async function loadSettings() {
       price: Number(addon.price),
       is_active: true,
       is_custom: false,
-      item_data: {}
+      item_data: {},
+      image_url: addon.image_url || null
     }))
   ];
 
   const { data: settings, error } = await sb
     .from("menu_settings")
-    .select("item_type,item_name,category,price,is_active,is_custom,item_data");
+    .select("item_type,item_name,category,price,is_active,is_custom,item_data,image_url");
 
   if (error) {
     menuSettingsList.innerHTML =
@@ -208,7 +221,8 @@ async function loadSettings() {
       is_active: Boolean(saved.is_active),
       category: saved.category || item.category,
       is_custom: Boolean(saved.is_custom),
-      item_data: saved.item_data || item.item_data
+      item_data: saved.item_data || item.item_data,
+      image_url: saved.image_url || item.image_url || null
     } : item;
   });
 
@@ -224,7 +238,8 @@ async function loadSettings() {
       price: Number(setting.price),
       is_active: Boolean(setting.is_active),
       is_custom: true,
-      item_data: setting.item_data || {}
+      item_data: setting.item_data || {},
+      image_url: setting.image_url || null
     }));
 
   items = [...defaultItems, ...customItems];
@@ -284,6 +299,64 @@ function setSelectedGroups(groups = []) {
   document.getElementById("editorSizeOption").checked = groups.includes("size");
 }
 
+function updateImagePreview(url = null) {
+  editorImageUrl = url || null;
+
+  if (editorImageUrl) {
+    editorImagePreview.src = editorImageUrl;
+    editorImagePreview.classList.remove("hidden");
+    editorImagePlaceholder.classList.add("hidden");
+    removeEditorImageButton.disabled = false;
+  } else {
+    editorImagePreview.removeAttribute("src");
+    editorImagePreview.classList.add("hidden");
+    editorImagePlaceholder.classList.remove("hidden");
+    removeEditorImageButton.disabled = true;
+  }
+}
+
+function safeFilePart(value) {
+  return String(value || "menu")
+    .normalize("NFKD")
+    .replace(/[^\w\u0E00-\u0E7F-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60) || "menu";
+}
+
+async function uploadMenuImage(file, itemType, itemName) {
+  if (!file) return editorImageUrl;
+
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("รูปมีขนาดเกิน 10 MB");
+  }
+
+  const extension = (file.name.split(".").pop() || "jpg")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "") || "jpg";
+
+  const path =
+    `${itemType}/${Date.now()}-${safeFilePart(itemName)}.${extension}`;
+
+  const { error: uploadError } = await sb.storage
+    .from("menu-images")
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type || undefined
+    });
+
+  if (uploadError) {
+    throw new Error("อัปโหลดรูปไม่สำเร็จ: " + uploadError.message);
+  }
+
+  const { data } = sb.storage
+    .from("menu-images")
+    .getPublicUrl(path);
+
+  return data.publicUrl;
+}
+
 function updateEditorTypeUI() {
   const isAddon = editorItemType.value === "addon";
   editorCategoryWrap.classList.toggle("hidden", isAddon);
@@ -327,6 +400,10 @@ function openMenuEditor(item = null) {
     editorPrice.value = Number(item.price);
     editorIsActive.checked = Boolean(item.is_active);
     setSelectedGroups(item.item_data?.groups || []);
+    pendingImageFile = null;
+    removeCurrentImage = false;
+    editorImageFile.value = "";
+    updateImagePreview(item.image_url || null);
 
     editorItemType.disabled = !item.is_custom;
     editorItemName.disabled = !item.is_custom;
@@ -339,6 +416,10 @@ function openMenuEditor(item = null) {
     editorPrice.value = "";
     editorIsActive.checked = true;
     setSelectedGroups([]);
+    pendingImageFile = null;
+    removeCurrentImage = false;
+    editorImageFile.value = "";
+    updateImagePreview(null);
 
     editorItemType.disabled = false;
     editorItemName.disabled = false;
@@ -474,6 +555,23 @@ saveMenuEditorButton.addEventListener("click", async () => {
   saveMenuEditorButton.disabled = true;
   saveMenuEditorButton.textContent = "กำลังบันทึก...";
 
+  let finalImageUrl = removeCurrentImage ? null : editorImageUrl;
+
+  try {
+    if (pendingImageFile) {
+      finalImageUrl = await uploadMenuImage(
+        pendingImageFile,
+        type,
+        name
+      );
+    }
+  } catch (uploadError) {
+    saveMenuEditorButton.disabled = false;
+    saveMenuEditorButton.textContent = "บันทึกเมนู";
+    menuEditorError.textContent = uploadError.message;
+    return;
+  }
+
   const { error } = await sb.rpc("manager_upsert_custom_menu", {
     p_pin: pin,
     p_old_item_type: editingItem?.item_type || null,
@@ -484,7 +582,8 @@ saveMenuEditorButton.addEventListener("click", async () => {
     p_price: price,
     p_is_active: isActive,
     p_item_data: { groups },
-    p_is_custom: editingItem ? Boolean(editingItem.is_custom) : true
+    p_is_custom: editingItem ? Boolean(editingItem.is_custom) : true,
+    p_image_url: finalImageUrl
   });
 
   saveMenuEditorButton.disabled = false;
@@ -562,6 +661,38 @@ saveMenuSettingsButton.addEventListener("click", async () => {
   originalItems = cloneItems(items);
   setDirty(false);
   alert(`บันทึกเรียบร้อย ${Number(data || changedItems.length)} รายการ`);
+});
+
+editorImageFile.addEventListener("change", () => {
+  const file = editorImageFile.files?.[0] || null;
+  menuEditorError.textContent = "";
+
+  if (!file) return;
+
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    menuEditorError.textContent = "รองรับเฉพาะ JPG, PNG และ WebP";
+    editorImageFile.value = "";
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    menuEditorError.textContent = "รูปมีขนาดเกิน 10 MB";
+    editorImageFile.value = "";
+    return;
+  }
+
+  pendingImageFile = file;
+  removeCurrentImage = false;
+
+  const objectUrl = URL.createObjectURL(file);
+  updateImagePreview(objectUrl);
+});
+
+removeEditorImageButton.addEventListener("click", () => {
+  pendingImageFile = null;
+  removeCurrentImage = true;
+  editorImageFile.value = "";
+  updateImagePreview(null);
 });
 
 addMenuButton.addEventListener("click", () => openMenuEditor());
