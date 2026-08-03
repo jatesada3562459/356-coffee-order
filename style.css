@@ -2066,3 +2066,18 @@ input[type=text]{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== V1.5.5 แก้รูปหน้าปกและโลโก้ไม่แสดง ===== */
+.store-cover-image,
+.store-logo-image,
+.store-cover-edit-preview,
+.store-logo-edit-preview{
+  display:block;
+}
+.store-cover-image.hidden,
+.store-logo-image.hidden,
+.store-cover-edit-preview.hidden,
+.store-logo-edit-preview.hidden{
+  display:none!important;
+}

@@ -29,10 +29,22 @@ let removeCover = false;
 let removeLogo = false;
 
 function updatePreview(imageEl,placeholderEl,url){
+  imageEl.onerror=null;
+
   if(url){
-    imageEl.src=url;
+    const isLocalPreview=String(url).startsWith("blob:");
+    const finalUrl=isLocalPreview
+      ? url
+      : `${url}${url.includes("?")?"&":"?"}v=${Date.now()}`;
+
+    imageEl.src=finalUrl;
     imageEl.classList.remove("hidden");
     placeholderEl.classList.add("hidden");
+
+    imageEl.onerror=()=>{
+      imageEl.classList.add("hidden");
+      placeholderEl.classList.remove("hidden");
+    };
   }else{
     imageEl.removeAttribute("src");
     imageEl.classList.add("hidden");
@@ -273,6 +285,11 @@ saveStoreSettingsButton.addEventListener("click",async()=>{
     logoFile=null;
     removeCover=false;
     removeLogo=false;
+    coverFileInput.value="";
+    logoFileInput.value="";
+
+    updatePreview(coverPreview,coverPlaceholder,currentCoverUrl);
+    updatePreview(logoPreview,logoPlaceholder,currentLogoUrl);
 
     alert("บันทึกหน้าร้านเรียบร้อย");
   }catch(error){
@@ -284,3 +301,9 @@ saveStoreSettingsButton.addEventListener("click",async()=>{
 });
 
 window.addEventListener("manager-unlocked",loadStoreSettings);
+
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",loadStoreSettings,{once:true});
+}else{
+  loadStoreSettings();
+}

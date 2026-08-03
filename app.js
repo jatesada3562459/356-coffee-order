@@ -6,10 +6,18 @@ $("table").textContent=tableNo==="counter"?"สั่งที่เคาน์
 $("customer").value=localStorage.getItem("356_customer_name")||"";
 
 function setImageState(imageEl, placeholderEl, url){
+  imageEl.onerror=null;
+
   if(url){
-    imageEl.src=url;
+    const separator=url.includes("?")?"&":"?";
+    imageEl.src=`${url}${separator}v=${Date.now()}`;
     imageEl.classList.remove("hidden");
     placeholderEl.classList.add("hidden");
+
+    imageEl.onerror=()=>{
+      imageEl.classList.add("hidden");
+      placeholderEl.classList.remove("hidden");
+    };
   }else{
     imageEl.removeAttribute("src");
     imageEl.classList.add("hidden");
@@ -110,7 +118,7 @@ async function loadMenu(){
                 price:Number(setting.price),
                 is_active:setting.is_active,
                 is_custom:Boolean(setting.is_custom),
-                image_url:setting.image_url||addon.image_url||null
+                image_url:setting.image_url||product.image_url||null
               }
             : {...product,is_active:true,is_custom:false,image_url:product.image_url||null};
         });
@@ -125,7 +133,7 @@ async function loadMenu(){
                 price:Number(setting.price),
                 is_active:setting.is_active,
                 is_custom:Boolean(setting.is_custom),
-                image_url:setting.image_url||product.image_url||null
+                image_url:setting.image_url||addon.image_url||null
               }
             : {...addon,is_active:true,is_custom:false,image_url:addon.image_url||null};
         });
