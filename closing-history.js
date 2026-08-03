@@ -274,4 +274,4 @@ showAllClosingsButton.addEventListener("click", () => {
   renderClosings();
 });
 
-loadClosings();
+window.addEventListener("manager-unlocked", loadClosings);

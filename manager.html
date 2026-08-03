@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>โหมดผู้จัดการ 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header>
+    <b>🔐 โหมดผู้จัดการ</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="audit-log.html">📜 Audit Log</a>
+      <a class="header-link-button" href="kitchen.html">← กลับหลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section id="setupPinPanel" class="manager-panel hidden">
+      <h2>ตั้ง PIN ผู้จัดการครั้งแรก</h2>
+      <p class="muted">ใช้ PIN 4 หลักสำหรับส่วนลด เงินในเก๊ะ การปิดยอด และการตั้งค่าที่สำคัญ</p>
+
+      <label class="manager-field">
+        <span>PIN ใหม่</span>
+        <input id="setupPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </label>
+
+      <label class="manager-field">
+        <span>ยืนยัน PIN ใหม่</span>
+        <input id="setupPinConfirm" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </label>
+
+      <div id="setupPinError" class="manager-pin-error"></div>
+      <button id="setupPinButton" class="primary" type="button">บันทึก PIN</button>
+    </section>
+
+    <section id="changePinPanel" class="manager-panel hidden">
+      <h2>เปลี่ยน PIN ผู้จัดการ</h2>
+
+      <label class="manager-field">
+        <span>PIN ปัจจุบัน</span>
+        <input id="currentPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </label>
+
+      <label class="manager-field">
+        <span>PIN ใหม่</span>
+        <input id="newPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </label>
+
+      <label class="manager-field">
+        <span>ยืนยัน PIN ใหม่</span>
+        <input id="newPinConfirm" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </label>
+
+      <div id="changePinError" class="manager-pin-error"></div>
+      <button id="changePinButton" class="primary" type="button">เปลี่ยน PIN</button>
+    </section>
+
+    <section class="manager-panel">
+      <h2>สถานะโหมดผู้จัดการ</h2>
+      <p>เมื่อปลดล็อกแล้ว ระบบจะจำไว้ 30 นาทีในอุปกรณ์นี้</p>
+      <button id="lockManagerButton" class="manager-lock-now-button" type="button">🔒 ล็อกทันที</button>
+    </section>
+
+    <footer class="version-label">356 POS V1.4.2 — Manager PIN & Audit Log</footer>
+  </main>
+
+  <script src="manager.js"></script>
+</body>
+</html>

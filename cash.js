@@ -45,6 +45,15 @@ let systemCashSales = 0;
 let systemPromptPay = 0;
 let expectedCash = 0;
 
+async function writeAudit(action, details = {}) {
+  const { error } = await sb.rpc("write_audit_log", {
+    p_action: action,
+    p_details: details,
+    p_actor: "manager"
+  });
+  if (error) console.error("บันทึก Audit Log ไม่สำเร็จ", error);
+}
+
 function bangkokDateKey(value = new Date()) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Bangkok",
@@ -318,6 +327,15 @@ movementForm.addEventListener("submit", async event => {
     return;
   }
 
+  await writeAudit(
+    type === "in" ? "บันทึกเงินเข้า" : "บันทึกเงินออก",
+    {
+      amount,
+      category,
+      note: note || ""
+    }
+  );
+
   movementForm.classList.add("hidden");
   await loadMovements();
   renderSummary();
@@ -353,6 +371,11 @@ openSessionButton.addEventListener("click", async () => {
         : "เปิดเก๊ะไม่สำเร็จ: " + error.message;
     return;
   }
+
+  await writeAudit("เปิดเก๊ะ", {
+    business_date: bangkokDateKey(),
+    opening_float: amount
+  });
 
   await loadSession();
 });
@@ -439,8 +462,20 @@ closeDayButton.addEventListener("click", async () => {
     return;
   }
 
+  await writeAudit("ปิดยอดประจำวัน", {
+    business_date: session.business_date,
+    expected_cash: expectedCash,
+    actual_cash: countedCash,
+    promptpay_system: systemPromptPay,
+    actual_promptpay: countedPromptPay,
+    cash_difference: cashDiff,
+    promptpay_difference: promptDiff,
+    net_difference: netDiff,
+    note: note || ""
+  });
+
   alert("ปิดยอดวันนี้เรียบร้อย");
   await loadSession();
 });
 
-loadSession();
+window.addEventListener("manager-unlocked", loadSession);

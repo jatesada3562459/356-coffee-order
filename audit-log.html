@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Audit Log 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>📜 Audit Log</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="manager.html">⚙️ ผู้จัดการ</a>
+      <a class="header-link-button" href="kitchen.html">← หลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="audit-filter-panel">
+      <label for="auditSearch">🔍 ค้นหาประวัติ</label>
+      <input id="auditSearch" type="search" placeholder="เช่น เงินออก ปิดยอด เปลี่ยน PIN">
+      <button id="refreshAuditButton" type="button">รีเฟรช</button>
+    </section>
+
+    <section id="auditList" class="audit-list"></section>
+
+    <footer class="version-label">356 POS V1.4.2 — Audit Log</footer>
+  </main>
+
+  <script src="audit-log.js"></script>
+</body>
+</html>
