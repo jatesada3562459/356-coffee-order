@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>รายงานยอดขาย 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>📊 รายงานยอดขาย</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="kitchen.html">← กลับหลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="report-filter-panel">
+      <label class="report-field">
+        <span>วันที่เริ่มต้น</span>
+        <input id="reportStartDate" type="date">
+      </label>
+
+      <label class="report-field">
+        <span>วันที่สิ้นสุด</span>
+        <input id="reportEndDate" type="date">
+      </label>
+
+      <div class="report-quick-actions">
+        <button id="todayReportButton" type="button">วันนี้</button>
+        <button id="thisMonthReportButton" type="button">เดือนนี้</button>
+        <button id="loadReportButton" class="primary" type="button">ดูรายงาน</button>
+      </div>
+    </section>
+
+    <section class="report-summary-grid">
+      <article class="report-summary-card hero">
+        <span>💰 ยอดขายสุทธิ</span>
+        <strong id="reportNetSales">฿0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>🧾 ออเดอร์</span>
+        <strong id="reportOrderCount">0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>💵 เงินสด</span>
+        <strong id="reportCashSales">฿0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>📱 พร้อมเพย์</span>
+        <strong id="reportPromptPaySales">฿0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>🏷️ ส่วนลด</span>
+        <strong id="reportDiscountTotal">฿0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>↩️ คืนเงิน</span>
+        <strong id="reportRefundTotal">฿0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>🥤 เครื่องดื่ม</span>
+        <strong id="reportDrinkCount">0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>🍞 ขนมปัง</span>
+        <strong id="reportBreadCount">0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>👥 บิลสมาชิก</span>
+        <strong id="reportMemberOrders">0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>👤 สมาชิกใหม่</span>
+        <strong id="reportNewMembers">0</strong>
+      </article>
+
+      <article class="report-summary-card">
+        <span>📈 เฉลี่ยต่อบิล</span>
+        <strong id="reportAverageOrder">฿0</strong>
+      </article>
+    </section>
+
+    <section class="report-section">
+      <div class="report-section-title">🏆 เมนูขายดี</div>
+      <div id="topSellingList" class="report-list"></div>
+    </section>
+
+    <section class="report-section">
+      <div class="report-section-title">📅 ยอดขายแยกตามวัน</div>
+      <div id="dailySalesList" class="report-list"></div>
+    </section>
+
+    <div id="reportError" class="report-error"></div>
+
+    <footer class="version-label">356 POS V1.6.0 — Sales Report</footer>
+  </main>
+
+  <script src="reports.js"></script>
+</body>
+</html>
