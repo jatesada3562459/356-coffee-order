@@ -1537,3 +1537,148 @@ input[type=text]{
     width:100%;
   }
 }
+
+
+/* ===== V1.5.1 เพิ่ม/แก้ไข/ลบเมนู ===== */
+.add-menu-button{
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  background:#171513;
+  color:#fff;
+  font-weight:900;
+  padding:10px 14px;
+}
+.menu-settings-toolbar .add-menu-button{
+  grid-column:1 / -1;
+}
+.custom-menu-badge{
+  display:inline-block;
+  margin-left:5px;
+  background:#eaf7ef;
+  color:#166c41;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:12px;
+  font-weight:900;
+}
+.edit-menu-button{
+  width:100%;
+  min-height:43px;
+  margin-top:10px;
+  border:0;
+  border-radius:11px;
+  background:#eee;
+  color:#0878de;
+  font-weight:900;
+}
+.menu-editor-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:50000;
+  overflow-y:auto;
+  padding:18px 12px max(50px,env(safe-area-inset-bottom));
+}
+.menu-editor-modal.show{display:block}
+.menu-editor-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(20,17,15,.72);
+}
+.menu-editor-dialog{
+  position:relative;
+  z-index:1;
+  width:min(100%,620px);
+  margin:0 auto;
+  background:#fff;
+  border-radius:20px;
+  padding:18px;
+}
+.menu-editor-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+.menu-editor-header h2{margin:0}
+.menu-editor-header button{
+  border:0;
+  border-radius:10px;
+  padding:8px 11px;
+}
+.menu-editor-field{
+  display:block;
+  margin:13px 0;
+}
+.menu-editor-field.hidden{display:none}
+.menu-editor-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.menu-editor-field input,
+.menu-editor-field select{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  border:1px solid #cbc2b9;
+  border-radius:12px;
+  padding:11px;
+  font:inherit;
+  background:#fff;
+}
+.menu-option-panel{
+  background:#faf7f2;
+  border-radius:14px;
+  padding:12px;
+  margin:13px 0;
+}
+.menu-option-panel.hidden{display:none}
+.menu-option-panel h3{margin:0 0 8px}
+.menu-option-panel label{
+  display:block;
+  padding:7px 0;
+}
+.menu-option-panel input{
+  width:20px;
+  height:20px;
+  vertical-align:middle;
+  margin-right:6px;
+}
+.menu-active-editor{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:900;
+  margin:14px 0;
+}
+.menu-active-editor input{
+  width:22px;
+  height:22px;
+}
+.menu-editor-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+}
+.menu-editor-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+.menu-editor-actions button{
+  min-height:48px;
+  border:0;
+  border-radius:12px;
+  font-weight:900;
+}
+.delete-menu-button{
+  background:#fff0ef;
+  color:#a33229;
+}
+.delete-menu-button.hidden{display:none}
+@media(max-width:600px){
+  .menu-editor-actions{grid-template-columns:1fr}
+}

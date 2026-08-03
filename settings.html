@@ -24,6 +24,7 @@
       <select id="menuSettingsCategory">
         <option value="ทั้งหมด">ทุกหมวดหมู่</option>
       </select>
+      <button id="addMenuButton" class="add-menu-button" type="button">➕ เพิ่มเมนูใหม่</button>
     </section>
 
     <section class="menu-settings-summary">
@@ -41,8 +42,66 @@
       </button>
     </div>
 
-    <footer class="version-label">356 POS V1.5.0 — Menu Settings</footer>
+    <footer class="version-label">356 POS V1.5.1 — Add Menu</footer>
   </main>
+
+
+  <div id="menuEditorModal" class="menu-editor-modal" aria-hidden="true">
+    <div class="menu-editor-backdrop" data-close-menu-editor></div>
+    <section class="menu-editor-dialog" role="dialog" aria-modal="true">
+      <div class="menu-editor-header">
+        <h2 id="menuEditorTitle">เพิ่มเมนูใหม่</h2>
+        <button id="closeMenuEditorButton" type="button">✕</button>
+      </div>
+
+      <label class="menu-editor-field">
+        <span>ประเภท</span>
+        <select id="editorItemType">
+          <option value="product">เมนูเครื่องดื่ม/อาหาร</option>
+          <option value="addon">ADD-ON</option>
+        </select>
+      </label>
+
+      <label class="menu-editor-field">
+        <span>ชื่อเมนู</span>
+        <input id="editorItemName" type="text" maxlength="100" placeholder="เช่น มัทฉะลาเต้">
+      </label>
+
+      <label id="editorCategoryWrap" class="menu-editor-field">
+        <span>หมวดหมู่</span>
+        <input id="editorCategory" type="text" maxlength="80" placeholder="เช่น ชา & นม">
+      </label>
+
+      <label class="menu-editor-field">
+        <span>ราคา (บาท)</span>
+        <input id="editorPrice" type="number" min="0" step="1" inputmode="decimal">
+      </label>
+
+      <section id="editorOptionsWrap" class="menu-option-panel">
+        <h3>ตัวเลือกของเมนู</h3>
+        <label><input type="checkbox" value="sweet"> ความหวาน 4 ระดับ</label>
+        <label><input type="checkbox" value="sweet_no_zero"> ความหวาน 3 ระดับ</label>
+        <label><input type="checkbox" value="milk"> เลือกชนิดนม</label>
+        <label><input type="checkbox" value="extras_all"> ท็อปปิ้งทั้งหมด</label>
+        <label><input type="checkbox" value="extras_no_blend"> ท็อปปิ้งไม่รวมปั่น</label>
+        <label><input type="checkbox" value="extras_soda"> ตัวเลือกโซดา</label>
+        <label><input type="checkbox" value="yogurt"> เพิ่มโยเกิร์ต</label>
+        <label><input type="checkbox" value="size"> อัปไซส์แก้วใหญ่</label>
+      </section>
+
+      <label class="menu-active-editor">
+        <input id="editorIsActive" type="checkbox" checked>
+        <span>เปิดขายทันที</span>
+      </label>
+
+      <div id="menuEditorError" class="menu-editor-error"></div>
+
+      <div class="menu-editor-actions">
+        <button id="deleteCustomMenuButton" class="delete-menu-button hidden" type="button">ลบเมนู</button>
+        <button id="saveMenuEditorButton" class="primary" type="button">บันทึกเมนู</button>
+      </div>
+    </section>
+  </div>
 
   <script src="settings.js"></script>
 </body>

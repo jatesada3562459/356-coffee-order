@@ -14,7 +14,7 @@ async function loadMenu(){
 
     const {data:settings,error}=await sb
       .from("menu_settings")
-      .select("item_type,item_name,price,is_active");
+      .select("item_type,item_name,category,price,is_active,is_custom,item_data");
 
     if(error){
       console.warn("โหลดการตั้งค่าเมนูไม่สำเร็จ ใช้ราคาในไฟล์เดิมแทน",error);
@@ -30,17 +30,55 @@ async function loadMenu(){
         .map(product=>{
           const setting=settingMap.get(`product:${product.name}`);
           return setting
-            ? {...product,price:Number(setting.price),is_active:setting.is_active}
-            : {...product,is_active:true};
+            ? {
+                ...product,
+                ...(setting.item_data||{}),
+                category:setting.category||product.category,
+                price:Number(setting.price),
+                is_active:setting.is_active,
+                is_custom:Boolean(setting.is_custom)
+              }
+            : {...product,is_active:true,is_custom:false};
         });
 
       db.addons=db.addons
         .map(addon=>{
           const setting=settingMap.get(`addon:${addon.name}`);
           return setting
-            ? {...addon,price:Number(setting.price),is_active:setting.is_active}
-            : {...addon,is_active:true};
+            ? {
+                ...addon,
+                ...(setting.item_data||{}),
+                price:Number(setting.price),
+                is_active:setting.is_active,
+                is_custom:Boolean(setting.is_custom)
+              }
+            : {...addon,is_active:true,is_custom:false};
         });
+
+      const customProducts=(settings||[])
+        .filter(item=>item.item_type==="product"&&item.is_custom)
+        .filter(item=>!db.products.some(product=>product.name===item.item_name))
+        .map(item=>({
+          name:item.item_name,
+          category:item.category||"อื่น ๆ",
+          price:Number(item.price),
+          groups:Array.isArray(item.item_data?.groups)?item.item_data.groups:[],
+          is_active:item.is_active,
+          is_custom:true
+        }));
+
+      const customAddons=(settings||[])
+        .filter(item=>item.item_type==="addon"&&item.is_custom)
+        .filter(item=>!db.addons.some(addon=>addon.name===item.item_name))
+        .map(item=>({
+          name:item.item_name,
+          price:Number(item.price),
+          is_active:item.is_active,
+          is_custom:true
+        }));
+
+      db.products.push(...customProducts);
+      db.addons.push(...customAddons);
     }
 
     renderTabs();
