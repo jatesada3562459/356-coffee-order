@@ -2081,3 +2081,82 @@ input[type=text]{
 .store-logo-edit-preview.hidden{
   display:none!important;
 }
+
+
+/* ===== V1.5.6 แก้โลโก้หน้าลูกค้า ===== */
+.store-logo-wrap{
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+.store-logo-image{
+  position:relative;
+  z-index:2;
+  display:block;
+}
+.store-logo-placeholder{
+  position:relative;
+  z-index:1;
+}
+
+
+/* ===== V1.5.7 ปรับหน้าปกลูกค้าให้กระชับ ===== */
+.store-hero{
+  overflow:hidden !important;
+}
+
+.store-cover-wrap{
+  position:relative !important;
+  width:100% !important;
+  height:150px !important;
+  min-height:150px !important;
+  max-height:150px !important;
+  aspect-ratio:auto !important;
+  overflow:hidden !important;
+  background:#171513 !important;
+}
+
+.store-cover-image{
+  position:absolute !important;
+  inset:0 !important;
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  max-height:none !important;
+  object-fit:cover !important;
+  object-position:center 62% !important;
+  border-radius:0 !important;
+}
+
+.store-cover-placeholder{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px !important;
+}
+
+.store-profile-row{
+  padding-top:0 !important;
+}
+
+.store-logo-wrap{
+  margin-top:-24px !important;
+}
+
+@media (max-width:600px){
+  .store-cover-wrap{
+    height:125px !important;
+    min-height:125px !important;
+    max-height:125px !important;
+  }
+
+  .store-cover-image{
+    object-position:center 65% !important;
+  }
+}
