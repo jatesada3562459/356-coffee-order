@@ -25,6 +25,8 @@ const dailySalesList = document.getElementById("dailySalesList");
 const reportError = document.getElementById("reportError");
 const reportLoadStatus = document.getElementById("reportLoadStatus");
 const reportSummarySection = document.getElementById("reportSummarySection");
+const topSellingSort = document.getElementById("topSellingSort");
+const categorySalesGrid = document.getElementById("categorySalesGrid");
 
 const BREAD_PRODUCTS = new Set([
   "เนยนม",
@@ -41,6 +43,9 @@ const ADDON_PRODUCTS = new Set([
   "ช็อตกาแฟ",
   "โยเกิร์ต"
 ]);
+
+let latestTopItems = [];
+let menuCategoryMap = new Map();
 
 function bangkokDateKey(value = new Date()) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -89,6 +94,47 @@ function setReportStatus(message, type = "info") {
   reportLoadStatus.className = `report-load-status ${type}`;
 }
 
+async function loadMenuCategoryMap() {
+  const map = new Map();
+
+  try {
+    const response = await fetch("menu.json", { cache: "no-store" });
+    if (response.ok) {
+      const menu = await response.json();
+      (menu.products || []).forEach(product => {
+        map.set(product.name, product.category || "อื่น ๆ");
+      });
+      (menu.addons || []).forEach(addon => {
+        map.set(addon.name, "ADD-ON");
+      });
+    }
+  } catch (error) {
+    console.warn("โหลดหมวดหมู่จาก menu.json ไม่สำเร็จ", error);
+  }
+
+  const { data, error } = await sb
+    .from("menu_settings")
+    .select("item_name,category,item_type");
+
+  if (!error) {
+    (data || []).forEach(item => {
+      map.set(
+        item.item_name,
+        item.item_type === "addon"
+          ? "ADD-ON"
+          : (item.category || "อื่น ๆ")
+      );
+    });
+  }
+
+  menuCategoryMap = map;
+}
+
+function productCategory(name) {
+  if (BREAD_PRODUCTS.has(name)) return "ขนมปังปิ้ง";
+  return menuCategoryMap.get(name) || "อื่น ๆ";
+}
+
 function renderTopSelling(items) {
   topSellingList.innerHTML = "";
 
@@ -98,18 +144,80 @@ function renderTopSelling(items) {
     return;
   }
 
-  items.slice(0, 10).forEach((item, index) => {
+  const sorted = [...items].sort((a, b) => {
+    if (topSellingSort.value === "sales") {
+      return b.sales - a.sales || b.quantity - a.quantity;
+    }
+    return b.quantity - a.quantity || b.sales - a.sales;
+  });
+
+  const maxValue = Math.max(
+    1,
+    ...sorted.map(item =>
+      topSellingSort.value === "sales" ? item.sales : item.quantity
+    )
+  );
+
+  sorted.slice(0, 10).forEach((item, index) => {
+    const value =
+      topSellingSort.value === "sales" ? item.sales : item.quantity;
+    const percent = Math.max(5, Math.round((value / maxValue) * 100));
+
     const row = document.createElement("div");
-    row.className = "report-row";
+    row.className = "report-row top-menu-row";
     row.innerHTML = `
       <span class="report-rank">${index + 1}</span>
       <div class="report-row-main">
-        <strong>${item.name}</strong>
-        <small>${item.quantity.toLocaleString("th-TH")} ${item.unit}</small>
+        <div class="top-menu-title-line">
+          <strong>${item.name}</strong>
+          <span class="category-badge">${item.category}</span>
+        </div>
+        <small>
+          ${item.quantity.toLocaleString("th-TH")} ${item.unit}
+          • ${numberBaht(item.sales)}
+        </small>
+        <div class="report-progress">
+          <span style="width:${percent}%"></span>
+        </div>
       </div>
-      <b>${numberBaht(item.sales)}</b>
     `;
     topSellingList.appendChild(row);
+  });
+}
+
+function renderCategorySales(items) {
+  categorySalesGrid.innerHTML = "";
+
+  if (!items.length) {
+    categorySalesGrid.innerHTML =
+      '<div class="empty-state">ยังไม่มีข้อมูลหมวดหมู่ในช่วงที่เลือก</div>';
+    return;
+  }
+
+  const totalSales = items.reduce((sum, item) => sum + item.sales, 0);
+
+  items.forEach(item => {
+    const percent = totalSales
+      ? Math.round((item.sales / totalSales) * 100)
+      : 0;
+
+    const card = document.createElement("article");
+    card.className = "category-sales-card";
+    card.innerHTML = `
+      <div class="category-sales-head">
+        <strong>${item.category}</strong>
+        <span>${percent}%</span>
+      </div>
+      <div class="category-sales-value">${numberBaht(item.sales)}</div>
+      <small>
+        ${item.quantity.toLocaleString("th-TH")} รายการ
+        • ${item.orders.toLocaleString("th-TH")} ออเดอร์
+      </small>
+      <div class="category-progress">
+        <span style="width:${Math.max(3, percent)}%"></span>
+      </div>
+    `;
+    categorySalesGrid.appendChild(card);
   });
 }
 
@@ -159,6 +267,10 @@ async function loadReport() {
   loadReportButton.textContent = "กำลังโหลด...";
 
   const { start, end } = dateRangeIso(startKey, endKey);
+
+  if (!menuCategoryMap.size) {
+    await loadMenuCategoryMap();
+  }
 
   const [ordersResult, membersResult] = await Promise.all([
     sb
@@ -220,6 +332,7 @@ async function loadReport() {
   let memberOrders = 0;
 
   const productMap = new Map();
+  const categoryMap = new Map();
   const dailyMap = new Map();
 
   orders.forEach(order => {
@@ -260,8 +373,11 @@ async function loadReport() {
 
       if (ADDON_PRODUCTS.has(name)) return;
 
+      const category = productCategory(name);
+
       const current = productMap.get(name) || {
         name,
+        category,
         quantity: 0,
         sales: 0,
         unit: BREAD_PRODUCTS.has(name) ? "ชิ้น" : "แก้ว"
@@ -270,6 +386,18 @@ async function loadReport() {
       current.quantity += quantity;
       current.sales += unitPrice * quantity;
       productMap.set(name, current);
+
+      const categoryCurrent = categoryMap.get(category) || {
+        category,
+        quantity: 0,
+        sales: 0,
+        orderIds: new Set()
+      };
+
+      categoryCurrent.quantity += quantity;
+      categoryCurrent.sales += unitPrice * quantity;
+      categoryCurrent.orderIds.add(order.id);
+      categoryMap.set(category, categoryCurrent);
     });
   });
 
@@ -292,10 +420,21 @@ async function loadReport() {
   const topItems = [...productMap.values()]
     .sort((a, b) => b.quantity - a.quantity || b.sales - a.sales);
 
+  const categoryItems = [...categoryMap.values()]
+    .map(item => ({
+      category: item.category,
+      quantity: item.quantity,
+      sales: item.sales,
+      orders: item.orderIds.size
+    }))
+    .sort((a, b) => b.sales - a.sales || b.quantity - a.quantity);
+
   const dailyItems = [...dailyMap.values()]
     .sort((a, b) => b.date.localeCompare(a.date));
 
-  renderTopSelling(topItems);
+  latestTopItems = topItems;
+  renderTopSelling(latestTopItems);
+  renderCategorySales(categoryItems);
   renderDailySales(dailyItems);
 
   const rangeText = startKey === endKey
@@ -324,6 +463,10 @@ thisMonthReportButton.addEventListener("click", () => {
 });
 
 loadReportButton.addEventListener("click", loadReport);
+topSellingSort.addEventListener("change", () => {
+  renderTopSelling(latestTopItems);
+});
+
 window.addEventListener("manager-unlocked", () => {
   setToday();
   loadReport();

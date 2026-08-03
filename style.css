@@ -2435,3 +2435,101 @@ input[type=text]{
 #reportSummarySection{
   scroll-margin-top:90px;
 }
+
+
+/* ===== V1.6.2 เมนูขายดีและยอดขายแยกหมวดหมู่ ===== */
+.report-section-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.report-section-header .report-section-title{
+  margin-bottom:0;
+}
+.report-mini-select{
+  min-height:38px;
+  border:1px solid #d3cbc3;
+  border-radius:10px;
+  padding:7px 9px;
+  background:#fff;
+  font:inherit;
+}
+.top-menu-row{
+  align-items:flex-start;
+}
+.top-menu-title-line{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.category-badge{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#ece7e1;
+  color:#665d55;
+  font-size:11px;
+  font-weight:900;
+}
+.report-progress,
+.category-progress{
+  height:7px;
+  border-radius:999px;
+  overflow:hidden;
+  background:#e9e3dc;
+  margin-top:8px;
+}
+.report-progress span,
+.category-progress span{
+  display:block;
+  height:100%;
+  border-radius:999px;
+  background:#171513;
+}
+.category-sales-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.category-sales-card{
+  background:#faf7f2;
+  border:1px solid #e4ddd5;
+  border-radius:13px;
+  padding:11px;
+}
+.category-sales-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:7px;
+}
+.category-sales-head span{
+  font-weight:900;
+  color:#775b00;
+}
+.category-sales-value{
+  margin-top:7px;
+  font-size:21px;
+  font-weight:900;
+}
+.category-sales-card small{
+  display:block;
+  margin-top:4px;
+  color:#6d645c;
+  line-height:1.35;
+}
+.category-progress span{
+  background:#b98500;
+}
+@media(max-width:600px){
+  .report-section-header{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .category-sales-grid{
+    grid-template-columns:1fr;
+  }
+}

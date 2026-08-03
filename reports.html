@@ -98,8 +98,19 @@
     </section>
 
     <section class="report-section">
-      <div class="report-section-title">🏆 เมนูขายดี</div>
+      <div class="report-section-header">
+        <div class="report-section-title">🏆 เมนูขายดี</div>
+        <select id="topSellingSort" class="report-mini-select">
+          <option value="quantity">เรียงตามจำนวนขาย</option>
+          <option value="sales">เรียงตามยอดขาย</option>
+        </select>
+      </div>
       <div id="topSellingList" class="report-list"></div>
+    </section>
+
+    <section class="report-section">
+      <div class="report-section-title">🗂️ ยอดขายแยกหมวดหมู่</div>
+      <div id="categorySalesGrid" class="category-sales-grid"></div>
     </section>
 
     <section class="report-section">
@@ -109,7 +120,7 @@
 
     <div id="reportError" class="report-error"></div>
 
-    <footer class="version-label">356 POS V1.6.1 — Report Feedback</footer>
+    <footer class="version-label">356 POS V1.6.2 — Top Menu & Category</footer>
   </main>
 
   <script src="reports.js"></script>
