@@ -2160,3 +2160,104 @@ input[type=text]{
     object-position:center 65% !important;
   }
 }
+
+
+/* ===== V1.5.8 Compact Menu Grid — ตั้งค่าเมนูแบบ 2 คอลัมน์ ===== */
+.menu-settings-list{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:10px !important;
+  padding-bottom:100px !important;
+}
+
+.menu-setting-card{
+  padding:10px !important;
+  border-radius:14px !important;
+  min-width:0 !important;
+}
+
+.menu-setting-thumb,
+.menu-setting-thumb-placeholder{
+  width:100% !important;
+  aspect-ratio:16 / 9 !important;
+  height:auto !important;
+  max-height:130px !important;
+  object-fit:cover !important;
+  border-radius:10px !important;
+  margin-bottom:8px !important;
+}
+
+.menu-setting-info{
+  gap:7px !important;
+}
+
+.menu-setting-category,
+.custom-menu-badge{
+  padding:3px 6px !important;
+  font-size:10px !important;
+}
+
+.menu-setting-card h3{
+  margin:5px 0 0 !important;
+  font-size:15px !important;
+  line-height:1.25 !important;
+  display:-webkit-box !important;
+  -webkit-line-clamp:2 !important;
+  -webkit-box-orient:vertical !important;
+  overflow:hidden !important;
+}
+
+.menu-active-switch{
+  gap:4px !important;
+  font-size:11px !important;
+  flex-direction:column !important;
+  align-items:center !important;
+}
+
+.menu-active-switch input{
+  width:19px !important;
+  height:19px !important;
+}
+
+.menu-price-field{
+  margin-top:8px !important;
+}
+
+.menu-price-field span{
+  margin-bottom:4px !important;
+  font-size:11px !important;
+}
+
+.menu-price-field input{
+  min-height:40px !important;
+  padding:8px !important;
+  font-size:16px !important;
+  border-radius:10px !important;
+}
+
+.edit-menu-button{
+  min-height:38px !important;
+  margin-top:7px !important;
+  padding:7px 5px !important;
+  font-size:12px !important;
+  border-radius:9px !important;
+}
+
+/* iPad แนวตั้ง/แนวนอน: 2 คอลัมน์ */
+@media (min-width:601px){
+  .menu-settings-list{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+/* มือถือจอแคบ: 1 คอลัมน์ เพื่อไม่ให้ข้อความเบียด */
+@media (max-width:600px){
+  .menu-settings-list{
+    grid-template-columns:1fr !important;
+  }
+
+  .menu-setting-thumb,
+  .menu-setting-thumb-placeholder{
+    max-height:150px !important;
+  }
+}
