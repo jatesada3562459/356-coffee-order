@@ -36,7 +36,11 @@
       </div>
     </section>
 
-    <section class="report-summary-grid">
+    <div id="reportLoadStatus" class="report-load-status" aria-live="polite">
+      เลือกช่วงวันที่แล้วกด “ดูรายงาน”
+    </div>
+
+    <section id="reportSummarySection" class="report-summary-grid">
       <article class="report-summary-card hero">
         <span>💰 ยอดขายสุทธิ</span>
         <strong id="reportNetSales">฿0</strong>
@@ -105,7 +109,7 @@
 
     <div id="reportError" class="report-error"></div>
 
-    <footer class="version-label">356 POS V1.6.0 — Sales Report</footer>
+    <footer class="version-label">356 POS V1.6.1 — Report Feedback</footer>
   </main>
 
   <script src="reports.js"></script>

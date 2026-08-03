@@ -2404,3 +2404,34 @@ input[type=text]{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== V1.6.1 สถานะโหลดรายงาน ===== */
+.report-load-status{
+  margin:0 0 12px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#f3efe9;
+  color:#655b52;
+  font-weight:900;
+  text-align:center;
+  border:1px solid #ddd4cb;
+}
+.report-load-status.loading{
+  background:#fff7d8;
+  color:#765f00;
+  border-color:#ead98b;
+}
+.report-load-status.success{
+  background:#eaf8ef;
+  color:#176a42;
+  border-color:#b9dfc8;
+}
+.report-load-status.error{
+  background:#fff0ef;
+  color:#a33229;
+  border-color:#edc0bc;
+}
+#reportSummarySection{
+  scroll-margin-top:90px;
+}

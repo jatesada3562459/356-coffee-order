@@ -23,6 +23,8 @@ const reportAverageOrder = document.getElementById("reportAverageOrder");
 const topSellingList = document.getElementById("topSellingList");
 const dailySalesList = document.getElementById("dailySalesList");
 const reportError = document.getElementById("reportError");
+const reportLoadStatus = document.getElementById("reportLoadStatus");
+const reportSummarySection = document.getElementById("reportSummarySection");
 
 const BREAD_PRODUCTS = new Set([
   "เนยนม",
@@ -82,6 +84,11 @@ function setThisMonth() {
   endDateInput.value = today;
 }
 
+function setReportStatus(message, type = "info") {
+  reportLoadStatus.textContent = message;
+  reportLoadStatus.className = `report-load-status ${type}`;
+}
+
 function renderTopSelling(items) {
   topSellingList.innerHTML = "";
 
@@ -134,14 +141,17 @@ async function loadReport() {
   const endKey = endDateInput.value;
 
   reportError.textContent = "";
+  setReportStatus("กำลังโหลดรายงาน...", "loading");
 
   if (!startKey || !endKey) {
     reportError.textContent = "กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด";
+    setReportStatus("ยังไม่ได้เลือกรายงาน", "error");
     return;
   }
 
   if (startKey > endKey) {
     reportError.textContent = "วันที่เริ่มต้นต้องไม่เกินวันที่สิ้นสุด";
+    setReportStatus("ช่วงวันที่ไม่ถูกต้อง", "error");
     return;
   }
 
@@ -188,11 +198,13 @@ async function loadReport() {
 
   if (ordersResult.error) {
     reportError.textContent = "โหลดรายงานไม่สำเร็จ: " + ordersResult.error.message;
+    setReportStatus("โหลดรายงานไม่สำเร็จ", "error");
     return;
   }
 
   if (membersResult.error) {
     reportError.textContent = "โหลดสมาชิกใหม่ไม่สำเร็จ: " + membersResult.error.message;
+    setReportStatus("โหลดข้อมูลสมาชิกไม่สำเร็จ", "error");
     return;
   }
 
@@ -285,6 +297,20 @@ async function loadReport() {
 
   renderTopSelling(topItems);
   renderDailySales(dailyItems);
+
+  const rangeText = startKey === endKey
+    ? thaiDate(startKey)
+    : `${thaiDate(startKey)} – ${thaiDate(endKey)}`;
+
+  setReportStatus(
+    `✅ อัปเดตรายงานแล้ว: ${rangeText} • ${orderCount.toLocaleString("th-TH")} ออเดอร์`,
+    "success"
+  );
+
+  reportSummarySection.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
 
 todayReportButton.addEventListener("click", () => {
