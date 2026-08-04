@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ตัดสต็อกหลายรายการ ร้าน 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>📤 ตัดสต็อกหลายรายการ</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="stock-history.html">📜 ประวัติสต็อก</a>
+      <a class="header-link-button" href="stock.html">← กลับสต็อก</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="bulk-issue-help">
+      <strong>ใช้ตัดของที่ไม่ได้เกิดจากการขาย</strong>
+      <p>
+        เช่น ของเสียหาย ของใช้ในร้าน ของแจกทดลอง หรือนับพบว่าสูญหาย
+        ระบบจะตัดหลายรายการพร้อมกันและเก็บประวัติทุกครั้ง
+      </p>
+    </section>
+
+    <section class="bulk-issue-summary">
+      <article>
+        <span>รายการสต็อกทั้งหมด</span>
+        <b id="issueAllCount">0</b>
+      </article>
+      <article>
+        <span>กรอกจำนวนแล้ว</span>
+        <b id="issueSelectedCount">0</b>
+      </article>
+      <article>
+        <span>จำนวนตัดออกรวม</span>
+        <b id="issueTotalAmount">0</b>
+      </article>
+    </section>
+
+    <section class="bulk-issue-toolbar">
+      <label>
+        <span>🔍 ค้นหารายการ</span>
+        <input id="issueSearch" type="search" placeholder="เช่น แก้ว ฝา หลอด">
+      </label>
+
+      <label>
+        <span>หมวดหมู่</span>
+        <select id="issueCategory">
+          <option value="all">ทุกหมวดหมู่</option>
+        </select>
+      </label>
+
+      <button id="clearIssueButton" type="button">ล้างจำนวนที่กรอก</button>
+    </section>
+
+    <section id="issueList" class="bulk-issue-list">
+      <div class="empty-state">กำลังโหลดรายการสต็อก...</div>
+    </section>
+
+    <section class="bulk-issue-save">
+      <label>
+        <span>สาเหตุที่ตัดออก</span>
+        <select id="issueReason">
+          <option value="">เลือกสาเหตุ</option>
+          <option value="ของเสียหาย">ของเสียหาย</option>
+          <option value="ใช้ภายในร้าน">ใช้ภายในร้าน</option>
+          <option value="แจกหรือทดลองสินค้า">แจกหรือทดลองสินค้า</option>
+          <option value="สูญหาย">สูญหาย</option>
+          <option value="ปรับออกอื่น ๆ">ปรับออกอื่น ๆ</option>
+        </select>
+      </label>
+
+      <label>
+        <span>หมายเหตุเพิ่มเติม</span>
+        <input id="issueNote" type="text" maxlength="200"
+          placeholder="เช่น แก้วแตกตอนจัดร้าน / ใช้ถ่ายรูปเมนู">
+      </label>
+
+      <div id="issueError" class="stock-error"></div>
+
+      <button id="saveIssueButton" class="primary" type="button">
+        ยืนยันตัดออกหลายรายการ
+      </button>
+    </section>
+
+    <footer class="version-label">356 POS V1.8.3 — Bulk Stock Issue</footer>
+  </main>
+
+  <script src="stock-issue.js"></script>
+</body>
+</html>
