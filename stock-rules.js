@@ -404,7 +404,7 @@ function packagingForMenu(menuName) {
 
   // ชาและนมฝาเรียบ
   if (TEA_MILK_FLAT.includes(n)) {
-    return [STOCK_NAMES.cup16, STOCK_NAMES.flat98, STOCK_NAMES.straw];
+    return [STOCK_NAMES.cup16, STOCK_NAMES.dome98, STOCK_NAMES.straw];
   }
 
   // ชาและนมฝาโดม
@@ -412,7 +412,7 @@ function packagingForMenu(menuName) {
     return [STOCK_NAMES.cup16, STOCK_NAMES.dome98, STOCK_NAMES.straw];
   }
 
-  // โซดาใช้ฝาเรียบ
+  // โซดาใช้ฝาโดม
   if (containsAny(n, ["โซดา", "บลูฮาวาย", "สตรอว์เบอร์รี", "ลิ้นจี่", "กีวี่", "เสาวรส"])) {
     return [STOCK_NAMES.cup16, STOCK_NAMES.flat98, STOCK_NAMES.straw];
   }
