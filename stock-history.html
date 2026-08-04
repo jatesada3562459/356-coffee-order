@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ประวัติสต็อก 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>📜 ประวัติสต็อก</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="stock.html">← กลับสต็อก</a>
+      <a class="header-link-button" href="kitchen.html">หลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="stock-toolbar">
+      <label>
+        <span>🔍 ค้นหาประวัติ</span>
+        <input id="stockHistorySearch" type="search" placeholder="ชื่อสินค้า เหตุผล หมายเหตุ">
+      </label>
+      <select id="stockHistoryType">
+        <option value="all">ทุกประเภท</option>
+        <option value="in">รับเข้า</option>
+        <option value="out">เบิกออก</option>
+        <option value="set">ตั้งยอดใหม่</option>
+      </select>
+    </section>
+
+    <section id="stockHistoryList" class="stock-history-list"></section>
+
+    <footer class="version-label">356 POS V1.7.0 — Stock History</footer>
+  </main>
+
+  <script src="stock-history.js"></script>
+</body>
+</html>
