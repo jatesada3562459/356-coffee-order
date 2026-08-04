@@ -130,6 +130,7 @@ async function loadStock() {
   const { data, error } = await sb
     .from("stock_items")
     .select("*")
+    .eq("is_active", true)
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
 
