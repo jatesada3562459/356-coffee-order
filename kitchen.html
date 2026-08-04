@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>356 หลังร้าน</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="printer-web.css?v=141">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
 </head>
@@ -20,6 +21,7 @@
       <a class="header-link-button" href="manager.html">🔐 ผู้จัดการ</a>
       <a class="header-link-button" href="cash.html">💰 เงินในเก๊ะ</a>
       <a class="header-link-button" href="members.html">👤 สมาชิก</a>
+      <button id="testPrintButton" type="button">🖨️ ทดสอบพิมพ์</button>
       <button id="soundToggle" type="button">🔇 เปิดเสียง</button>
       <button id="refreshButton" type="button">รีเฟรช</button>
     </div>
@@ -92,7 +94,7 @@
     </section>
 
     <div id="orders"></div>
-    <footer class="version-label">356 POS V1.7.6 — Stock Center</footer>
+    <footer class="version-label">356 POS V1.8.0 — Web Print</footer>
 
     <div id="checkoutModal" class="checkout-modal" aria-hidden="true">
       <div class="checkout-backdrop" data-close-checkout></div>
@@ -196,5 +198,6 @@
 
   <audio id="dingAudio" src="notification.wav" preload="auto"></audio>
   <script src="kitchen.js"></script>
+  <script src="printer-web.js?v=141"></script>
 </body>
 </html>
