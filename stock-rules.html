@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>สูตรตัดสต็อก 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>🔗 สูตรตัดสต็อกอัตโนมัติ</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="stock.html">📦 กลับสต็อก</a>
+      <a class="header-link-button" href="kitchen.html">หลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="stock-rule-help">
+      <strong>ตัวอย่าง</strong>
+      <p>ชาไทย 1 แก้ว → แก้ว PET 16 oz จำนวน 1 + ฝาโดม 1 + หลอด 1</p>
+      <p>เมื่อบิลชำระเงินแล้ว ระบบจะตัดสต็อกตามสูตรนี้อัตโนมัติ</p>
+    </section>
+
+    <section class="stock-rule-editor">
+      <label class="stock-field">
+        <span>เลือกเมนู</span>
+        <select id="ruleMenuName"></select>
+      </label>
+
+      <label class="stock-field">
+        <span>เลือกรายการสต็อก</span>
+        <select id="ruleStockItem"></select>
+      </label>
+
+      <label class="stock-field">
+        <span>ใช้ต่อ 1 เมนู</span>
+        <input id="ruleQuantity" type="number" min="0.01" step="0.01" value="1" inputmode="decimal">
+      </label>
+
+      <div id="stockRuleError" class="stock-error"></div>
+
+      <button id="addStockRuleButton" class="primary" type="button">
+        ＋ เพิ่มสูตรตัดสต็อก
+      </button>
+    </section>
+
+    <section class="stock-toolbar">
+      <label>
+        <span>🔍 ค้นหาเมนูหรือวัตถุดิบ</span>
+        <input id="stockRuleSearch" type="search" placeholder="เช่น ชาไทย แก้ว ฝา">
+      </label>
+    </section>
+
+    <section id="stockRuleList" class="stock-rule-list"></section>
+
+    <footer class="version-label">356 POS V1.7.2 — Auto Stock Rules</footer>
+  </main>
+
+  <script src="stock-rules.js"></script>
+</body>
+</html>
