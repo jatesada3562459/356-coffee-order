@@ -26,6 +26,19 @@
   </header>
 
   <main>
+    <section id="lowStockAlertPanel" class="low-stock-alert-panel" hidden>
+      <div class="low-stock-alert-head">
+        <div>
+          <strong>⚠️ สต็อกใกล้หมด</strong>
+          <span id="lowStockAlertSummary">กำลังตรวจสอบ...</span>
+        </div>
+        <div class="low-stock-alert-actions">
+          <button id="refreshLowStockButton" type="button">รีเฟรช</button>
+          <a href="stock.html">เปิดหน้าสต็อก</a>
+        </div>
+      </div>
+      <div id="lowStockAlertList" class="low-stock-alert-list"></div>
+    </section>
     <div id="soundHint" class="sound-hint">
       แตะ “เปิดเสียง” 1 ครั้ง แล้วต้องได้ยินเสียงทดสอบ
     </div>
@@ -92,7 +105,7 @@
     </section>
 
     <div id="orders"></div>
-    <footer class="version-label">356 POS V1.7.0 — Basic Stock</footer>
+    <footer class="version-label">356 POS V1.7.4 — Low Stock Alerts</footer>
 
     <div id="checkoutModal" class="checkout-modal" aria-hidden="true">
       <div class="checkout-backdrop" data-close-checkout></div>
@@ -196,5 +209,6 @@
 
   <audio id="dingAudio" src="notification.wav" preload="auto"></audio>
   <script src="kitchen.js"></script>
+  <script src="stock-alert.js?v=135"></script>
 </body>
 </html>

@@ -3106,3 +3106,121 @@ input[type=text]{
   background:#ffe3e1;
   color:#a33229;
 }
+
+
+/* ===== V1.7.4 แจ้งเตือนสต็อกใกล้หมดหลังร้าน ===== */
+.low-stock-alert-panel{
+  background:#fff8e7;
+  border:1px solid #e7bd58;
+  border-radius:16px;
+  padding:13px;
+  margin-bottom:14px;
+}
+.low-stock-alert-panel.error{
+  background:#fff0ef;
+  border-color:#e39a94;
+}
+.low-stock-alert-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.low-stock-alert-head strong,
+.low-stock-alert-head span{
+  display:block;
+}
+.low-stock-alert-head strong{
+  font-size:17px;
+}
+.low-stock-alert-head span{
+  margin-top:4px;
+  color:#6d5a1b;
+  font-size:13px;
+}
+.low-stock-alert-actions{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.low-stock-alert-actions button,
+.low-stock-alert-actions a{
+  min-height:36px;
+  border:0;
+  border-radius:9px;
+  padding:8px 10px;
+  text-decoration:none;
+  font-weight:900;
+  font:inherit;
+}
+.low-stock-alert-actions button{
+  background:#fff;
+  color:#171513;
+  border:1px solid #dccca9;
+}
+.low-stock-alert-actions a{
+  background:#171513;
+  color:#fff;
+}
+.low-stock-alert-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:10px;
+}
+.low-stock-alert-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  background:#fff;
+  border:1px solid #ead8ad;
+  border-radius:11px;
+  padding:9px;
+}
+.low-stock-alert-item.out{
+  background:#fff0ef;
+  border-color:#e8aaa4;
+}
+.low-stock-alert-item strong,
+.low-stock-alert-item small,
+.low-stock-alert-qty b{
+  display:block;
+}
+.low-stock-alert-item small{
+  margin-top:3px;
+  color:#6d645c;
+}
+.low-stock-alert-qty{
+  text-align:right;
+  white-space:nowrap;
+}
+.low-stock-alert-qty b{
+  color:#8b6200;
+}
+.low-stock-alert-item.out .low-stock-alert-qty b{
+  color:#b42318;
+}
+.low-stock-alert-error{
+  margin-top:10px;
+  color:#b42318;
+  font-weight:900;
+}
+@media(max-width:600px){
+  .low-stock-alert-head{
+    flex-direction:column;
+  }
+  .low-stock-alert-actions{
+    width:100%;
+    justify-content:stretch;
+  }
+  .low-stock-alert-actions button,
+  .low-stock-alert-actions a{
+    flex:1;
+    text-align:center;
+  }
+  .low-stock-alert-list{
+    grid-template-columns:1fr;
+  }
+}
