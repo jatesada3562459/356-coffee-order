@@ -10,6 +10,8 @@ const stockRuleError = document.getElementById("stockRuleError");
 const addStockRuleButton = document.getElementById("addStockRuleButton");
 const stockRuleSearch = document.getElementById("stockRuleSearch");
 const stockRuleList = document.getElementById("stockRuleList");
+const createStandardRulesButton = document.getElementById("createStandardRulesButton");
+const standardRulesResult = document.getElementById("standardRulesResult");
 
 let menuNames = [];
 let stockItems = [];
@@ -280,6 +282,189 @@ async function deleteRule(rule) {
   await loadRules();
 }
 
+function normalizedName(value) {
+  return String(value || "")
+    .replace(/\s+/g, "")
+    .replace(/โอริโอ/g, "โอรีโอ")
+    .replace(/โอลิโอ/g, "โอรีโอ")
+    .replace(/มักคิอาโต้/g, "มัคคิอาโต้")
+    .toLowerCase();
+}
+
+const STOCK_NAMES = {
+  cup16: "แก้ว PET 16 oz",
+  cup22: "แก้ว PET 22 oz",
+  jar22: "แก้วโอ่ง 22 oz",
+  hot8: "แก้วร้อน 8 oz",
+  flat98: "ฝาเรียบ 98",
+  dome98: "ฝาโดม 98",
+  flat22: "ฝาเรียบ 22 oz",
+  jarDome22: "ฝาโดมแก้วโอ่ง 22 oz",
+  whip98: "ฝาหลุม / ฝาวิปครีม 98",
+  hotLid8: "ฝาร้อน 8 oz",
+  straw: "หลอดธรรมดา",
+  bubbleStraw: "หลอดไข่มุก",
+  hotFlatStraw: "หลอดแบนร้อน",
+  spoonStraw: "หลอดช้อน"
+};
+
+const COFFEE_DOME = [
+  "คาปูชิโน่",
+  "มอคค่า",
+  "คาราเมลมัคคิอาโต้"
+].map(normalizedName);
+
+const TEA_MILK_FLAT = [
+  "ดาร์กช็อกโกแลต",
+  "ชามะนาว",
+  "น้ำผึ้งมะนาว",
+  "ชาพีช",
+  "โกโก้มิ้นท์"
+].map(normalizedName);
+
+const TEA_MILK_DOME = [
+  "นมสด",
+  "ชาไทย",
+  "ชาเขียว",
+  "นมชมพู",
+  "นมสดมิ้นท์",
+  "นมสดบราวน์ชูก้า",
+  "โกโก้",
+  "นมสดคาราเมล",
+  "นมสดน้ำผึ้ง"
+].map(normalizedName);
+
+const BLENDED_SPOON = [
+  "ปีโป้นมสดปั่น",
+  "นมสดโอรีโอปั่น",
+  "โกโก้โอรีโอปั่น",
+  "กล้วยปั่น",
+  "นมสดโอรีโอกล้วยปั่น",
+  "โกโก้โอรีโอกล้วยปั่น",
+  "เฉาก๊วย",
+  "เฉาก๊วยนมสด"
+].map(normalizedName);
+
+function containsAny(name, words) {
+  return words.some(word => name.includes(normalizedName(word)));
+}
+
+function packagingForMenu(menuName) {
+  const n = normalizedName(menuName);
+
+  // เมนูร้อน
+  if (n.includes("ร้อน")) {
+    return [STOCK_NAMES.hot8, STOCK_NAMES.hotLid8, STOCK_NAMES.hotFlatStraw];
+  }
+
+  // ปังเย็น
+  if (n.includes("ปังเย็น")) {
+    return [STOCK_NAMES.jar22, STOCK_NAMES.jarDome22, STOCK_NAMES.spoonStraw];
+  }
+
+  // Signature 22 oz
+  if (n.includes("ซิกเนเจอร์")) {
+    const hasCream = n.includes("ครีมชีส") || n.includes("ดับเบิ้ล");
+    return [
+      STOCK_NAMES.cup22,
+      hasCream ? STOCK_NAMES.dome98 : STOCK_NAMES.flat22,
+      STOCK_NAMES.straw
+    ];
+  }
+
+  // เมนูปั่น/โอรีโอ/ปีโป้/กล้วย/เฉาก๊วย
+  if (
+    BLENDED_SPOON.includes(n) ||
+    n.includes("ปั่น") ||
+    n.includes("โอรีโอ") ||
+    n.includes("ปีโป้") ||
+    n.includes("กล้วย")
+  ) {
+    return [STOCK_NAMES.cup16, STOCK_NAMES.whip98, STOCK_NAMES.spoonStraw];
+  }
+
+  // สมูทตี้
+  if (n.includes("สมูทตี้")) {
+    return [STOCK_NAMES.cup16, STOCK_NAMES.whip98, STOCK_NAMES.spoonStraw];
+  }
+
+  // กาแฟมีฟองนม
+  if (COFFEE_DOME.includes(n)) {
+    return [STOCK_NAMES.cup16, STOCK_NAMES.dome98, STOCK_NAMES.straw];
+  }
+
+  // ชาและนมฝาเรียบ
+  if (TEA_MILK_FLAT.includes(n)) {
+    return [STOCK_NAMES.cup16, STOCK_NAMES.flat98, STOCK_NAMES.straw];
+  }
+
+  // ชาและนมฝาโดม
+  if (TEA_MILK_DOME.includes(n)) {
+    return [STOCK_NAMES.cup16, STOCK_NAMES.dome98, STOCK_NAMES.straw];
+  }
+
+  // โซดาใช้ฝาเรียบ
+  if (containsAny(n, ["โซดา", "บลูฮาวาย", "สตรอว์เบอร์รี", "ลิ้นจี่", "กีวี่", "เสาวรส"])) {
+    return [STOCK_NAMES.cup16, STOCK_NAMES.flat98, STOCK_NAMES.straw];
+  }
+
+  // กาแฟทั่วไปไม่มีฟองนม และเครื่องดื่มเย็นทั่วไป
+  return [STOCK_NAMES.cup16, STOCK_NAMES.flat98, STOCK_NAMES.straw];
+}
+
+async function createStandardRules() {
+  if (!menuNames.length) {
+    standardRulesResult.textContent = "ยังโหลดรายชื่อเมนูไม่สำเร็จ";
+    return;
+  }
+
+  const pin = await requestPin();
+  if (!pin) return;
+
+  createStandardRulesButton.disabled = true;
+  createStandardRulesButton.textContent = "กำลังสร้างสูตร...";
+  standardRulesResult.className = "standard-rules-result loading";
+  standardRulesResult.textContent = "กำลังสร้างรายการสต็อกและสูตรมาตรฐาน...";
+
+  const rulePayload = [];
+
+  menuNames.forEach(menuName => {
+    packagingForMenu(menuName).forEach(stockName => {
+      rulePayload.push({
+        menu_name: menuName,
+        stock_name: stockName,
+        quantity_per_unit: 1
+      });
+    });
+  });
+
+  const { data, error } = await sb.rpc("manager_create_356_standard_stock_rules", {
+    p_pin: pin,
+    p_rules: rulePayload
+  });
+
+  createStandardRulesButton.disabled = false;
+  createStandardRulesButton.textContent = "⚡ สร้างสูตรมาตรฐานร้าน 356";
+
+  if (error) {
+    standardRulesResult.className = "standard-rules-result error";
+    standardRulesResult.textContent = "สร้างสูตรไม่สำเร็จ: " + error.message;
+    return;
+  }
+
+  const result = data || {};
+  standardRulesResult.className = "standard-rules-result success";
+  standardRulesResult.innerHTML = `
+    <strong>✅ สร้างสูตรมาตรฐานเรียบร้อย</strong>
+    <span>${Number(result.menu_count || menuNames.length).toLocaleString("th-TH")} เมนู</span>
+    <span>${Number(result.rule_count || rulePayload.length).toLocaleString("th-TH")} สูตร</span>
+    <span>${Number(result.stock_count || 14).toLocaleString("th-TH")} รายการสต็อก</span>
+    <small>ท็อปปิ้งไม่ถูกนำมานับสต็อก</small>
+  `;
+
+  await Promise.all([loadStockItems(), loadRules()]);
+}
+
 async function initialize() {
   try {
     await Promise.all([loadMenuNames(), loadStockItems()]);
@@ -289,6 +474,7 @@ async function initialize() {
   }
 }
 
+createStandardRulesButton.addEventListener("click", createStandardRules);
 addStockRuleButton.addEventListener("click", addRule);
 stockRuleSearch.addEventListener("input", renderRules);
 window.addEventListener("manager-unlocked", initialize);

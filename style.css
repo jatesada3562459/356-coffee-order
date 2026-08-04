@@ -3058,3 +3058,51 @@ input[type=text]{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== V1.7.3 สูตรมาตรฐานร้าน 356 ===== */
+.stock-standard-panel{
+  background:linear-gradient(135deg,#171513,#4b4036);
+  color:#fff;
+  border-radius:17px;
+  padding:15px;
+  margin-bottom:12px;
+}
+.stock-standard-panel h2{
+  margin:0 0 6px;
+}
+.stock-standard-panel p{
+  margin:0 0 12px;
+  opacity:.86;
+  line-height:1.45;
+}
+.stock-standard-panel .primary{
+  width:100%;
+  min-height:48px;
+  background:#fff;
+  color:#171513;
+}
+.standard-rules-result{
+  display:none;
+  margin-top:11px;
+  padding:11px;
+  border-radius:12px;
+  line-height:1.45;
+}
+.standard-rules-result.loading,
+.standard-rules-result.success,
+.standard-rules-result.error{
+  display:grid;
+  gap:3px;
+}
+.standard-rules-result.loading{
+  background:rgba(255,255,255,.13);
+}
+.standard-rules-result.success{
+  background:#e8f7ee;
+  color:#166c41;
+}
+.standard-rules-result.error{
+  background:#ffe3e1;
+  color:#a33229;
+}
