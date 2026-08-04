@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>รายการสั่งซื้อสต็อกร้าน 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>🛒 รายการสั่งซื้อสต็อก</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="stock-report.html">📊 รายงานสต็อก</a>
+      <a class="header-link-button" href="stock.html">← กลับสต็อก</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="reorder-help">
+      <strong>ใช้สำหรับเตรียมรายการซื้อของเข้าร้าน</strong>
+      <p>
+        ระบบดึงของหมดและใกล้หมดมาให้ เลือกรายการ กำหนดจำนวนเป้าหมาย
+        แล้วคัดลอกหรือแชร์รายการได้ทันที
+      </p>
+    </section>
+
+    <section class="reorder-summary">
+      <button type="button" data-reorder-status="problem" class="active">
+        ต้องซื้อ <b id="reorderProblemCount">0</b>
+      </button>
+      <button type="button" data-reorder-status="out">
+        หมดแล้ว <b id="reorderOutCount">0</b>
+      </button>
+      <button type="button" data-reorder-status="low">
+        ใกล้หมด <b id="reorderLowCount">0</b>
+      </button>
+      <button type="button" data-reorder-status="all">
+        ทั้งหมด <b id="reorderAllCount">0</b>
+      </button>
+    </section>
+
+    <section class="reorder-toolbar">
+      <label>
+        <span>🔍 ค้นหา</span>
+        <input id="reorderSearch" type="search" placeholder="เช่น แก้ว ฝา หลอด">
+      </label>
+
+      <label>
+        <span>หมวดหมู่</span>
+        <select id="reorderCategory">
+          <option value="all">ทุกหมวดหมู่</option>
+        </select>
+      </label>
+
+      <div class="reorder-toolbar-actions">
+        <button id="selectProblemItemsButton" type="button">เลือกของที่ต้องซื้อ</button>
+        <button id="clearSelectedItemsButton" type="button">ล้างการเลือก</button>
+      </div>
+    </section>
+
+    <section class="reorder-selected-summary">
+      <div>
+        <span>เลือกแล้ว</span>
+        <b id="reorderSelectedCount">0 รายการ</b>
+      </div>
+      <div>
+        <span>จำนวนที่ควรซื้อรวม</span>
+        <b id="reorderSuggestedTotal">0 หน่วย</b>
+      </div>
+    </section>
+
+    <section id="reorderList" class="reorder-list">
+      <div class="empty-state">กำลังโหลดข้อมูลสต็อก...</div>
+    </section>
+
+    <section class="reorder-note-panel">
+      <label>
+        <span>หมายเหตุท้ายรายการ</span>
+        <textarea id="reorderNote" rows="3"
+          placeholder="เช่น ซื้อร้านเดิม / ต้องใช้ก่อนวันศุกร์"></textarea>
+      </label>
+
+      <div id="reorderMessage" class="report-load-status" aria-live="polite"></div>
+
+      <div class="reorder-share-actions">
+        <button id="copyReorderListButton" type="button">📋 คัดลอกรายการ</button>
+        <button id="shareReorderListButton" class="primary" type="button">📤 แชร์รายการ</button>
+      </div>
+    </section>
+
+    <footer class="version-label">356 POS V1.8.1 — Stock Reorder List</footer>
+  </main>
+
+  <script src="stock-order-list.js"></script>
+</body>
+</html>
