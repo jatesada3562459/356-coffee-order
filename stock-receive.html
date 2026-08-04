@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>รับสต็อกหลายรายการ ร้าน 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>📥 รับสต็อกหลายรายการ</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="stock-history.html">📜 ประวัติสต็อก</a>
+      <a class="header-link-button" href="stock.html">← กลับสต็อก</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="bulk-receive-help">
+      <strong>ใช้ตอนซื้อของเข้าร้านหลายอย่างพร้อมกัน</strong>
+      <p>
+        กรอกเฉพาะจำนวนที่รับเข้า ระบบจะเพิ่มยอดทุกเมนูพร้อมกัน
+        และบันทึกประวัติแยกแต่ละรายการ
+      </p>
+    </section>
+
+    <section class="bulk-receive-summary">
+      <article>
+        <span>รายการสต็อกทั้งหมด</span>
+        <b id="receiveAllCount">0</b>
+      </article>
+      <article>
+        <span>กรอกจำนวนแล้ว</span>
+        <b id="receiveSelectedCount">0</b>
+      </article>
+      <article>
+        <span>จำนวนรับเข้ารวม</span>
+        <b id="receiveTotalAmount">0</b>
+      </article>
+    </section>
+
+    <section class="bulk-receive-toolbar">
+      <label>
+        <span>🔍 ค้นหารายการ</span>
+        <input id="receiveSearch" type="search" placeholder="เช่น แก้ว ฝา หลอด">
+      </label>
+
+      <label>
+        <span>หมวดหมู่</span>
+        <select id="receiveCategory">
+          <option value="all">ทุกหมวดหมู่</option>
+        </select>
+      </label>
+
+      <button id="clearReceiveButton" type="button">ล้างจำนวนที่กรอก</button>
+    </section>
+
+    <section id="receiveList" class="bulk-receive-list">
+      <div class="empty-state">กำลังโหลดรายการสต็อก...</div>
+    </section>
+
+    <section class="bulk-receive-save">
+      <label>
+        <span>หมายเหตุรับเข้า</span>
+        <input id="receiveNote" type="text" maxlength="200"
+          placeholder="เช่น ซื้อจากร้านเดิม / ใบเสร็จวันที่ 4 ส.ค.">
+      </label>
+
+      <div id="receiveError" class="stock-error"></div>
+
+      <button id="saveReceiveButton" class="primary" type="button">
+        บันทึกรับเข้าหลายรายการ
+      </button>
+    </section>
+
+    <footer class="version-label">356 POS V1.8.2 — Bulk Stock Receive</footer>
+  </main>
+
+  <script src="stock-receive.js"></script>
+</body>
+</html>
