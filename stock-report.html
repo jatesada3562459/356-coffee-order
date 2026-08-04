@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>รายงานสต็อกร้าน 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>📊 รายงานสต็อก</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="stock-history.html">📜 ประวัติสต็อก</a>
+      <a class="header-link-button" href="stock.html">← กลับสต็อก</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="stock-report-filter">
+      <label>
+        <span>วันที่เริ่มต้น</span>
+        <input id="stockReportStartDate" type="date">
+      </label>
+
+      <label>
+        <span>วันที่สิ้นสุด</span>
+        <input id="stockReportEndDate" type="date">
+      </label>
+
+      <label>
+        <span>หมวดหมู่</span>
+        <select id="stockReportCategory">
+          <option value="all">ทุกหมวดหมู่</option>
+        </select>
+      </label>
+
+      <div class="stock-report-filter-actions">
+        <button id="stockReportTodayButton" type="button">วันนี้</button>
+        <button id="stockReportMonthButton" type="button">เดือนนี้</button>
+        <button id="loadStockReportButton" class="primary" type="button">ดูรายงาน</button>
+      </div>
+    </section>
+
+    <div id="stockReportStatus" class="report-load-status" aria-live="polite">
+      เลือกช่วงวันที่แล้วกด “ดูรายงาน”
+    </div>
+
+    <section class="stock-report-summary">
+      <article>
+        <span>รับเข้า</span>
+        <strong id="stockReportInTotal">0</strong>
+        <small>หน่วยรวม</small>
+      </article>
+
+      <article>
+        <span>เบิกใช้ / ขาย</span>
+        <strong id="stockReportOutTotal">0</strong>
+        <small>หน่วยรวม</small>
+      </article>
+
+      <article>
+        <span>ปรับยอด</span>
+        <strong id="stockReportSetCount">0</strong>
+        <small>ครั้ง</small>
+      </article>
+
+      <article>
+        <span>รายการเคลื่อนไหว</span>
+        <strong id="stockReportMovementCount">0</strong>
+        <small>รายการ</small>
+      </article>
+    </section>
+
+    <section class="stock-report-actions">
+      <button id="exportStockReportButton" type="button">📄 ดาวน์โหลด CSV</button>
+      <button id="printStockReportButton" type="button">🖨️ พิมพ์ / บันทึก PDF</button>
+    </section>
+
+    <section class="stock-report-section">
+      <div class="stock-report-section-head">
+        <div>
+          <h2>⚠️ สต็อกที่ต้องตรวจ</h2>
+          <p>แสดงของหมดและใกล้หมดจากยอดคงเหลือปัจจุบัน</p>
+        </div>
+        <span id="stockAttentionCount">0 รายการ</span>
+      </div>
+      <div id="stockAttentionList" class="stock-attention-list"></div>
+    </section>
+
+    <section class="stock-report-section">
+      <div class="stock-report-section-head">
+        <div>
+          <h2>📦 สรุปการเคลื่อนไหวรายสินค้า</h2>
+          <p>รับเข้า ใช้ออก ปรับยอด และคงเหลือปัจจุบัน</p>
+        </div>
+      </div>
+
+      <div id="stockUsageSummaryList" class="stock-usage-summary-list"></div>
+    </section>
+
+    <section class="stock-report-section">
+      <div class="stock-report-section-head">
+        <div>
+          <h2>🕒 รายการเคลื่อนไหวล่าสุด</h2>
+          <p>เรียงจากใหม่ไปเก่าในช่วงวันที่เลือก</p>
+        </div>
+      </div>
+
+      <div id="stockReportMovementList" class="stock-report-movement-list"></div>
+    </section>
+
+    <div id="stockReportError" class="stock-error"></div>
+
+    <footer class="version-label">356 POS V1.7.9 — Stock Usage Report</footer>
+  </main>
+
+  <script src="stock-report.js"></script>
+</body>
+</html>

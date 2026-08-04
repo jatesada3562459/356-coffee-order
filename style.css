@@ -3659,3 +3659,319 @@ input[type=text]{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== V1.7.9 รายงานการใช้สต็อก ===== */
+.stock-report-filter{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  background:#fff;
+  border:1px solid #ded7cf;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.stock-report-filter label span{
+  display:block;
+  margin-bottom:5px;
+  font-weight:900;
+}
+.stock-report-filter input,
+.stock-report-filter select{
+  width:100%;
+  min-height:44px;
+  box-sizing:border-box;
+  border:1px solid #d6cec6;
+  border-radius:11px;
+  padding:9px 10px;
+  background:#fff;
+  font:inherit;
+}
+.stock-report-filter-actions{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+.stock-report-filter-actions button{
+  min-height:44px;
+  border:1px solid #d6cec6;
+  border-radius:11px;
+  background:#fff;
+  font-weight:900;
+}
+.stock-report-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  margin-bottom:12px;
+}
+.stock-report-summary article{
+  background:#fff;
+  border:1px solid #ded7cf;
+  border-radius:14px;
+  padding:12px;
+}
+.stock-report-summary span,
+.stock-report-summary strong,
+.stock-report-summary small{
+  display:block;
+}
+.stock-report-summary span{
+  color:#6d645c;
+  font-size:13px;
+}
+.stock-report-summary strong{
+  margin-top:5px;
+  font-size:25px;
+}
+.stock-report-summary small{
+  margin-top:3px;
+  color:#81776f;
+}
+.stock-report-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-bottom:12px;
+}
+.stock-report-actions button{
+  min-height:45px;
+  border:0;
+  border-radius:11px;
+  background:#171513;
+  color:#fff;
+  font-weight:900;
+}
+.stock-report-actions button:last-child{
+  background:#e9ecef;
+  color:#171513;
+}
+.stock-report-section{
+  background:#fff;
+  border:1px solid #ded7cf;
+  border-radius:17px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.stock-report-section-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.stock-report-section-head h2{
+  margin:0 0 4px;
+}
+.stock-report-section-head p{
+  margin:0;
+  color:#6d645c;
+  line-height:1.4;
+}
+.stock-report-section-head > span{
+  flex:0 0 auto;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#f0ece7;
+  font-weight:900;
+}
+.stock-attention-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.stock-attention-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:9px;
+  border:1px solid #e2c779;
+  border-radius:11px;
+  padding:10px;
+  background:#fffaf0;
+}
+.stock-attention-card.out{
+  border-color:#e7aaa4;
+  background:#fff0ef;
+}
+.stock-attention-card strong,
+.stock-attention-card small,
+.stock-attention-value b{
+  display:block;
+}
+.stock-attention-card small{
+  margin-top:3px;
+  color:#6d645c;
+}
+.stock-attention-value{
+  text-align:right;
+  white-space:nowrap;
+}
+.stock-attention-card.low .stock-attention-value b{
+  color:#8a6200;
+}
+.stock-attention-card.out .stock-attention-value b{
+  color:#b42318;
+}
+.stock-usage-summary-list{
+  display:grid;
+  gap:8px;
+}
+.stock-usage-row{
+  display:grid;
+  grid-template-columns:minmax(170px,.9fr) minmax(0,2fr);
+  align-items:center;
+  gap:12px;
+  background:#faf8f5;
+  border:1px solid #e5dfd9;
+  border-radius:12px;
+  padding:11px;
+}
+.stock-usage-main span,
+.stock-usage-main strong,
+.stock-usage-main small{
+  display:block;
+}
+.stock-usage-main span{
+  color:#776d64;
+  font-size:12px;
+}
+.stock-usage-main strong{
+  margin-top:3px;
+}
+.stock-usage-main small{
+  margin-top:4px;
+  color:#81776f;
+}
+.stock-usage-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+}
+.stock-usage-metrics > div{
+  padding:8px;
+  border-radius:9px;
+  background:#fff;
+  text-align:center;
+}
+.stock-usage-metrics span,
+.stock-usage-metrics b{
+  display:block;
+}
+.stock-usage-metrics span{
+  font-size:11px;
+  color:#766c63;
+}
+.stock-usage-metrics b{
+  margin-top:3px;
+}
+.stock-usage-metrics .in b{
+  color:#177245;
+}
+.stock-usage-metrics .out b{
+  color:#b42318;
+}
+.stock-report-movement-list{
+  display:grid;
+  gap:8px;
+}
+.stock-report-movement{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border:1px solid #e1dad3;
+  border-radius:12px;
+  padding:10px;
+  background:#fff;
+}
+.stock-report-movement.in{
+  background:#eef8f2;
+}
+.stock-report-movement.out{
+  background:#fff2f1;
+}
+.stock-report-movement.set{
+  background:#fff8df;
+}
+.stock-report-movement-title{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.stock-report-movement-title span{
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(0,0,0,.07);
+  font-size:11px;
+  font-weight:900;
+}
+.stock-report-movement-main small{
+  display:block;
+  margin-top:4px;
+  color:#6d645c;
+}
+.stock-report-movement-value{
+  text-align:right;
+  white-space:nowrap;
+}
+.stock-report-movement-value b,
+.stock-report-movement-value small{
+  display:block;
+}
+@media(max-width:760px){
+  .stock-report-filter{
+    grid-template-columns:1fr;
+  }
+  .stock-report-filter-actions{
+    grid-column:auto;
+  }
+  .stock-report-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .stock-attention-list{
+    grid-template-columns:1fr;
+  }
+  .stock-usage-row{
+    grid-template-columns:1fr;
+  }
+  .stock-usage-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:520px){
+  .stock-report-filter-actions{
+    grid-template-columns:1fr;
+  }
+  .stock-report-actions{
+    grid-template-columns:1fr;
+  }
+  .stock-report-movement{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .stock-report-movement-value{
+    text-align:left;
+  }
+}
+@media print{
+  body > header,
+  .stock-report-filter,
+  .stock-report-actions,
+  .report-load-status,
+  .stock-error,
+  .version-label{
+    display:none !important;
+  }
+  main{
+    max-width:none !important;
+    padding:0 !important;
+  }
+  .stock-report-section,
+  .stock-report-summary{
+    break-inside:avoid;
+  }
+}
