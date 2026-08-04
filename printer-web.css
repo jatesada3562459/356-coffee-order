@@ -1,0 +1,45 @@
+
+/* ===== Step 14.1 Web Print ===== */
+.web-print-button{
+  width:100%;
+  min-height:42px;
+  margin-top:9px;
+  border:0;
+  border-radius:10px;
+  padding:9px 10px;
+  background:#2458a6;
+  color:#fff;
+  font-weight:900;
+  font-size:14px;
+}
+
+.web-print-button:active{
+  transform:scale(.99);
+}
+
+.web-print-toast{
+  position:fixed;
+  left:50%;
+  bottom:22px;
+  z-index:999999;
+  transform:translateX(-50%);
+  width:min(calc(100% - 28px),520px);
+  box-sizing:border-box;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#171513;
+  color:#fff;
+  font-weight:800;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+.web-print-toast.error{
+  background:#a33229;
+}
+
+@media print{
+  body.web-printing > *{
+    display:none !important;
+  }
+}
