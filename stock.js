@@ -23,6 +23,10 @@ const stockItemIsActive = document.getElementById("stockItemIsActive");
 const stockItemError = document.getElementById("stockItemError");
 const saveStockItemButton = document.getElementById("saveStockItemButton");
 const deleteStockItemButton = document.getElementById("deleteStockItemButton");
+const stockCenterOverview = document.getElementById("stockCenterOverview");
+const stockCenterSummary = document.getElementById("stockCenterSummary");
+const stockCenterProblemList = document.getElementById("stockCenterProblemList");
+const refreshStockCenterButton = document.getElementById("refreshStockCenterButton");
 
 const stockAdjustModal = document.getElementById("stockAdjustModal");
 const stockAdjustTitle = document.getElementById("stockAdjustTitle");
@@ -58,13 +62,74 @@ function statusText(status) {
 }
 
 function updateSummary() {
+  const lowItems = stockItems.filter(item => stockStatus(item) === "low");
+  const outItems = stockItems.filter(item => stockStatus(item) === "out");
+
   stockItemCount.textContent = stockItems.length.toLocaleString("th-TH");
-  lowStockCount.textContent = stockItems
-    .filter(item => stockStatus(item) === "low")
-    .length.toLocaleString("th-TH");
-  outOfStockCount.textContent = stockItems
-    .filter(item => stockStatus(item) === "out")
-    .length.toLocaleString("th-TH");
+  lowStockCount.textContent = lowItems.length.toLocaleString("th-TH");
+  outOfStockCount.textContent = outItems.length.toLocaleString("th-TH");
+
+  renderStockCenterOverview(outItems, lowItems);
+}
+
+function stockNumber(value) {
+  return Number(value || 0).toLocaleString("th-TH", {
+    maximumFractionDigits: 2
+  });
+}
+
+function renderStockCenterOverview(outItems, lowItems) {
+  if (!stockCenterOverview || !stockCenterProblemList || !stockCenterSummary) return;
+
+  const problemItems = [...outItems, ...lowItems];
+
+  stockCenterSummary.textContent =
+    `หมดแล้ว ${outItems.length.toLocaleString("th-TH")} รายการ • ` +
+    `ใกล้หมด ${lowItems.length.toLocaleString("th-TH")} รายการ`;
+
+  if (!problemItems.length) {
+    stockCenterOverview.classList.add("all-ok");
+    stockCenterProblemList.innerHTML =
+      '<div class="stock-center-ok">✅ สต็อกทุกรายการอยู่ในระดับปกติ</div>';
+    return;
+  }
+
+  stockCenterOverview.classList.remove("all-ok");
+  stockCenterProblemList.innerHTML = problemItems.map(item => {
+    const status = stockStatus(item);
+    return `
+      <button type="button" class="stock-center-problem ${status}"
+        data-stock-item-id="${item.id}">
+        <div>
+          <strong>${item.name}</strong>
+          <small>${item.category || "ทั่วไป"}</small>
+        </div>
+        <div class="stock-center-problem-qty">
+          <b>${stockNumber(item.quantity)} ${item.unit}</b>
+          <small>ขั้นต่ำ ${stockNumber(item.minimum_quantity)} ${item.unit}</small>
+        </div>
+      </button>
+    `;
+  }).join("");
+
+  stockCenterProblemList
+    .querySelectorAll("[data-stock-item-id]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        const item = stockItems.find(
+          stockItem => stockItem.id === button.dataset.stockItemId
+        );
+        if (!item) return;
+
+        stockSearch.value = item.name;
+        stockStatusFilter.value = "all";
+        renderStock();
+
+        setTimeout(() => {
+          stockList.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 50);
+      });
+    });
 }
 
 function renderStock() {
@@ -374,6 +439,17 @@ deleteStockItemButton.addEventListener("click", deleteStockItem);
 closeStockItemModalButton.addEventListener("click", closeStockItemModal);
 stockItemModal.querySelector("[data-close-stock-item-modal]").addEventListener("click", closeStockItemModal);
 stockMovementType.addEventListener("change", updateAmountLabel);
+refreshStockCenterButton?.addEventListener("click", loadStock);
+
+document.querySelectorAll("[data-stock-filter]").forEach(button => {
+  button.addEventListener("click", () => {
+    stockSearch.value = "";
+    stockStatusFilter.value = button.dataset.stockFilter;
+    renderStock();
+    stockList.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
+
 stockSearch.addEventListener("input", renderStock);
 stockStatusFilter.addEventListener("change", renderStock);
 closeStockAdjustButton.addEventListener("click", closeStockAdjustment);

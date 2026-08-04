@@ -19,19 +19,28 @@
   </header>
 
   <main>
-    <section class="stock-summary-grid">
-      <article class="stock-summary-card">
-        <span>รายการทั้งหมด</span>
-        <strong id="stockItemCount">0</strong>
-      </article>
-      <article class="stock-summary-card">
-        <span>ใกล้หมด</span>
-        <strong id="lowStockCount">0</strong>
-      </article>
-      <article class="stock-summary-card">
-        <span>หมดแล้ว</span>
-        <strong id="outOfStockCount">0</strong>
-      </article>
+    <section id="stockCenterOverview" class="stock-center-overview">
+      <div class="stock-center-head">
+        <div>
+          <strong>📦 ภาพรวมสต็อกร้าน</strong>
+          <span id="stockCenterSummary">กำลังโหลดข้อมูล...</span>
+        </div>
+        <button id="refreshStockCenterButton" type="button">รีเฟรช</button>
+      </div>
+
+      <div id="stockCenterProblemList" class="stock-center-problem-list"></div>
+
+      <div class="stock-center-totals">
+        <button type="button" data-stock-filter="all">
+          ทั้งหมด <b id="stockItemCount">0</b>
+        </button>
+        <button type="button" data-stock-filter="low">
+          ใกล้หมด <b id="lowStockCount">0</b>
+        </button>
+        <button type="button" data-stock-filter="out">
+          หมดแล้ว <b id="outOfStockCount">0</b>
+        </button>
+      </div>
     </section>
 
     <section class="stock-toolbar">
@@ -49,7 +58,7 @@
 
     <section id="stockList" class="stock-list"></section>
 
-    <footer class="version-label">356 POS V1.7.1 — Manage Stock Items</footer>
+    <footer class="version-label">356 POS V1.7.6 — Stock Center</footer>
   </main>
 
   <div id="stockItemModal" class="stock-adjust-modal" aria-hidden="true">

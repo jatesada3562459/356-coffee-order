@@ -3224,3 +3224,130 @@ input[type=text]{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== V1.7.6 หน้าสต็อกเป็นศูนย์กลางเดียว ===== */
+.stock-center-overview{
+  background:#fff8e7;
+  border:1px solid #e7bd58;
+  border-radius:17px;
+  padding:13px;
+  margin-bottom:12px;
+}
+.stock-center-overview.all-ok{
+  background:#eef8f2;
+  border-color:#9bcfaf;
+}
+.stock-center-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.stock-center-head strong,
+.stock-center-head span{
+  display:block;
+}
+.stock-center-head strong{
+  font-size:18px;
+}
+.stock-center-head span{
+  margin-top:4px;
+  color:#6d5a1b;
+  font-size:13px;
+}
+.stock-center-head button{
+  min-height:36px;
+  border:1px solid #d8c79f;
+  border-radius:9px;
+  padding:8px 11px;
+  background:#fff;
+  font-weight:900;
+}
+.stock-center-problem-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:10px;
+}
+.stock-center-problem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:9px;
+  width:100%;
+  border:1px solid #ead8ad;
+  border-radius:11px;
+  padding:10px;
+  background:#fff;
+  color:#171513;
+  text-align:left;
+  font:inherit;
+}
+.stock-center-problem.out{
+  background:#fff0ef;
+  border-color:#e8aaa4;
+}
+.stock-center-problem.low{
+  background:#fffaf0;
+  border-color:#e0bd69;
+}
+.stock-center-problem strong,
+.stock-center-problem small,
+.stock-center-problem-qty b{
+  display:block;
+}
+.stock-center-problem small{
+  margin-top:3px;
+  color:#6d645c;
+}
+.stock-center-problem-qty{
+  text-align:right;
+  white-space:nowrap;
+}
+.stock-center-problem.out .stock-center-problem-qty b{
+  color:#b42318;
+}
+.stock-center-problem.low .stock-center-problem-qty b{
+  color:#8b6200;
+}
+.stock-center-ok{
+  margin-top:10px;
+  padding:13px;
+  border-radius:11px;
+  background:#fff;
+  color:#166c41;
+  font-weight:900;
+  text-align:center;
+}
+.stock-center-totals{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:10px;
+}
+.stock-center-totals button{
+  min-height:42px;
+  border:1px solid rgba(0,0,0,.1);
+  border-radius:10px;
+  background:#fff;
+  font-weight:800;
+}
+.stock-center-totals b{
+  margin-left:4px;
+  font-size:17px;
+}
+@media(max-width:600px){
+  .stock-center-head{
+    flex-direction:column;
+  }
+  .stock-center-head button{
+    width:100%;
+  }
+  .stock-center-problem-list{
+    grid-template-columns:1fr;
+  }
+  .stock-center-totals{
+    grid-template-columns:1fr;
+  }
+}
