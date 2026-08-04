@@ -3493,3 +3493,169 @@ input[type=text]{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== V1.7.8 ตรวจนับสต็อกหลายรายการ ===== */
+.stock-count-help,
+.stock-count-toolbar,
+.stock-count-save-panel{
+  background:#fff;
+  border:1px solid #ded7cf;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.stock-count-help p{
+  margin:6px 0 0;
+  color:#685f57;
+  line-height:1.45;
+}
+.stock-count-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  margin-bottom:12px;
+}
+.stock-count-summary > div{
+  background:#fff;
+  border:1px solid #ded7cf;
+  border-radius:14px;
+  padding:12px;
+}
+.stock-count-summary span,
+.stock-count-summary b{
+  display:block;
+}
+.stock-count-summary span{
+  color:#6d645c;
+  font-size:13px;
+}
+.stock-count-summary b{
+  margin-top:5px;
+  font-size:24px;
+}
+.stock-count-toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:10px;
+}
+.stock-count-toolbar label span{
+  display:block;
+  margin-bottom:5px;
+  font-weight:900;
+}
+.stock-count-toolbar input{
+  width:100%;
+  min-height:44px;
+  border:1px solid #d7d0c8;
+  border-radius:11px;
+  padding:10px 12px;
+  font:inherit;
+}
+.stock-count-toolbar-actions{
+  display:flex;
+  gap:8px;
+}
+.stock-count-toolbar-actions button{
+  min-height:44px;
+  border:1px solid #d7d0c8;
+  border-radius:11px;
+  padding:9px 12px;
+  background:#fff;
+  font-weight:900;
+}
+.stock-count-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:12px;
+}
+.stock-count-card{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(150px,.8fr);
+  align-items:center;
+  gap:12px;
+  background:#fff;
+  border:1px solid #ded7cf;
+  border-radius:15px;
+  padding:12px;
+}
+.stock-count-card.positive{
+  background:#f0faf3;
+  border-color:#9fd0b0;
+}
+.stock-count-card.negative{
+  background:#fff0ef;
+  border-color:#e4aaa4;
+}
+.stock-count-card.equal{
+  background:#f8f8f7;
+}
+.stock-count-card-info > span{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#f2efeb;
+  color:#6b625a;
+  font-size:12px;
+  font-weight:900;
+}
+.stock-count-card-info h3{
+  margin:7px 0;
+}
+.stock-count-card-info div{
+  color:#625951;
+}
+.stock-count-input-wrap span,
+.stock-count-input-wrap small{
+  display:block;
+}
+.stock-count-input-wrap span{
+  margin-bottom:5px;
+  font-weight:900;
+}
+.stock-count-input-wrap input{
+  width:100%;
+  min-height:44px;
+  border:1px solid #cfc7bf;
+  border-radius:10px;
+  padding:9px 11px;
+  font:inherit;
+  font-size:18px;
+  font-weight:900;
+}
+.stock-count-difference{
+  margin-top:5px;
+  color:#6d645c;
+}
+.stock-count-card.positive .stock-count-difference{
+  color:#177245;
+}
+.stock-count-card.negative .stock-count-difference{
+  color:#ad3027;
+}
+.stock-count-save-panel .primary{
+  width:100%;
+  min-height:48px;
+}
+@media(max-width:760px){
+  .stock-count-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .stock-count-toolbar{
+    grid-template-columns:1fr;
+  }
+  .stock-count-toolbar-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .stock-count-list{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:480px){
+  .stock-count-card{
+    grid-template-columns:1fr;
+  }
+}

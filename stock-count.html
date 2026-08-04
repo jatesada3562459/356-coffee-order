@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ตรวจนับสต็อกร้าน 356</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header>
+    <b>🧮 ตรวจนับสต็อกจริง</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="stock-history.html">📜 ประวัติสต็อก</a>
+      <a class="header-link-button" href="stock.html">← กลับสต็อก</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="stock-count-help">
+      <strong>วิธีใช้</strong>
+      <p>นับของจริงทีละรายการ แล้วกรอกจำนวนในช่อง “นับได้จริง” ระบบจะแสดงส่วนต่างก่อนบันทึก</p>
+    </section>
+
+    <section class="stock-count-summary">
+      <div><span>รายการทั้งหมด</span><b id="countAllItems">0</b></div>
+      <div><span>มีการเปลี่ยนแปลง</span><b id="countChangedItems">0</b></div>
+      <div><span>ของเกินระบบ</span><b id="countPositiveItems">0</b></div>
+      <div><span>ของขาดจากระบบ</span><b id="countNegativeItems">0</b></div>
+    </section>
+
+    <section class="stock-count-toolbar">
+      <label>
+        <span>🔍 ค้นหารายการ</span>
+        <input id="stockCountSearch" type="search" placeholder="เช่น แก้ว ฝา หลอด">
+      </label>
+      <div class="stock-count-toolbar-actions">
+        <button id="fillSystemQuantityButton" type="button">ใส่ยอดตามระบบทั้งหมด</button>
+        <button id="clearCountButton" type="button">ล้างช่องที่กรอก</button>
+      </div>
+    </section>
+
+    <section id="stockCountList" class="stock-count-list">
+      <div class="empty-state">กำลังโหลดสต็อก...</div>
+    </section>
+
+    <section class="stock-count-save-panel">
+      <label class="stock-field">
+        <span>หมายเหตุการตรวจนับ</span>
+        <input id="stockCountNote" type="text" maxlength="200"
+          placeholder="เช่น ตรวจนับปิดร้าน / ตรวจนับประจำสัปดาห์">
+      </label>
+      <div id="stockCountError" class="stock-error"></div>
+      <button id="saveStockCountButton" class="primary" type="button">
+        บันทึกผลตรวจนับ
+      </button>
+    </section>
+
+    <footer class="version-label">356 POS V1.7.8 — Bulk Stock Count</footer>
+  </main>
+
+  <script src="stock-count.js"></script>
+</body>
+</html>
