@@ -325,9 +325,6 @@ const COFFEE_DOME = [
 
 const TEA_MILK_FLAT = [
   "ดาร์กช็อกโกแลต",
-  "ชามะนาว",
-  "น้ำผึ้งมะนาว",
-  "ชาพีช",
   "โกโก้มิ้นท์"
 ].map(normalizedName);
 
@@ -340,7 +337,10 @@ const TEA_MILK_DOME = [
   "นมสดบราวน์ชูก้า",
   "โกโก้",
   "นมสดคาราเมล",
-  "นมสดน้ำผึ้ง"
+  "นมสดน้ำผึ้ง",
+  "ชาพีช",
+  "ชามะนาว",
+  "น้ำผึ้งมะนาว"
 ].map(normalizedName);
 
 const BLENDED_SPOON = [
