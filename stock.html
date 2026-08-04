@@ -35,6 +35,7 @@
     </section>
 
     <section class="stock-toolbar">
+      <button id="addStockItemButton" class="primary stock-add-item-button" type="button">＋ เพิ่มรายการสต็อก</button>
       <label>
         <span>🔍 ค้นหา</span>
         <input id="stockSearch" type="search" placeholder="เช่น แก้ว ฝา หลอด">
@@ -48,8 +49,32 @@
 
     <section id="stockList" class="stock-list"></section>
 
-    <footer class="version-label">356 POS V1.7.0 — Basic Stock</footer>
+    <footer class="version-label">356 POS V1.7.1 — Manage Stock Items</footer>
   </main>
+
+  <div id="stockItemModal" class="stock-adjust-modal" aria-hidden="true">
+    <div class="stock-adjust-backdrop" data-close-stock-item-modal></div>
+    <section class="stock-adjust-dialog">
+      <div class="stock-adjust-header">
+        <div><h2 id="stockItemModalTitle">เพิ่มรายการสต็อก</h2><div class="muted">กำหนดชื่อ หน่วย และจุดแจ้งเตือน</div></div>
+        <button id="closeStockItemModalButton" type="button">✕</button>
+      </div>
+      <label class="stock-field"><span>ชื่อรายการ</span><input id="stockItemName" type="text" maxlength="100"></label>
+      <label class="stock-field"><span>หมวดหมู่</span><select id="stockItemCategory">
+        <option value="แก้ว">แก้ว</option><option value="ฝา">ฝา</option><option value="หลอด">หลอด</option>
+        <option value="วัตถุดิบ">วัตถุดิบ</option><option value="บรรจุภัณฑ์">บรรจุภัณฑ์</option>
+        <option value="อุปกรณ์">อุปกรณ์</option><option value="อื่น ๆ">อื่น ๆ</option>
+      </select></label>
+      <label class="stock-field"><span>หน่วยนับ</span><input id="stockItemUnit" type="text" maxlength="30" placeholder="เช่น ใบ, เส้น, ขวด"></label>
+      <label class="stock-field"><span>ยอดคงเหลือเริ่มต้น</span><input id="stockItemQuantity" type="number" min="0" step="0.01"></label>
+      <label class="stock-field"><span>แจ้งเตือนเมื่อเหลือ</span><input id="stockItemMinimum" type="number" min="0" step="0.01"></label>
+      <label class="stock-field"><span>ลำดับการแสดง</span><input id="stockItemSortOrder" type="number" min="0" step="1"></label>
+      <label class="stock-active-toggle"><input id="stockItemIsActive" type="checkbox" checked><span>เปิดใช้งานรายการนี้</span></label>
+      <div id="stockItemError" class="stock-error"></div>
+      <button id="saveStockItemButton" class="primary" type="button">บันทึกรายการสต็อก</button>
+      <button id="deleteStockItemButton" class="stock-delete-item-button" type="button">ลบรายการสต็อก</button>
+    </section>
+  </div>
 
   <div id="stockAdjustModal" class="stock-adjust-modal" aria-hidden="true">
     <div class="stock-adjust-backdrop" data-close-stock-modal></div>

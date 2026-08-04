@@ -9,6 +9,20 @@ const outOfStockCount = document.getElementById("outOfStockCount");
 const stockSearch = document.getElementById("stockSearch");
 const stockStatusFilter = document.getElementById("stockStatusFilter");
 const stockList = document.getElementById("stockList");
+const addStockItemButton = document.getElementById("addStockItemButton");
+const stockItemModal = document.getElementById("stockItemModal");
+const stockItemModalTitle = document.getElementById("stockItemModalTitle");
+const closeStockItemModalButton = document.getElementById("closeStockItemModalButton");
+const stockItemName = document.getElementById("stockItemName");
+const stockItemCategory = document.getElementById("stockItemCategory");
+const stockItemUnit = document.getElementById("stockItemUnit");
+const stockItemQuantity = document.getElementById("stockItemQuantity");
+const stockItemMinimum = document.getElementById("stockItemMinimum");
+const stockItemSortOrder = document.getElementById("stockItemSortOrder");
+const stockItemIsActive = document.getElementById("stockItemIsActive");
+const stockItemError = document.getElementById("stockItemError");
+const saveStockItemButton = document.getElementById("saveStockItemButton");
+const deleteStockItemButton = document.getElementById("deleteStockItemButton");
 
 const stockAdjustModal = document.getElementById("stockAdjustModal");
 const stockAdjustTitle = document.getElementById("stockAdjustTitle");
@@ -24,6 +38,7 @@ const saveStockAdjustmentButton = document.getElementById("saveStockAdjustmentBu
 
 let stockItems = [];
 let selectedStockItem = null;
+let editingStockItem = null;
 
 function stockStatus(item) {
   const quantity = Number(item.quantity || 0);
@@ -99,11 +114,11 @@ function renderStock() {
         แจ้งเตือนเมื่อเหลือ ${Number(item.minimum_quantity || 0).toLocaleString("th-TH")} ${item.unit}
       </div>
 
-      <button class="stock-adjust-button" type="button">ปรับสต็อก</button>
+      <div class="stock-card-actions"><button class="stock-adjust-button" type="button">ปรับสต็อก</button><button class="stock-edit-button" type="button">แก้ไข</button></div>
     `;
 
-    card.querySelector(".stock-adjust-button")
-      .addEventListener("click", () => openStockAdjustment(item));
+    card.querySelector(".stock-adjust-button").addEventListener("click", () => openStockAdjustment(item));
+    card.querySelector(".stock-edit-button").addEventListener("click", () => openStockItemModal(item));
 
     stockList.appendChild(card);
   });
@@ -127,6 +142,73 @@ async function loadStock() {
   stockItems = data || [];
   updateSummary();
   renderStock();
+}
+
+function openStockItemModal(item = null) {
+  editingStockItem = item;
+  stockItemModalTitle.textContent = item ? "แก้ไขรายการสต็อก" : "เพิ่มรายการสต็อก";
+  stockItemName.value = item?.name || "";
+  stockItemCategory.value = item?.category || "วัตถุดิบ";
+  stockItemUnit.value = item?.unit || "";
+  stockItemQuantity.value = item ? Number(item.quantity || 0) : 0;
+  stockItemMinimum.value = item ? Number(item.minimum_quantity || 0) : 0;
+  stockItemSortOrder.value = item ? Number(item.sort_order || 0) : 0;
+  stockItemIsActive.checked = item ? item.is_active !== false : true;
+  stockItemQuantity.disabled = Boolean(item);
+  deleteStockItemButton.style.display = item ? "block" : "none";
+  stockItemError.textContent = "";
+  stockItemModal.classList.add("show");
+  stockItemModal.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+}
+function closeStockItemModal() {
+  stockItemModal.classList.remove("show");
+  stockItemModal.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+  editingStockItem = null;
+}
+async function saveStockItem() {
+  const name = stockItemName.value.trim();
+  const unit = stockItemUnit.value.trim();
+  const quantity = Number(stockItemQuantity.value || 0);
+  const minimum = Number(stockItemMinimum.value || 0);
+  const sortOrder = Number(stockItemSortOrder.value || 0);
+  stockItemError.textContent = "";
+  if (!name) return stockItemError.textContent = "กรุณากรอกชื่อรายการ";
+  if (!unit) return stockItemError.textContent = "กรุณากรอกหน่วยนับ";
+  if (quantity < 0 || minimum < 0 || sortOrder < 0) return stockItemError.textContent = "ตัวเลขต้องไม่ติดลบ";
+  const pin = await requestManagerPin();
+  if (!pin) return;
+  saveStockItemButton.disabled = true;
+  saveStockItemButton.textContent = "กำลังบันทึก...";
+  const { error } = await sb.rpc("manager_upsert_stock_item", {
+    p_pin: pin,
+    p_stock_item_id: editingStockItem?.id || null,
+    p_name: name,
+    p_category: stockItemCategory.value,
+    p_unit: unit,
+    p_quantity: editingStockItem ? null : quantity,
+    p_minimum_quantity: minimum,
+    p_sort_order: sortOrder,
+    p_is_active: stockItemIsActive.checked
+  });
+  saveStockItemButton.disabled = false;
+  saveStockItemButton.textContent = "บันทึกรายการสต็อก";
+  if (error) return stockItemError.textContent = "บันทึกไม่สำเร็จ: " + error.message;
+  closeStockItemModal();
+  await loadStock();
+}
+async function deleteStockItem() {
+  if (!editingStockItem || !confirm(`ยืนยันลบรายการ “${editingStockItem.name}”?`)) return;
+  const pin = await requestManagerPin();
+  if (!pin) return;
+  const { error } = await sb.rpc("manager_delete_stock_item", {
+    p_pin: pin,
+    p_stock_item_id: editingStockItem.id
+  });
+  if (error) return stockItemError.textContent = "ลบไม่สำเร็จ: " + error.message;
+  closeStockItemModal();
+  await loadStock();
 }
 
 function openStockAdjustment(item) {
@@ -285,6 +367,11 @@ saveStockAdjustmentButton.addEventListener("click", async () => {
   await loadStock();
 });
 
+addStockItemButton.addEventListener("click", () => openStockItemModal());
+saveStockItemButton.addEventListener("click", saveStockItem);
+deleteStockItemButton.addEventListener("click", deleteStockItem);
+closeStockItemModalButton.addEventListener("click", closeStockItemModal);
+stockItemModal.querySelector("[data-close-stock-item-modal]").addEventListener("click", closeStockItemModal);
 stockMovementType.addEventListener("change", updateAmountLabel);
 stockSearch.addEventListener("input", renderStock);
 stockStatusFilter.addEventListener("change", renderStock);
