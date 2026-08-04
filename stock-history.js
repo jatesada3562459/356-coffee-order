@@ -19,7 +19,9 @@ function formatDateTime(value) {
   });
 }
 
-function movementText(type) {
+function movementText(type, reason = "") {
+  if (reason === "ขายอัตโนมัติ") return "ตัดจากการขาย";
+  if (reason === "คืนจากยกเลิกออเดอร์") return "คืนจากยกเลิก";
   return {
     in: "รับเข้า",
     out: "เบิกออก",
@@ -56,7 +58,7 @@ function renderHistory() {
       <div>
         <div class="stock-history-title">
           <strong>${item.stock_items?.name || "ไม่พบชื่อสินค้า"}</strong>
-          <span>${movementText(item.movement_type)}</span>
+          <span>${movementText(item.movement_type, item.reason)}</span>
         </div>
         <div>${item.reason}${item.note ? ` • ${item.note}` : ""}</div>
         <small>${formatDateTime(item.created_at)}</small>
