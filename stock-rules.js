@@ -12,10 +12,18 @@ const stockRuleSearch = document.getElementById("stockRuleSearch");
 const stockRuleList = document.getElementById("stockRuleList");
 const createStandardRulesButton = document.getElementById("createStandardRulesButton");
 const standardRulesResult = document.getElementById("standardRulesResult");
+const refreshRuleAuditButton = document.getElementById("refreshRuleAuditButton");
+const stockRuleAuditResult = document.getElementById("stockRuleAuditResult");
+const auditAllCount = document.getElementById("auditAllCount");
+const auditOkCount = document.getElementById("auditOkCount");
+const auditCheckCount = document.getElementById("auditCheckCount");
+const auditMissingCount = document.getElementById("auditMissingCount");
 
 let menuNames = [];
 let stockItems = [];
 let rules = [];
+let ruleAuditItems = [];
+let ruleAuditFilter = "all";
 
 async function requestPin() {
   return new Promise(resolve => {
@@ -158,6 +166,7 @@ async function loadRules() {
 
   rules = data || [];
   renderRules();
+  renderRuleAudit();
 }
 
 function renderRules() {
@@ -412,6 +421,139 @@ function packagingForMenu(menuName) {
   return [STOCK_NAMES.cup16, STOCK_NAMES.flat98, STOCK_NAMES.straw];
 }
 
+
+function packagingStockNameSet() {
+  return new Set(Object.values(STOCK_NAMES));
+}
+
+function actualPackagingRulesForMenu(menuName) {
+  const target = normalizedName(menuName);
+  const packagingNames = packagingStockNameSet();
+
+  return rules
+    .filter(rule => normalizedName(rule.menu_name) === target)
+    .map(rule => rule.stock_items?.name || "")
+    .filter(name => packagingNames.has(name));
+}
+
+function buildRuleAuditItems() {
+  ruleAuditItems = menuNames.map(menuName => {
+    const expected = packagingForMenu(menuName);
+    const actual = actualPackagingRulesForMenu(menuName);
+
+    const expectedSet = new Set(expected);
+    const actualSet = new Set(actual);
+
+    const missing = expected.filter(name => !actualSet.has(name));
+    const extra = [...actualSet].filter(name => !expectedSet.has(name));
+
+    let status = "ok";
+
+    if (!actual.length) {
+      status = "missing";
+    } else if (missing.length || extra.length) {
+      status = "check";
+    }
+
+    return {
+      menuName,
+      expected,
+      actual: [...actualSet],
+      missing,
+      extra,
+      status
+    };
+  });
+}
+
+function auditStatusText(status) {
+  return {
+    ok: "สูตรครบ",
+    check: "ต้องตรวจ",
+    missing: "ไม่มีสูตร"
+  }[status] || status;
+}
+
+function renderRuleAudit() {
+  if (!stockRuleAuditResult) return;
+
+  buildRuleAuditItems();
+
+  const okItems = ruleAuditItems.filter(item => item.status === "ok");
+  const checkItems = ruleAuditItems.filter(item => item.status === "check");
+  const missingItems = ruleAuditItems.filter(item => item.status === "missing");
+
+  auditAllCount.textContent = ruleAuditItems.length.toLocaleString("th-TH");
+  auditOkCount.textContent = okItems.length.toLocaleString("th-TH");
+  auditCheckCount.textContent = checkItems.length.toLocaleString("th-TH");
+  auditMissingCount.textContent = missingItems.length.toLocaleString("th-TH");
+
+  const filtered = ruleAuditItems.filter(item =>
+    ruleAuditFilter === "all" || item.status === ruleAuditFilter
+  );
+
+  if (!filtered.length) {
+    stockRuleAuditResult.innerHTML =
+      '<div class="stock-rule-audit-empty">ไม่มีรายการในกลุ่มนี้</div>';
+    return;
+  }
+
+  stockRuleAuditResult.innerHTML = filtered.map(item => {
+    const missingHtml = item.missing.length
+      ? `<div class="audit-detail missing">
+          <strong>ขาด:</strong> ${item.missing.join(" • ")}
+        </div>`
+      : "";
+
+    const extraHtml = item.extra.length
+      ? `<div class="audit-detail extra">
+          <strong>เกิน/ไม่ตรง:</strong> ${item.extra.join(" • ")}
+        </div>`
+      : "";
+
+    const actualHtml = item.actual.length
+      ? item.actual.join(" • ")
+      : "ยังไม่มีสูตร";
+
+    return `
+      <article class="stock-rule-audit-card ${item.status}">
+        <div class="stock-rule-audit-card-head">
+          <div>
+            <h3>${item.menuName}</h3>
+            <span>${auditStatusText(item.status)}</span>
+          </div>
+          <button type="button" data-audit-menu="${item.menuName}">
+            ดูสูตร
+          </button>
+        </div>
+
+        <div class="audit-detail">
+          <strong>ควรใช้:</strong> ${item.expected.join(" • ")}
+        </div>
+
+        <div class="audit-detail">
+          <strong>สูตรปัจจุบัน:</strong> ${actualHtml}
+        </div>
+
+        ${missingHtml}
+        ${extraHtml}
+      </article>
+    `;
+  }).join("");
+
+  stockRuleAuditResult
+    .querySelectorAll("[data-audit-menu]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        stockRuleSearch.value = button.dataset.auditMenu;
+        renderRules();
+
+        document.getElementById("stockRuleList")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+}
+
 async function createStandardRules() {
   if (!menuNames.length) {
     standardRulesResult.textContent = "ยังโหลดรายชื่อเมนูไม่สำเร็จ";
@@ -473,6 +615,33 @@ async function initialize() {
     stockRuleError.textContent = "โหลดข้อมูลไม่สำเร็จ: " + error.message;
   }
 }
+
+refreshRuleAuditButton?.addEventListener("click", async () => {
+  refreshRuleAuditButton.disabled = true;
+  refreshRuleAuditButton.textContent = "กำลังตรวจ...";
+
+  await Promise.all([loadMenuNames(), loadStockItems()]);
+  await loadRules();
+
+  refreshRuleAuditButton.disabled = false;
+  refreshRuleAuditButton.textContent = "ตรวจใหม่";
+});
+
+document.querySelectorAll("[data-audit-filter]").forEach(button => {
+  button.addEventListener("click", () => {
+    ruleAuditFilter = button.dataset.auditFilter;
+
+    document.querySelectorAll("[data-audit-filter]")
+      .forEach(item => item.classList.toggle(
+        "active",
+        item.dataset.auditFilter === ruleAuditFilter
+      ));
+
+    renderRuleAudit();
+  });
+});
+
+document.querySelector('[data-audit-filter="all"]')?.classList.add("active");
 
 createStandardRulesButton.addEventListener("click", createStandardRules);
 addStockRuleButton.addEventListener("click", addRule);

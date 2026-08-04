@@ -3351,3 +3351,145 @@ input[type=text]{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== V1.7.7 ตรวจสูตรตัดสต็อกทั้งร้าน ===== */
+.stock-rule-audit{
+  background:#fff;
+  border:1px solid #ded7cf;
+  border-radius:17px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.stock-rule-audit-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.stock-rule-audit-head h2{
+  margin:0 0 5px;
+}
+.stock-rule-audit-head p{
+  margin:0;
+  color:#6d645c;
+  line-height:1.4;
+}
+.stock-rule-audit-head > button{
+  flex:0 0 auto;
+  min-height:38px;
+  border:1px solid #d5cdc5;
+  border-radius:10px;
+  padding:8px 12px;
+  background:#fff;
+  font-weight:900;
+}
+.stock-rule-audit-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin-top:12px;
+}
+.stock-rule-audit-summary button{
+  min-height:45px;
+  border:1px solid #ddd5cd;
+  border-radius:11px;
+  background:#faf8f5;
+  font-weight:800;
+}
+.stock-rule-audit-summary button.active{
+  background:#171513;
+  color:#fff;
+  border-color:#171513;
+}
+.stock-rule-audit-summary b{
+  display:block;
+  margin-top:2px;
+  font-size:18px;
+}
+.stock-rule-audit-result{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin-top:12px;
+}
+.stock-rule-audit-card{
+  border:1px solid #d8d2cc;
+  border-radius:13px;
+  padding:11px;
+  background:#fff;
+}
+.stock-rule-audit-card.ok{
+  background:#f1faf4;
+  border-color:#a7d5b7;
+}
+.stock-rule-audit-card.check{
+  background:#fff8e7;
+  border-color:#e1bd64;
+}
+.stock-rule-audit-card.missing{
+  background:#fff0ef;
+  border-color:#e4aaa4;
+}
+.stock-rule-audit-card-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+.stock-rule-audit-card h3{
+  margin:0;
+}
+.stock-rule-audit-card-head span{
+  display:inline-block;
+  margin-top:4px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.75);
+  font-size:12px;
+  font-weight:900;
+}
+.stock-rule-audit-card-head button{
+  flex:0 0 auto;
+  border:0;
+  border-radius:9px;
+  padding:7px 9px;
+  background:#171513;
+  color:#fff;
+  font-weight:900;
+}
+.audit-detail{
+  margin-top:5px;
+  color:#544c45;
+  line-height:1.4;
+  word-break:break-word;
+}
+.audit-detail.missing{
+  color:#9a6300;
+}
+.audit-detail.extra{
+  color:#a33229;
+}
+.stock-rule-audit-empty{
+  grid-column:1/-1;
+  padding:18px;
+  border-radius:12px;
+  background:#faf8f5;
+  text-align:center;
+  color:#6d645c;
+}
+@media(max-width:700px){
+  .stock-rule-audit-head{
+    flex-direction:column;
+  }
+  .stock-rule-audit-head > button{
+    width:100%;
+  }
+  .stock-rule-audit-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .stock-rule-audit-result{
+    grid-template-columns:1fr;
+  }
+}
