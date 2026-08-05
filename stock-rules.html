@@ -37,8 +37,8 @@
     <section class="stock-rule-audit">
       <div class="stock-rule-audit-head">
         <div>
-          <h2>🔎 ตรวจสูตรตัดสต็อกทั้งร้าน</h2>
-          <p>ตรวจว่าแต่ละเมนูมีแก้ว ฝา และหลอดครบตามมาตรฐานร้าน 356 หรือไม่</p>
+          <h2>🔎 ตรวจความสมบูรณ์ของสูตร</h2>
+          <p>ตรวจว่าแต่ละเมนูมีสูตรใช้งานได้หรือไม่ โดยยึดสูตรที่คุณตั้งเองเป็นหลัก</p>
         </div>
         <button id="refreshRuleAuditButton" type="button">ตรวจใหม่</button>
       </div>
@@ -48,15 +48,20 @@
           เมนูทั้งหมด <b id="auditAllCount">0</b>
         </button>
         <button type="button" data-audit-filter="ok">
-          สูตรครบ <b id="auditOkCount">0</b>
+          พร้อมใช้งาน <b id="auditOkCount">0</b>
         </button>
         <button type="button" data-audit-filter="check">
-          ต้องตรวจ <b id="auditCheckCount">0</b>
+          พบปัญหา <b id="auditCheckCount">0</b>
         </button>
         <button type="button" data-audit-filter="missing">
-          ไม่มีสูตร <b id="auditMissingCount">0</b>
+          ยังไม่มีสูตร <b id="auditMissingCount">0</b>
         </button>
       </div>
+
+      <div class="single-source-notice">
+          <strong>สูตรที่คุณตั้งเอง = มาตรฐานของร้าน</strong>
+          <span>ระบบจะไม่ตัดสินอีกว่าเมนูใดต้องใช้แก้ว ฝา หรือหลอดชนิดไหน</span>
+        </div>
 
       <div id="stockRuleAuditResult" class="stock-rule-audit-result">
         กำลังตรวจสูตร...
@@ -95,7 +100,7 @@
 
     <section id="stockRuleList" class="stock-rule-list"></section>
 
-    <footer class="version-label">356 POS V1.7.7 — Stock Rule Audit</footer>
+    <footer class="version-label">356 POS V1.8.4 — Flexible Stock Rules</footer>
   </main>
 
   <script src="stock-rules.js"></script>

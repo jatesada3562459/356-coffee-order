@@ -182,7 +182,7 @@ function renderRules() {
 
   if (!filtered.length) {
     stockRuleList.innerHTML =
-      '<div class="empty-state">ยังไม่มีสูตรตัดสต็อกที่ตรงกับการค้นหา</div>';
+      '<div class="empty-state">ยังยังไม่มีสูตรตัดสต็อกที่ตรงกับการค้นหา</div>';
     return;
   }
 
@@ -325,6 +325,9 @@ const COFFEE_DOME = [
 
 const TEA_MILK_FLAT = [
   "ดาร์กช็อกโกแลต",
+  "ชามะนาว",
+  "น้ำผึ้งมะนาว",
+  "ชาพีช",
   "โกโก้มิ้นท์"
 ].map(normalizedName);
 
@@ -337,10 +340,7 @@ const TEA_MILK_DOME = [
   "นมสดบราวน์ชูก้า",
   "โกโก้",
   "นมสดคาราเมล",
-  "นมสดน้ำผึ้ง",
-  "ชาพีช",
-  "ชามะนาว",
-  "น้ำผึ้งมะนาว"
+  "นมสดน้ำผึ้ง"
 ].map(normalizedName);
 
 const BLENDED_SPOON = [
@@ -412,9 +412,9 @@ function packagingForMenu(menuName) {
     return [STOCK_NAMES.cup16, STOCK_NAMES.dome98, STOCK_NAMES.straw];
   }
 
-  // โซดาใช้ฝาโดม
+  // โซดาใช้ฝาเรียบ
   if (containsAny(n, ["โซดา", "บลูฮาวาย", "สตรอว์เบอร์รี", "ลิ้นจี่", "กีวี่", "เสาวรส"])) {
-    return [STOCK_NAMES.cup16, STOCK_NAMES.dome98, STOCK_NAMES.straw];
+    return [STOCK_NAMES.cup16, STOCK_NAMES.flat98, STOCK_NAMES.straw];
   }
 
   // กาแฟทั่วไปไม่มีฟองนม และเครื่องดื่มเย็นทั่วไป
@@ -422,55 +422,70 @@ function packagingForMenu(menuName) {
 }
 
 
-function packagingStockNameSet() {
-  return new Set(Object.values(STOCK_NAMES));
-}
-
-function actualPackagingRulesForMenu(menuName) {
+function rulesForMenu(menuName) {
   const target = normalizedName(menuName);
-  const packagingNames = packagingStockNameSet();
 
-  return rules
-    .filter(rule => normalizedName(rule.menu_name) === target)
-    .map(rule => rule.stock_items?.name || "")
-    .filter(name => packagingNames.has(name));
+  return rules.filter(rule =>
+    normalizedName(rule.menu_name) === target
+  );
 }
 
 function buildRuleAuditItems() {
   ruleAuditItems = menuNames.map(menuName => {
-    const expected = packagingForMenu(menuName);
-    const actual = actualPackagingRulesForMenu(menuName);
+    const menuRules = rulesForMenu(menuName);
+    const problems = [];
+    const seenStockIds = new Set();
+    const duplicates = [];
 
-    const expectedSet = new Set(expected);
-    const actualSet = new Set(actual);
+    if (!menuRules.length) {
+      return {
+        menuName,
+        rules: [],
+        problems: ["ยังยังไม่มีสูตรตัดสต็อก"],
+        status: "missing"
+      };
+    }
 
-    const missing = expected.filter(name => !actualSet.has(name));
-    const extra = [...actualSet].filter(name => !expectedSet.has(name));
+    menuRules.forEach(rule => {
+      const stockItem = rule.stock_items;
+      const quantity = Number(rule.quantity_per_unit);
 
-    let status = "ok";
+      if (!stockItem || !stockItem.name) {
+        problems.push("มีรายการสต็อกที่ถูกลบหรือใช้งานไม่ได้");
+      }
 
-    if (!actual.length) {
-      status = "missing";
-    } else if (missing.length || extra.length) {
-      status = "check";
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        problems.push("จำนวนที่ใช้ต้องมากกว่า 0");
+      }
+
+      if (rule.stock_item_id) {
+        if (seenStockIds.has(rule.stock_item_id)) {
+          duplicates.push(stockItem?.name || "รายการเดิม");
+        }
+        seenStockIds.add(rule.stock_item_id);
+      }
+    });
+
+    if (duplicates.length) {
+      problems.push(
+        `มีรายการซ้ำ: ${[...new Set(duplicates)].join(" • ")}`
+      );
     }
 
     return {
       menuName,
-      expected,
-      actual: [...actualSet],
-      missing,
-      extra,
-      status
+      rules: menuRules,
+      problems,
+      status: problems.length ? "check" : "ok"
     };
   });
 }
 
 function auditStatusText(status) {
   return {
-    ok: "สูตรครบ",
-    check: "ต้องตรวจ",
-    missing: "ไม่มีสูตร"
+    ok: "พร้อมใช้งาน",
+    check: "พบปัญหา",
+    missing: "ยังยังไม่มีสูตร"
   }[status] || status;
 }
 
@@ -499,21 +514,24 @@ function renderRuleAudit() {
   }
 
   stockRuleAuditResult.innerHTML = filtered.map(item => {
-    const missingHtml = item.missing.length
-      ? `<div class="audit-detail missing">
-          <strong>ขาด:</strong> ${item.missing.join(" • ")}
-        </div>`
-      : "";
+    const rulesHtml = item.rules.length
+      ? item.rules.map(rule => {
+          const name = rule.stock_items?.name || "รายการสต็อกที่ใช้งานไม่ได้";
+          const unit = rule.stock_items?.unit || "";
+          const quantity = Number(rule.quantity_per_unit || 0)
+            .toLocaleString("th-TH", { maximumFractionDigits: 3 });
 
-    const extraHtml = item.extra.length
-      ? `<div class="audit-detail extra">
-          <strong>เกิน/ไม่ตรง:</strong> ${item.extra.join(" • ")}
-        </div>`
-      : "";
+          return `<span class="audit-rule-chip">${name} × ${quantity} ${unit}</span>`;
+        }).join("")
+      : '<span class="audit-rule-empty">ยังยังไม่มีสูตร</span>';
 
-    const actualHtml = item.actual.length
-      ? item.actual.join(" • ")
-      : "ยังไม่มีสูตร";
+    const problemsHtml = item.problems.length
+      ? `<div class="audit-detail problem">
+          <strong>ปัญหาที่พบ:</strong> ${item.problems.join(" • ")}
+        </div>`
+      : `<div class="audit-detail ok">
+          <strong>สถานะ:</strong> สูตรใช้งานได้
+        </div>`;
 
     return `
       <article class="stock-rule-audit-card ${item.status}">
@@ -523,20 +541,16 @@ function renderRuleAudit() {
             <span>${auditStatusText(item.status)}</span>
           </div>
           <button type="button" data-audit-menu="${item.menuName}">
-            ดูสูตร
+            ดู/แก้สูตร
           </button>
         </div>
 
         <div class="audit-detail">
-          <strong>ควรใช้:</strong> ${item.expected.join(" • ")}
+          <strong>สูตรปัจจุบัน:</strong>
+          <div class="audit-rule-chips">${rulesHtml}</div>
         </div>
 
-        <div class="audit-detail">
-          <strong>สูตรปัจจุบัน:</strong> ${actualHtml}
-        </div>
-
-        ${missingHtml}
-        ${extraHtml}
+        ${problemsHtml}
       </article>
     `;
   }).join("");
