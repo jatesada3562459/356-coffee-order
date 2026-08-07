@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>356 Coffee & Drink</title>
-  <link rel="stylesheet" href="style.css?v=1600">
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css?v=1620">
+  <!-- Local scripts only: no external CDN, so mobile/4G cannot be blocked by jsDelivr -->
   <script defer src="config.js"></script>
-  <script defer src="storefront-v3.js?v=1154"></script>
-  <script defer src="language.js?v=1601"></script>
+  <script defer src="supabase-lite.js?v=1620"></script>
+  <script defer src="storefront-v3.js?v=1620"></script>
+  <script defer src="language.js?v=1620"></script>
 </head>
 <body>
 <header>
@@ -89,6 +90,5 @@
     <button class="primary" onclick="submitOrder()" data-i18n="submitOrder">ยืนยันออร์เดอร์</button>
   </div>
 </div>
-
 </body>
 </html>

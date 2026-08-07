@@ -56,7 +56,12 @@ async function loadStoreSettings(){
     .maybeSingle();
 
   if(error){
-    console.warn("โหลดข้อมูลหน้าร้านไม่สำเร็จ",error);
+    console.warn("โหลดข้อมูลหน้าร้านไม่สำเร็จ ใช้เวลาร้านมาตรฐานแทน",error);
+    const fallback={open_time:"09:00",close_time:"16:00",accepting_orders:true};
+    const status=calculateStoreStatus(fallback);
+    $("storeStatusBadge").textContent=status.text;
+    $("storeStatusBadge").classList.toggle("closed",!status.open);
+    $("storeHours").textContent="09:00–16:00";
     return;
   }
 
@@ -121,6 +126,10 @@ async function loadMenu(){
     if(!response.ok) throw new Error("โหลดเมนูไม่สำเร็จ");
 
     db=await response.json();
+
+    // แสดงเมนูพื้นฐานทันที ไม่ต้องรอ Supabase
+    renderTabs();
+    renderMenu();
 
     const {data:settings,error}=await sb
       .from("menu_settings")
