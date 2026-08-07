@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>356 Coffee & Drink</title>
   <link rel="stylesheet" href="style.css?v=1600">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="config.js"></script>
+  <script defer src="storefront-v3.js?v=1154"></script>
+  <script defer src="language.js?v=1601"></script>
 </head>
 <body>
 <header>
@@ -46,7 +48,7 @@
   </section>
 
   <div class="tabs" id="tabs"></div>
-  <div class="grid" id="menu"></div>
+  <div class="grid" id="menu"><p style="grid-column:1/-1;text-align:center;padding:18px 0">กำลังโหลดเมนู... / Loading menu...</p></div>
 </main>
 
 <div class="panel" id="product">
@@ -88,7 +90,5 @@
   </div>
 </div>
 
-<script src="storefront-v3.js?v=1154"></script>
-<script src="language.js?v=1600"></script>
 </body>
 </html>
