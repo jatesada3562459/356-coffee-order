@@ -217,14 +217,18 @@ function translateStatus356(){
   var el = document.getElementById("storeStatusBadge");
   if(!el) return;
   var text = (el.textContent || "").trim();
+  var target = null;
   var isPaused = text === "ปิดรับออเดอร์ชั่วคราว" || text === "Orders Temporarily Paused";
   var isOpen = text === "เปิดรับออเดอร์" || text === "Open for Orders";
   var isClosed = text === "ปิดร้าน" || text === "Closed";
   var isChecking = text === "กำลังตรวจสอบสถานะร้าน" || text === "Checking store status";
-  if(isPaused) el.textContent = tr356("storePaused");
-  else if(isOpen) el.textContent = tr356("storeOpen");
-  else if(isClosed) el.textContent = tr356("storeClosed");
-  else if(isChecking) el.textContent = tr356("checkingStore");
+  if(isPaused) target = tr356("storePaused");
+  else if(isOpen) target = tr356("storeOpen");
+  else if(isClosed) target = tr356("storeClosed");
+  else if(isChecking) target = tr356("checkingStore");
+  // IMPORTANT: write only when the text actually changes.
+  // Writing the same text inside MutationObserver can create an endless loop in Safari/iOS.
+  if(target !== null && text !== target) el.textContent = target;
 }
 
 function setLanguage356(lang){
