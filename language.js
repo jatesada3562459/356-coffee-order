@@ -23,7 +23,7 @@ const UI_TEXT_356 = {
     addPrefix:"เพิ่ม", to:"ให้", added:"แล้ว", orderFailed:"ส่งออร์เดอร์ไม่สำเร็จ",
     itemSaveFailed:"บันทึกรายการสินค้าไม่สำเร็จ", orderSuccess:"ส่งออร์เดอร์สำเร็จ",
     orderNumber:"เลขที่", totalAmount:"ยอดรวม", menuLoadFailed:"โหลดเมนูไม่สำเร็จ",
-    noSelectedOptions:"ไม่มีตัวเลือกเพิ่มเติม"
+    noSelectedOptions:"ไม่มีตัวเลือกเพิ่มเติม", itemNote:"หมายเหตุ (ไม่บังคับ)", itemNotePlaceholder:"เช่น ไม่ใส่น้ำแข็ง / แยกครีมชีส / อื่น ๆ", noteLabel:"หมายเหตุ"
   },
   en: {
     cart:"Cart", back:"Back", quantity:"Quantity", cartTitle:"Cart",
@@ -41,7 +41,7 @@ const UI_TEXT_356 = {
     addPrefix:"Add", to:"to", added:"added", orderFailed:"Order could not be sent",
     itemSaveFailed:"Could not save order items", orderSuccess:"Order placed successfully",
     orderNumber:"Order No.", totalAmount:"Total", menuLoadFailed:"Could not load menu",
-    noSelectedOptions:"No additional options"
+    noSelectedOptions:"No additional options", itemNote:"Special request (optional)", itemNotePlaceholder:"e.g. No ice / Cream cheese on the side / Other request", noteLabel:"Special request"
   }
 };
 
@@ -280,7 +280,7 @@ renderMenu = function(){
         '<div class="name">'+shownName+'</div>'+
         '<div class="price">+฿'+a.price+'</div>'+
         '<button>'+tr356("add")+'</button>';
-      d.onclick = function(){ openAddon(a); };
+      d.onclick = function(){ if(!window.ensureStoreOpen356 || ensureStoreOpen356()) openAddon(a); };
       menuEl.appendChild(d);
     });
     return;
@@ -298,7 +298,7 @@ renderMenu = function(){
         '<div class="name">'+shownName+'</div>'+
         '<div class="price">฿'+p.price+'</div>'+
         '<button>'+tr356("selectMenu")+'</button>';
-      d.onclick = function(){ openProduct(p); };
+      d.onclick = function(){ if(!window.ensureStoreOpen356 || ensureStoreOpen356()) openProduct(p); };
       menuEl.appendChild(d);
     });
 };
@@ -320,6 +320,7 @@ checks = function(title,name,opts,selected){
 };
 
 openProduct = function(p,i){
+  if(window.ensureStoreOpen356 && !ensureStoreOpen356()) return;
   if(typeof i === "undefined") i = null;
   current = p;
   editIndex = i;
@@ -328,6 +329,7 @@ openProduct = function(p,i){
   document.getElementById("pname").textContent = displayProduct356(p.name);
 
   var old = i===null ? [] : cart[i].options;
+  var oldNote = i===null ? "" : (cart[i].note || "");
   var h = "";
 
   if(p.groups.includes("sweet")){
@@ -377,6 +379,8 @@ openProduct = function(p,i){
 
   if(!h) h = '<p>'+tr356("noOptions")+'</p>';
 
+  var safeNote = oldNote.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  h += '<h3>'+tr356("itemNote")+'</h3><textarea id="itemNote356" maxlength="150" rows="3" placeholder="'+tr356("itemNotePlaceholder")+'" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:12px;font:inherit;resize:vertical">'+safeNote+'</textarea>';
   document.getElementById("modifierArea").innerHTML = h;
   document.getElementById("saveBtn").textContent = i===null ? tr356("addToCart") : tr356("saveChanges");
   document.getElementById("product").classList.add("show");
@@ -393,6 +397,7 @@ renderCart = function(){
     d.className = "row";
     d.innerHTML = '<b>'+displayProduct356(x.name)+' × '+x.qty+'</b>'+
       '<div class="muted">'+(translatedOptions.join(" • ") || tr356("noSelectedOptions"))+'</div>'+
+      (x.note ? '<div class="muted"><b>'+tr356("noteLabel")+':</b> '+x.note+'</div>' : '')+
       '<div>฿'+(x.unit*x.qty)+'</div>'+
       '<div class="actions"><button class="edit">'+tr356("edit")+'</button><button class="remove">'+tr356("remove")+'</button></div>';
 
@@ -405,6 +410,7 @@ renderCart = function(){
 };
 
 openAddon = function(a){
+  if(window.ensureStoreOpen356 && !ensureStoreOpen356()) return;
   currentAddon = a;
   if(!cart.length){ alert(tr356("chooseMainFirst")); return; }
   if(cart.length===1){ applyAddon(0); return; }
@@ -436,6 +442,8 @@ applyAddon = function(i){
 };
 
 submitOrder = async function(){
+  try{ await loadStoreSettings(); }catch(e){}
+  if(window.ensureStoreOpen356 && !ensureStoreOpen356()) return;
   if(!cart.length){ alert(tr356("chooseItem")); return; }
 
   var customer_name = document.getElementById("customer").value.trim() || null;
@@ -467,7 +475,7 @@ submitOrder = async function(){
       product_name:x.name,
       quantity:x.qty,
       unit_price:x.unit,
-      options:x.options,
+      options:x.note ? x.options.concat(["หมายเหตุ: "+x.note]) : x.options,
       line_total:x.unit*x.qty
     };
   });

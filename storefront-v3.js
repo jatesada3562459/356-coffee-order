@@ -1,5 +1,8 @@
 const sb=supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
 let db={products:[],addons:[]},cat="ทั้งหมด",cart=[],current=null,editIndex=null,qty=1,currentAddon=null;
+let storeOpen356=false;
+let storeStatusReason356="checking";
+let lastStoreSettings356=null;
 const $=id=>document.getElementById(id),tableNo=new URLSearchParams(location.search).get("table")||"counter";
 
 $("table").textContent=tableNo==="counter"?"สั่งที่เคาน์เตอร์ / กลับบ้าน":`โต๊ะ ${tableNo}`;
@@ -25,27 +28,80 @@ function setImageState(imageEl, placeholderEl, url){
   }
 }
 
+function bangkokNow356(){
+  const parts=new Intl.DateTimeFormat("en-CA",{
+    timeZone:"Asia/Bangkok",year:"numeric",month:"2-digit",day:"2-digit",
+    hour:"2-digit",minute:"2-digit",hour12:false
+  }).formatToParts(new Date()).reduce((a,p)=>{a[p.type]=p.value;return a;},{});
+  return {date:`${parts.year}-${parts.month}-${parts.day}`,time:`${parts.hour}:${parts.minute}`};
+}
+
 function calculateStoreStatus(settings){
   if(settings.accepting_orders===false){
-    return {open:false,text:"ปิดรับออเดอร์ชั่วคราว"};
+    return {open:false,text:"ปิดรับออเดอร์ชั่วคราว",reason:"paused"};
   }
 
-  const now=new Date();
-  const bangkokTime=new Intl.DateTimeFormat("en-GB",{
-    timeZone:"Asia/Bangkok",
-    hour:"2-digit",
-    minute:"2-digit",
-    hour12:false
-  }).format(now);
+  const now=bangkokNow356();
+  const override=(settings.manual_override||"auto").toLowerCase();
+  const overrideDate=settings.manual_override_date||null;
+  if(overrideDate===now.date && override==="open"){
+    return {open:true,text:"เปิดรับออเดอร์",reason:"manual_open"};
+  }
+  if(overrideDate===now.date && override==="closed"){
+    return {open:false,text:"ปิดร้าน",reason:"manual_closed"};
+  }
 
-  const openTime=settings.open_time||"09:00";
-  const closeTime=settings.close_time||"16:00";
-  const open=bangkokTime>=openTime&&bangkokTime<closeTime;
+  const openTime=(settings.open_time||"09:00").slice(0,5);
+  const closeTime=(settings.close_time||"16:00").slice(0,5);
+  let open=false;
+  if(openTime===closeTime){
+    open=true;
+  }else if(openTime<closeTime){
+    open=now.time>=openTime && now.time<closeTime;
+  }else{
+    // รองรับร้านที่เปิดข้ามเที่ยงคืน เช่น 18:00–02:00
+    open=now.time>=openTime || now.time<closeTime;
+  }
+  return {open,text:open?"เปิดรับออเดอร์":"ปิดร้าน",reason:open?"schedule_open":"schedule_closed"};
+}
 
-  return {
-    open,
-    text:open?"เปิดรับออเดอร์":"ปิดร้าน"
-  };
+function closedMessage356(){
+  if(storeStatusReason356==="paused") return "ร้านหยุดรับออเดอร์ชั่วคราว";
+  return "ขออภัย ขณะนี้ร้านปิดให้บริการ";
+}
+
+function ensureStoreOpen356(){
+  if(storeOpen356) return true;
+  alert(closedMessage356());
+  return false;
+}
+
+function applyStoreLock356(status){
+  storeOpen356=Boolean(status&&status.open);
+  storeStatusReason356=status?.reason||"closed";
+  document.body.classList.toggle("store-closed-356",!storeOpen356);
+
+  let banner=document.getElementById("storeClosedBanner356");
+  if(!banner){
+    banner=document.createElement("div");
+    banner.id="storeClosedBanner356";
+    banner.style.cssText="margin:12px 0;padding:12px 14px;border-radius:12px;background:#fff3f3;border:1px solid #efb4b4;color:#9b1c1c;font-weight:700;text-align:center;display:none";
+    const hero=document.querySelector(".store-hero");
+    if(hero) hero.appendChild(banner);
+  }
+  if(!storeOpen356){
+    const hours=document.getElementById("storeHours")?.textContent||"";
+    banner.textContent=(storeStatusReason356==="paused"?"ร้านหยุดรับออเดอร์ชั่วคราว":"ร้านปิดให้บริการ")+(hours?` • เวลา ${hours}`:"");
+    banner.style.display="block";
+  }else{
+    banner.style.display="none";
+  }
+
+  document.querySelectorAll("#menu .card button,#saveBtn,#cart .primary").forEach(btn=>{
+    btn.disabled=!storeOpen356;
+    btn.style.opacity=storeOpen356?"":"0.45";
+    btn.style.cursor=storeOpen356?"":"not-allowed";
+  });
 }
 
 async function loadStoreSettings(){
@@ -57,15 +113,18 @@ async function loadStoreSettings(){
 
   if(error){
     console.warn("โหลดข้อมูลหน้าร้านไม่สำเร็จ ใช้เวลาร้านมาตรฐานแทน",error);
-    const fallback={open_time:"09:00",close_time:"16:00",accepting_orders:true};
+    const fallback={open_time:"09:00",close_time:"16:00",accepting_orders:true,manual_override:"auto"};
+    lastStoreSettings356=fallback;
     const status=calculateStoreStatus(fallback);
     $("storeStatusBadge").textContent=status.text;
     $("storeStatusBadge").classList.toggle("closed",!status.open);
     $("storeHours").textContent="09:00–16:00";
+    applyStoreLock356(status);
     return;
   }
 
   const settings=data||{};
+  lastStoreSettings356=settings;
   $("storeName").textContent=settings.store_name||"356 Coffee & Drink";
   $("storeDescription").textContent=
     settings.description||"เครื่องดื่มและขนมจากร้าน 356";
@@ -118,6 +177,7 @@ async function loadStoreSettings(){
   const status=calculateStoreStatus(settings);
   $("storeStatusBadge").textContent=status.text;
   $("storeStatusBadge").classList.toggle("closed",!status.open);
+  applyStoreLock356(status);
 }
 
 async function loadMenu(){
@@ -213,6 +273,7 @@ async function loadMenu(){
 
 loadStoreSettings();
 loadMenu();
+setInterval(loadStoreSettings,10000);
 
 function renderTabs(){
   const cats=["ทั้งหมด",...new Set(db.products.filter(x=>x.is_active!==false).map(x=>x.category)),"ADD-ON"];
@@ -240,7 +301,7 @@ function renderMenu(){
         <div class="price">+฿${a.price}</div>
         <button>เพิ่ม</button>
       `;
-      d.onclick=()=>openAddon(a);
+      d.onclick=()=>{if(ensureStoreOpen356()) openAddon(a)};
       $("menu").appendChild(d);
     });
     return;
@@ -259,7 +320,7 @@ function renderMenu(){
         <div class="price">฿${p.price}</div>
         <button>เลือกเมนู</button>
       `;
-      d.onclick=()=>openProduct(p);
+      d.onclick=()=>{if(ensureStoreOpen356()) openProduct(p)};
       $("menu").appendChild(d);
     });
 }
@@ -275,6 +336,7 @@ function checks(title,name,opts,selected){
 }
 
 function openProduct(p,i=null){
+  if(!ensureStoreOpen356()) return;
   current=p;
   editIndex=i;
   qty=i===null?1:cart[i].qty;
@@ -282,6 +344,7 @@ function openProduct(p,i=null){
   $("pname").textContent=p.name;
 
   const old=i===null?[]:cart[i].options;
+  const oldNote=i===null?"":(cart[i].note||"");
   let h="";
 
   if(p.groups.includes("sweet")){
@@ -342,6 +405,7 @@ function openProduct(p,i=null){
 
   if(!h) h="<p>เมนูนี้ไม่มีตัวเลือกเพิ่มเติม</p>";
 
+  h+=`<h3>หมายเหตุ (ไม่บังคับ)</h3><textarea id="itemNote356" maxlength="150" rows="3" placeholder="เช่น ไม่ใส่น้ำแข็ง / แยกครีมชีส / อื่น ๆ" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:12px;font:inherit;resize:vertical">${oldNote.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</textarea>`;
   $("modifierArea").innerHTML=h;
   $("saveBtn").textContent=i===null?"เพิ่มลงตะกร้า":"บันทึกการแก้ไข";
   $("product").classList.add("show");
@@ -355,6 +419,7 @@ function changeQty(n){
 }
 
 function saveProduct(){
+  if(!ensureStoreOpen356()) return;
   let options=[],extra=0;
 
   ["sweet","milk","yogurt"].forEach(name=>{
@@ -370,12 +435,15 @@ function saveProduct(){
     extra+=Number(e.dataset.price||0);
   });
 
+  const noteEl=$("itemNote356");
+  const note=noteEl?noteEl.value.trim().slice(0,150):"";
   const item={
     product:current,
     name:current.name,
     qty,
     unit:current.price+extra,
-    options
+    options,
+    note
   };
 
   if(editIndex===null) cart.push(item);
@@ -395,6 +463,7 @@ function renderCart(){
     d.innerHTML=`
       <b>${x.name} × ${x.qty}</b>
       <div class="muted">${x.options.join(" • ")||"ไม่มีตัวเลือกเพิ่มเติม"}</div>
+      ${x.note?`<div class="muted"><b>หมายเหตุ:</b> ${x.note}</div>`:""}
       <div>฿${x.unit*x.qty}</div>
       <div class="actions">
         <button class="edit">แก้ไข</button>
@@ -421,6 +490,7 @@ function openCart(){renderCart();$("cart").classList.add("show")}
 function closeCart(){$("cart").classList.remove("show")}
 
 function openAddon(a){
+  if(!ensureStoreOpen356()) return;
   currentAddon=a;
 
   if(!cart.length){
@@ -459,6 +529,8 @@ function applyAddon(i){
 }
 
 async function submitOrder(){
+  await loadStoreSettings();
+  if(!ensureStoreOpen356()) return;
   if(!cart.length){
     alert("กรุณาเลือกสินค้า");
     return;
@@ -507,3 +579,6 @@ async function submitOrder(){
   renderCart();
   closeCart();
 }
+
+window.ensureStoreOpen356=ensureStoreOpen356;
+window.applyStoreLock356=applyStoreLock356;
