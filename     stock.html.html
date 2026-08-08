@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>สต็อกร้าน 356</title>
+  <link rel="stylesheet" href="style.css?v=stockfix2">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="manager-auth.js"></script>
+</head>
+<body>
+  <header>
+    <b>📦 สต็อกร้าน</b>
+    <div class="header-actions">
+      <a class="header-link-button" href="stock-issue.html">📤 ตัดออกหลายรายการ</a>
+      <a class="header-link-button" href="stock-receive.html">📥 รับเข้าหลายรายการ</a>
+      <a class="header-link-button" href="stock-order-list.html">🛒 รายการสั่งซื้อ</a>
+      <a class="header-link-button" href="stock-report.html">📊 รายงานสต็อก</a>
+      <a class="header-link-button" href="stock-count.html">🧮 ตรวจนับสต็อก</a>
+      <a class="header-link-button" href="stock-history.html">📜 ประวัติสต็อก</a>
+      <a class="header-link-button" href="kitchen.html">← กลับหลังร้าน</a>
+    </div>
+  </header>
+
+  <main>
+    <section id="stockCenterOverview" class="stock-center-overview">
+      <div class="stock-center-head">
+        <div>
+          <strong>📦 ภาพรวมสต็อกร้าน</strong>
+          <span id="stockCenterSummary">กำลังโหลดข้อมูล...</span>
+        </div>
+        <button id="refreshStockCenterButton" type="button">รีเฟรช</button>
+      </div>
+
+      <div id="stockCenterProblemList" class="stock-center-problem-list"></div>
+
+      <div class="stock-center-totals">
+        <button type="button" data-stock-filter="all">
+          ทั้งหมด <b id="stockItemCount">0</b>
+        </button>
+        <button type="button" data-stock-filter="low">
+          ใกล้หมด <b id="lowStockCount">0</b>
+        </button>
+        <button type="button" data-stock-filter="out">
+          หมดแล้ว <b id="outOfStockCount">0</b>
+        </button>
+      </div>
+    </section>
+
+    <section class="stock-toolbar">
+      <button id="addStockItemButton" class="primary stock-add-item-button" type="button">＋ เพิ่มรายการสต็อก</button>
+      <label>
+        <span>🔍 ค้นหา</span>
+        <input id="stockSearch" type="search" placeholder="เช่น แก้ว ฝา หลอด">
+      </label>
+      <select id="stockStatusFilter">
+        <option value="all">ทั้งหมด</option>
+        <option value="low">ใกล้หมด</option>
+        <option value="out">หมดแล้ว</option>
+      </select>
+    </section>
+
+    <section id="stockList" class="stock-list"></section>
+
+    <footer class="version-label">356 POS V1.8.3 — Bulk Stock Issue</footer>
+  </main>
+
+  <div id="stockItemModal" class="stock-adjust-modal" aria-hidden="true">
+    <div class="stock-adjust-backdrop" data-close-stock-item-modal></div>
+    <section class="stock-adjust-dialog">
+      <div class="stock-adjust-header">
+        <div><h2 id="stockItemModalTitle">เพิ่มรายการสต็อก</h2><div class="muted">กำหนดชื่อ หน่วย และจุดแจ้งเตือน</div></div>
+        <button id="closeStockItemModalButton" type="button">✕</button>
+      </div>
+      <label class="stock-field"><span>ชื่อรายการ</span><input id="stockItemName" type="text" maxlength="100"></label>
+      <label class="stock-field"><span>หมวดหมู่</span><select id="stockItemCategory">
+        <option value="แก้ว">แก้ว</option><option value="ฝา">ฝา</option><option value="หลอด">หลอด</option>
+        <option value="วัตถุดิบ">วัตถุดิบ</option><option value="บรรจุภัณฑ์">บรรจุภัณฑ์</option>
+        <option value="อุปกรณ์">อุปกรณ์</option><option value="อื่น ๆ">อื่น ๆ</option>
+      </select></label>
+      <label class="stock-field"><span>หน่วยนับ</span><input id="stockItemUnit" type="text" maxlength="30" placeholder="เช่น ใบ, เส้น, ขวด"></label>
+      <label class="stock-field"><span>ยอดคงเหลือเริ่มต้น</span><input id="stockItemQuantity" type="number" min="0" step="0.01"></label>
+      <label class="stock-field"><span>แจ้งเตือนเมื่อเหลือ</span><input id="stockItemMinimum" type="number" min="0" step="0.01"></label>
+      <label class="stock-field"><span>ลำดับการแสดง</span><input id="stockItemSortOrder" type="number" min="0" step="1"></label>
+      <label class="stock-active-toggle"><input id="stockItemIsActive" type="checkbox" checked><span>เปิดใช้งานรายการนี้</span></label>
+      <div id="stockItemError" class="stock-error"></div>
+      <button id="saveStockItemButton" class="primary" type="button">บันทึกรายการสต็อก</button>
+      <button id="deleteStockItemButton" class="stock-delete-item-button" type="button">ลบรายการสต็อก</button>
+    </section>
+  </div>
+
+  <div id="stockAdjustModal" class="stock-adjust-modal" aria-hidden="true">
+    <div class="stock-adjust-backdrop" data-close-stock-modal></div>
+    <section class="stock-adjust-dialog">
+      <div class="stock-adjust-header">
+        <div>
+          <h2 id="stockAdjustTitle">ปรับสต็อก</h2>
+          <div id="stockAdjustCurrent" class="muted"></div>
+        </div>
+        <button id="closeStockAdjustButton" type="button">✕</button>
+      </div>
+
+      <label class="stock-field">
+        <span>ประเภทการปรับ</span>
+        <select id="stockMovementType">
+          <option value="in">รับเข้า</option>
+          <option value="out">เบิกใช้ / ของเสีย</option>
+          <option value="set">ตั้งยอดใหม่</option>
+        </select>
+      </label>
+
+      <label class="stock-field">
+        <span id="stockAmountLabel">จำนวน</span>
+        <input id="stockMovementAmount" type="number" min="0" step="1" inputmode="decimal">
+      </label>
+
+      <label class="stock-field">
+        <span>เหตุผล</span>
+        <select id="stockMovementReason">
+          <option value="">เลือกเหตุผล</option>
+          <option value="รับของเข้า">รับของเข้า</option>
+          <option value="เบิกใช้">เบิกใช้</option>
+          <option value="ของเสีย">ของเสีย</option>
+          <option value="ตรวจนับสต็อก">ตรวจนับสต็อก</option>
+          <option value="แก้ไขยอด">แก้ไขยอด</option>
+          <option value="อื่น ๆ">อื่น ๆ</option>
+        </select>
+      </label>
+
+      <label class="stock-field">
+        <span>หมายเหตุ</span>
+        <input id="stockMovementNote" type="text" maxlength="200">
+      </label>
+
+      <div id="stockAdjustError" class="stock-error"></div>
+
+      <button id="saveStockAdjustmentButton" class="primary" type="button">
+        บันทึกการปรับสต็อก
+      </button>
+    </section>
+  </div>
+
+  <script src="stock.js"></script>
+</body>
+</html>
