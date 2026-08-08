@@ -306,6 +306,18 @@ async function loadMenu(){
       menuCategories356=categoryRows||[];
     }
 
+    // Step 16.5.4.2:
+    // ให้หมวด “ซิกเนเจอร์” แสดงบนหน้าลูกค้าได้ทันที
+    // แม้หมวดนี้ยังไม่มีเมนูอยู่ข้างใน
+    if(!menuCategories356.some(c=>c.category_key==="ซิกเนเจอร์")){
+      menuCategories356.push({
+        category_key:"ซิกเนเจอร์",
+        display_name:"ซิกเนเจอร์",
+        sort_order:5,
+        is_active:true
+      });
+    }
+
     renderTabs();
     renderMenu();
   }catch(error){
