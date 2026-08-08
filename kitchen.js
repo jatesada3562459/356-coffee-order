@@ -47,6 +47,11 @@ const checkoutNetTotal = document.getElementById("checkoutNetTotal");
 const cashFields = document.getElementById("cashFields");
 const cashReceived = document.getElementById("cashReceived");
 const changeAmount = document.getElementById("changeAmount");
+const exactCashButton = document.getElementById("exactCashButton");
+const mixedFields = document.getElementById("mixedFields");
+const mixedCashAmount = document.getElementById("mixedCashAmount");
+const mixedPromptPayAmount = document.getElementById("mixedPromptPayAmount");
+const mixedPaidTotal = document.getElementById("mixedPaidTotal");
 const discountError = document.getElementById("discountError");
 const checkoutMemberSearch = document.getElementById("checkoutMemberSearch");
 const checkoutMemberResults = document.getElementById("checkoutMemberResults");
@@ -83,6 +88,10 @@ function injectKitchenStyles() {
     .new-order-flash{animation:newOrderFlash 2s ease-in-out}
     @keyframes newOrderFlash{0%,100%{box-shadow:none}20%,60%{box-shadow:0 0 0 5px rgba(217,45,32,.35);background:#fff1f0}}
     #soundToggle.sound-on{background:#171513;color:#fff}
+    .cash-received-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+    .exact-cash-button{min-height:46px;padding:0 16px;white-space:nowrap;border:1px solid #cfc6bd;border-radius:12px;background:#f3f1ee;color:#0878de;font-weight:900}
+    #mixedFields{border:1px solid #d8d0c7;border-radius:14px;padding:12px;margin:12px 0}
+    .split-summary-row{margin-bottom:0}
   `;
   document.head.appendChild(style);
 }
@@ -184,7 +193,23 @@ function statusText(status) {
 }
 
 function paymentText(method) {
-  return method === "promptpay" ? "พร้อมเพย์" : "จ่ายที่เคาน์เตอร์";
+  if (method === "promptpay") return "พร้อมเพย์";
+  if (method === "mixed") return "เงินสด + พร้อมเพย์";
+  return "จ่ายที่เคาน์เตอร์";
+}
+
+function paymentAmounts(order) {
+  const net = orderFinalTotal(order);
+  const method = order.actual_payment_method || order.payment_method;
+  if (method === "mixed") {
+    return {
+      cash: Number(order.cash_paid_amount || 0),
+      promptpay: Number(order.promptpay_paid_amount || 0)
+    };
+  }
+  return method === "promptpay"
+    ? { cash: 0, promptpay: net }
+    : { cash: net, promptpay: 0 };
 }
 
 function orderTime(value) {
@@ -434,16 +459,10 @@ function updateDashboard() {
   );
 
   const cash = todayPaidOrders
-    .filter(order =>
-      (order.actual_payment_method || order.payment_method) !== "promptpay"
-    )
-    .reduce((sum, order) => sum + orderFinalTotal(order), 0);
+    .reduce((sum, order) => sum + paymentAmounts(order).cash, 0);
 
   const promptPay = todayPaidOrders
-    .filter(order =>
-      (order.actual_payment_method || order.payment_method) === "promptpay"
-    )
-    .reduce((sum, order) => sum + orderFinalTotal(order), 0);
+    .reduce((sum, order) => sum + paymentAmounts(order).promptpay, 0);
 
   const soldItems = classifySoldItems(todayPaidOrders);
   const discountTotal = todayPaidOrders.reduce(
@@ -706,10 +725,15 @@ function calculateCheckout() {
   const change = paymentMethod === "counter"
     ? Math.max(0, received - net)
     : 0;
+  const mixedCash = Math.max(0, Number(mixedCashAmount.value || 0));
+  const mixedPromptPay = Math.max(0, Number(mixedPromptPayAmount.value || 0));
+  const mixedTotal = mixedCash + mixedPromptPay;
 
   checkoutNetTotal.textContent = numberBaht(net);
   changeAmount.textContent = numberBaht(change);
+  mixedPaidTotal.textContent = numberBaht(mixedTotal);
   cashFields.style.display = paymentMethod === "counter" ? "block" : "none";
+  mixedFields.style.display = paymentMethod === "mixed" ? "block" : "none";
   discountError.textContent = "";
 
   if (discount > total) {
@@ -720,6 +744,10 @@ function calculateCheckout() {
     discountError.textContent = "กรุณาระบุเหตุผลส่วนลด";
   } else if (paymentMethod === "counter" && received < net) {
     discountError.textContent = "จำนวนเงินที่รับยังไม่พอยอดสุทธิ";
+  } else if (paymentMethod === "mixed" && (mixedCash <= 0 || mixedPromptPay <= 0)) {
+    discountError.textContent = "กรุณากรอกทั้งยอดเงินสดและยอดพร้อมเพย์";
+  } else if (paymentMethod === "mixed" && Math.abs(mixedTotal - net) > 0.009) {
+    discountError.textContent = `ยอดเงินสด + พร้อมเพย์ ต้องรวมเท่ากับ ${numberBaht(net)}`;
   }
 
   return {
@@ -729,6 +757,8 @@ function calculateCheckout() {
     paymentMethod,
     received,
     change,
+    mixedCash,
+    mixedPromptPay,
     reason: reason === "อื่น ๆ" ? otherReason : reason
   };
 }
@@ -763,6 +793,8 @@ function openCheckout(order) {
   otherDiscountReason.value = "";
   otherReasonWrap.classList.add("hidden");
   cashReceived.value = "";
+  mixedCashAmount.value = "";
+  mixedPromptPayAmount.value = "";
 
   const defaultPayment =
     order.payment_method === "promptpay" ? "promptpay" : "counter";
@@ -799,6 +831,22 @@ discountAmount.addEventListener("input", () => {
   calculateCheckout();
 });
 cashReceived.addEventListener("input", calculateCheckout);
+exactCashButton.addEventListener("click", () => {
+  const total = Number(checkoutOrder?.total || 0);
+  const discount = Math.max(0, Number(discountAmount.value || 0));
+  cashReceived.value = String(Math.max(0, total - discount));
+  calculateCheckout();
+});
+mixedCashAmount.addEventListener("input", () => {
+  if (!checkoutOrder || selectedCheckoutPayment() !== "mixed") return calculateCheckout();
+  const total = Number(checkoutOrder.total || 0);
+  const discount = Math.max(0, Number(discountAmount.value || 0));
+  const net = Math.max(0, total - discount);
+  const cash = Math.max(0, Number(mixedCashAmount.value || 0));
+  mixedPromptPayAmount.value = String(Math.max(0, net - cash));
+  calculateCheckout();
+});
+mixedPromptPayAmount.addEventListener("input", calculateCheckout);
 otherDiscountReason.addEventListener("input", calculateCheckout);
 
 discountReason.addEventListener("change", () => {
@@ -863,9 +911,10 @@ checkoutDoneButton.addEventListener("click", async () => {
     p_discount_amount: result.discount,
     p_discount_reason: result.reason || null,
     p_final_total: result.net,
-    p_payment_method: result.paymentMethod,
+    p_payment_method: result.paymentMethod === "mixed" ? "counter" : result.paymentMethod,
     p_cash_received:
-      result.paymentMethod === "counter" ? result.received : null,
+      result.paymentMethod === "counter" ? result.received :
+      result.paymentMethod === "mixed" ? result.net : null,
     p_change_amount:
       result.paymentMethod === "counter" ? result.change : 0,
     p_member_id: selectedMember?.id || null,
@@ -878,6 +927,18 @@ checkoutDoneButton.addEventListener("click", async () => {
   if (error) {
     alert("บันทึกการชำระเงินไม่สำเร็จ: " + error.message);
     return;
+  }
+
+  if (result.paymentMethod === "mixed") {
+    const { error: splitError } = await sb.rpc("set_order_split_payment_v1", {
+      p_order_id: checkoutOrder.id,
+      p_cash_paid: result.mixedCash,
+      p_promptpay_paid: result.mixedPromptPay
+    });
+    if (splitError) {
+      alert("บันทึกยอดแบ่งชำระไม่สำเร็จ: " + splitError.message);
+      return;
+    }
   }
 
   const saved = Array.isArray(data) ? data[0] : data;
@@ -1177,6 +1238,8 @@ async function loadOrders() {
       actual_payment_method,
       cash_received,
       change_amount,
+      cash_paid_amount,
+      promptpay_paid_amount,
       payment_status,
       paid_at,
       member_id,

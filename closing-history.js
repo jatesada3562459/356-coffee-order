@@ -167,6 +167,8 @@ async function loadAnomalies(businessDate) {
       discount_reason,
       payment_method,
       actual_payment_method,
+      cash_paid_amount,
+      promptpay_paid_amount,
       reward_used,
       refund_status,
       refund_amount,
@@ -224,7 +226,7 @@ async function loadAnomalies(businessDate) {
         order,
         detail:
           `${order.payment_method === "promptpay" ? "พร้อมเพย์" : "เงินสด"} → ` +
-          `${order.actual_payment_method === "promptpay" ? "พร้อมเพย์" : "เงินสด"}`
+          `${order.actual_payment_method === "promptpay" ? "พร้อมเพย์" : order.actual_payment_method === "mixed" ? "เงินสด + พร้อมเพย์" : "เงินสด"}`
       });
     }
   });

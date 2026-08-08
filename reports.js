@@ -350,7 +350,26 @@ function csvEscape(value) {
 }
 
 function paymentMethodText(method) {
-  return method === "promptpay" ? "พร้อมเพย์" : "เงินสด";
+  if (method === "promptpay") return "พร้อมเพย์";
+  if (method === "mixed") return "เงินสด + พร้อมเพย์";
+  return "เงินสด";
+}
+
+function paymentBreakdown(order) {
+  const gross = Number(order.final_total ?? order.total ?? 0);
+  const refund = Number(order.refund_amount || 0);
+  const net = Math.max(0, gross - refund);
+  const method = order.actual_payment_method || order.payment_method;
+  if (method === "mixed") {
+    const cashGross = Number(order.cash_paid_amount || 0);
+    const promptGross = Number(order.promptpay_paid_amount || 0);
+    const paidGross = cashGross + promptGross;
+    const ratio = paidGross > 0 ? net / paidGross : 0;
+    return { cash: cashGross * ratio, promptpay: promptGross * ratio };
+  }
+  return method === "promptpay"
+    ? { cash: 0, promptpay: net }
+    : { cash: net, promptpay: 0 };
 }
 
 function downloadCsvFile() {
@@ -661,6 +680,8 @@ async function loadReport() {
         refund_amount,
         refund_status,
         actual_payment_method,
+        cash_paid_amount,
+        promptpay_paid_amount,
         payment_method,
         payment_status,
         paid_at,
@@ -746,8 +767,9 @@ async function loadReport() {
     discountTotal += Number(order.discount_amount || 0);
     refundTotal += refund;
 
-    if (method === "promptpay") promptPaySales += net;
-    else cashSales += net;
+    const breakdown = paymentBreakdown(order);
+    cashSales += breakdown.cash;
+    promptPaySales += breakdown.promptpay;
 
     if (order.member_id) memberOrders += 1;
 

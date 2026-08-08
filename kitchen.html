@@ -173,17 +173,39 @@
             <input type="radio" name="checkoutPayment" value="promptpay">
             พร้อมเพย์
           </label>
+          <label>
+            <input type="radio" name="checkoutPayment" value="mixed">
+            เงินสด + พร้อมเพย์
+          </label>
         </fieldset>
 
         <div id="cashFields">
           <label class="checkout-field" for="cashReceived">
             <span>รับเงิน (บาท)</span>
-            <input id="cashReceived" type="number" min="0" step="1" inputmode="decimal" placeholder="กรอกจำนวนเงินที่รับ">
+            <div class="cash-received-row">
+              <input id="cashReceived" type="number" min="0" step="1" inputmode="decimal" placeholder="กรอกจำนวนเงินที่รับ">
+              <button id="exactCashButton" class="secondary exact-cash-button" type="button">จ่ายพอดี</button>
+            </div>
           </label>
 
           <div class="change-row">
             <span>เงินทอน</span>
             <strong id="changeAmount">฿0</strong>
+          </div>
+        </div>
+
+        <div id="mixedFields" style="display:none">
+          <label class="checkout-field" for="mixedCashAmount">
+            <span>เงินสด (บาท)</span>
+            <input id="mixedCashAmount" type="number" min="0" step="1" inputmode="decimal" placeholder="กรอกยอดเงินสด">
+          </label>
+          <label class="checkout-field" for="mixedPromptPayAmount">
+            <span>พร้อมเพย์ (บาท)</span>
+            <input id="mixedPromptPayAmount" type="number" min="0" step="1" inputmode="decimal" placeholder="ระบบคำนวณยอดที่เหลือให้">
+          </label>
+          <div class="change-row split-summary-row">
+            <span>รวมที่ชำระ</span>
+            <strong id="mixedPaidTotal">฿0</strong>
           </div>
         </div>
 

@@ -198,7 +198,7 @@ async function loadSystemSales() {
 
   const { data, error } = await sb
     .from("orders")
-    .select("final_total,total,refund_amount,refund_status,actual_payment_method,payment_method,payment_status,paid_at")
+    .select("final_total,total,refund_amount,refund_status,actual_payment_method,payment_method,cash_paid_amount,promptpay_paid_amount,payment_status,paid_at")
     .eq("payment_status", "paid")
     .gte("paid_at", start)
     .lt("paid_at", end);
@@ -217,8 +217,18 @@ async function loadSystemSales() {
     const total = Math.max(0, gross - refunded);
     const method = order.actual_payment_method || order.payment_method;
 
-    if (method === "promptpay") systemPromptPay += total;
-    else systemCashSales += total;
+    if (method === "mixed") {
+      const cashGross = Number(order.cash_paid_amount || 0);
+      const promptGross = Number(order.promptpay_paid_amount || 0);
+      const paidGross = cashGross + promptGross;
+      const ratio = paidGross > 0 ? total / paidGross : 0;
+      systemCashSales += cashGross * ratio;
+      systemPromptPay += promptGross * ratio;
+    } else if (method === "promptpay") {
+      systemPromptPay += total;
+    } else {
+      systemCashSales += total;
+    }
   });
 }
 
