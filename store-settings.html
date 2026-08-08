@@ -8,6 +8,17 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="manager-auth.js"></script>
+
+  <style>
+    .store-holiday-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:10px;align-items:end}
+    .store-holiday-list{display:grid;gap:8px;margin-top:14px}
+    .store-holiday-item{display:grid;grid-template-columns:minmax(120px,.7fr) minmax(0,1.4fr) auto;gap:10px;align-items:center;background:#faf7f2;border:1px solid #e1d9d1;border-radius:13px;padding:11px}
+    .store-holiday-date{font-weight:900}
+    .store-holiday-note{color:#625a53;overflow-wrap:anywhere}
+    .store-holiday-delete{background:#fff0ef;color:#a33229;border:1px solid #e3b9b5}
+    .store-holiday-empty{color:#736b64;padding:8px 2px}
+    @media(max-width:650px){.store-holiday-form{grid-template-columns:1fr}.store-holiday-item{grid-template-columns:1fr}.store-holiday-delete{width:100%}}
+  </style>
 </head>
 <body>
   <header>
@@ -86,6 +97,28 @@
       </label>
     </section>
 
+
+
+    <section class="store-settings-panel">
+      <h2>วันหยุดร้าน</h2>
+      <p class="muted">ตั้งวันหยุดล่วงหน้าได้ วันดังกล่าวหน้าเว็บลูกค้าจะปิดรับออเดอร์อัตโนมัติ</p>
+
+      <div class="store-holiday-form">
+        <label class="store-settings-field">
+          <span>วันที่หยุด</span>
+          <input id="storeHolidayDate" type="date">
+        </label>
+        <label class="store-settings-field">
+          <span>หมายเหตุ (ไม่บังคับ)</span>
+          <input id="storeHolidayNote" type="text" maxlength="120" placeholder="เช่น หยุดสงกรานต์">
+        </label>
+        <button id="addStoreHolidayButton" type="button">＋ เพิ่มวันหยุด</button>
+      </div>
+
+      <div id="storeHolidayError" class="store-settings-error"></div>
+      <div id="storeHolidayList" class="store-holiday-list"></div>
+    </section>
+
     <div id="storeImageStatus" class="store-image-status">ยังไม่ได้เลือกรูปใหม่</div>
     <div id="storeSettingsError" class="store-settings-error"></div>
 
@@ -93,9 +126,9 @@
       บันทึกหน้าร้าน
     </button>
 
-    <footer class="version-label">356 POS V1.5.5 — Image Upload Fix</footer>
+    <footer class="version-label">356 POS V1.5.6 — Store Holidays</footer>
   </main>
 
-  <script src="store-settings-v2.js?v=1152"></script>
+  <script src="store-settings-v2.js?v=1156"></script>
 </body>
 </html>

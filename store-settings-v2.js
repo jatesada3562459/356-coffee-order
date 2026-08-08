@@ -21,6 +21,12 @@ const storeAcceptingOrders = document.getElementById("storeAcceptingOrders");
 const storeImageStatus = document.getElementById("storeImageStatus");
 const storeSettingsError = document.getElementById("storeSettingsError");
 const saveStoreSettingsButton = document.getElementById("saveStoreSettingsButton");
+const storeHolidayDate = document.getElementById("storeHolidayDate");
+const storeHolidayNote = document.getElementById("storeHolidayNote");
+const addStoreHolidayButton = document.getElementById("addStoreHolidayButton");
+const storeHolidayError = document.getElementById("storeHolidayError");
+const storeHolidayList = document.getElementById("storeHolidayList");
+
 
 let coverFile = null;
 let logoFile = null;
@@ -252,6 +258,106 @@ async function requestPin() {
   });
 }
 
+function formatHolidayDate356(value) {
+  if (!value) return "";
+  const [y,m,d] = String(value).split("-");
+  return `${d}/${m}/${y}`;
+}
+
+async function loadStoreHolidays() {
+  storeHolidayError.textContent = "";
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit"
+  }).format(new Date());
+
+  const { data, error } = await sb
+    .from("store_holidays")
+    .select("holiday_date,note")
+    .gte("holiday_date", today)
+    .order("holiday_date", { ascending: true });
+
+  if (error) {
+    storeHolidayList.innerHTML = '<div class="store-holiday-empty">ยังโหลดวันหยุดไม่ได้ — กรุณารันไฟล์ SQL ที่แนบมาก่อน</div>';
+    return;
+  }
+
+  const rows = data || [];
+  if (!rows.length) {
+    storeHolidayList.innerHTML = '<div class="store-holiday-empty">ยังไม่ได้ตั้งวันหยุดร้าน</div>';
+    return;
+  }
+
+  storeHolidayList.innerHTML = "";
+  rows.forEach(row => {
+    const item = document.createElement("div");
+    item.className = "store-holiday-item";
+
+    const date = document.createElement("div");
+    date.className = "store-holiday-date";
+    date.textContent = formatHolidayDate356(row.holiday_date);
+
+    const note = document.createElement("div");
+    note.className = "store-holiday-note";
+    note.textContent = row.note || "วันหยุดร้าน";
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "store-holiday-delete";
+    del.textContent = "ลบ";
+    del.addEventListener("click", async () => {
+      const pin = await requestPin();
+      if (!pin) return;
+      del.disabled = true;
+      const { error } = await sb.rpc("manager_delete_store_holiday", {
+        p_pin: pin,
+        p_holiday_date: row.holiday_date
+      });
+      if (error) {
+        storeHolidayError.textContent = "ลบวันหยุดไม่สำเร็จ: " + error.message;
+        del.disabled = false;
+        return;
+      }
+      await loadStoreHolidays();
+    });
+
+    item.append(date, note, del);
+    storeHolidayList.appendChild(item);
+  });
+}
+
+addStoreHolidayButton?.addEventListener("click", async () => {
+  const holidayDate = storeHolidayDate.value;
+  const note = storeHolidayNote.value.trim();
+  storeHolidayError.textContent = "";
+  if (!holidayDate) {
+    storeHolidayError.textContent = "กรุณาเลือกวันที่หยุด";
+    return;
+  }
+
+  const pin = await requestPin();
+  if (!pin) return;
+  addStoreHolidayButton.disabled = true;
+  addStoreHolidayButton.textContent = "กำลังบันทึก...";
+
+  const { error } = await sb.rpc("manager_save_store_holiday", {
+    p_pin: pin,
+    p_holiday_date: holidayDate,
+    p_note: note || null
+  });
+
+  addStoreHolidayButton.disabled = false;
+  addStoreHolidayButton.textContent = "＋ เพิ่มวันหยุด";
+
+  if (error) {
+    storeHolidayError.textContent = "เพิ่มวันหยุดไม่สำเร็จ: " + error.message;
+    return;
+  }
+
+  storeHolidayDate.value = "";
+  storeHolidayNote.value = "";
+  await loadStoreHolidays();
+});
+
 async function loadStoreSettings() {
   if (loaded) return;
   loaded = true;
@@ -294,6 +400,8 @@ async function loadStoreSettings() {
     currentCoverUrl || currentLogoUrl
       ? "โหลดรูปที่บันทึกไว้แล้ว"
       : "ยังไม่ได้เลือกรูปใหม่";
+
+  await loadStoreHolidays();
 }
 
 saveStoreSettingsButton.addEventListener("click", async () => {

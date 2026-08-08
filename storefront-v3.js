@@ -36,7 +36,7 @@ function bangkokNow356(){
   return {date:`${parts.year}-${parts.month}-${parts.day}`,time:`${parts.hour}:${parts.minute}`};
 }
 
-function calculateStoreStatus(settings){
+function calculateStoreStatus(settings,holiday=null){
   if(settings.accepting_orders===false){
     return {open:false,text:"ปิดรับออเดอร์ชั่วคราว",reason:"paused"};
   }
@@ -49,6 +49,9 @@ function calculateStoreStatus(settings){
   }
   if(overrideDate===now.date && override==="closed"){
     return {open:false,text:"ปิดร้าน",reason:"manual_closed"};
+  }
+  if(holiday){
+    return {open:false,text:"หยุดวันนี้",reason:"holiday",holiday};
   }
 
   const openTime=(settings.open_time||"09:00").slice(0,5);
@@ -74,6 +77,7 @@ function storeHoursMessage356(){
 
 function closedMessage356(){
   if(storeStatusReason356==="paused") return "ร้านหยุดรับออเดอร์ชั่วคราว";
+  if(storeStatusReason356==="holiday") return "ร้านหยุดวันนี้ จะเปิดอีกครั้งตามวันและเวลาทำการถัดไป";
   return `ร้านปิด จะเปิดในวันถัดไปเวลา ${storeHoursMessage356()}`;
 }
 
@@ -99,7 +103,9 @@ function applyStoreLock356(status){
   if(!storeOpen356){
     banner.textContent=storeStatusReason356==="paused"
       ? "ร้านหยุดรับออเดอร์ชั่วคราว"
-      : `ร้านปิด จะเปิดในวันถัดไปเวลา ${storeHoursMessage356()}`;
+      : storeStatusReason356==="holiday"
+        ? "ร้านหยุดวันนี้ จะเปิดอีกครั้งตามวันและเวลาทำการถัดไป"
+        : `ร้านปิด จะเปิดในวันถัดไปเวลา ${storeHoursMessage356()}`;
     banner.style.display="block";
   }else{
     banner.style.display="none";
@@ -133,6 +139,14 @@ async function loadStoreSettings(){
 
   const settings=data||{};
   lastStoreSettings356=settings;
+
+  const today356=bangkokNow356().date;
+  const {data:holiday356,error:holidayError356}=await sb
+    .from("store_holidays")
+    .select("holiday_date,note")
+    .eq("holiday_date",today356)
+    .maybeSingle();
+  if(holidayError356) console.warn("โหลดวันหยุดร้านไม่สำเร็จ",holidayError356);
   $("storeName").textContent=settings.store_name||"356 Coffee & Drink";
   $("storeDescription").textContent=
     settings.description||"เครื่องดื่มและขนมจากร้าน 356";
@@ -182,7 +196,7 @@ async function loadStoreSettings(){
     logoPlaceholder.classList.remove("hidden");
   }
 
-  const status=calculateStoreStatus(settings);
+  const status=calculateStoreStatus(settings,holiday356||null);
   $("storeStatusBadge").textContent=status.text;
   $("storeStatusBadge").classList.toggle("closed",!status.open);
   applyStoreLock356(status);
