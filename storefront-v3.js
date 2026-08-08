@@ -1,5 +1,6 @@
 const sb=supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
 let db={products:[],addons:[]},cat="ทั้งหมด",cart=[],current=null,editIndex=null,qty=1,currentAddon=null;
+let menuCategories356=[];
 let storeOpen356=false;
 let storeStatusReason356="checking";
 let lastStoreSettings356=null;
@@ -213,9 +214,17 @@ async function loadMenu(){
     renderTabs();
     renderMenu();
 
-    const {data:settings,error}=await sb
-      .from("menu_settings")
-      .select("item_type,item_name,category,price,is_active,is_custom,item_data,image_url");
+    const [{data:settings,error},{data:categoryRows,error:categoryError}]=await Promise.all([
+      sb.from("menu_settings").select("item_type,item_name,category,price,is_active,is_custom,item_data,image_url"),
+      sb.from("menu_categories").select("category_key,display_name,sort_order,is_active").order("sort_order",{ascending:true})
+    ]);
+
+    if(categoryError){
+      console.warn("โหลดการจัดการหมวดหมู่ไม่สำเร็จ ใช้หมวดจากเมนูเดิมแทน",categoryError);
+      menuCategories356=[];
+    }else{
+      menuCategories356=categoryRows||[];
+    }
 
     if(error){
       console.warn("โหลดการตั้งค่าเมนูไม่สำเร็จ ใช้ราคาในไฟล์เดิมแทน",error);
@@ -297,14 +306,33 @@ loadStoreSettings();
 loadMenu();
 setInterval(loadStoreSettings,10000);
 
+function visibleCategoryKeys356(){
+  if(!menuCategories356.length) return null;
+  return new Set(menuCategories356.filter(c=>c.is_active!==false).map(c=>c.category_key));
+}
+
 function renderTabs(){
-  const cats=["ทั้งหมด",...new Set(db.products.filter(x=>x.is_active!==false).map(x=>x.category)),"ADD-ON"];
+  let cats;
+  if(menuCategories356.length){
+    const activeProducts=db.products.filter(x=>x.is_active!==false);
+    cats=[{key:"ทั้งหมด",label:"ทั้งหมด"},
+      ...menuCategories356
+        .filter(c=>c.is_active!==false)
+        .sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
+        .filter(c=>activeProducts.some(p=>p.category===c.category_key))
+        .map(c=>({key:c.category_key,label:c.display_name})),
+      {key:"ADD-ON",label:"ADD-ON"}];
+  }else{
+    cats=[{key:"ทั้งหมด",label:"ทั้งหมด"},...new Set(db.products.filter(x=>x.is_active!==false).map(x=>x.category))].map(x=>({key:x,label:x}));
+    cats.push({key:"ADD-ON",label:"ADD-ON"});
+  }
+  if(cat!=="ทั้งหมด"&&!cats.some(c=>c.key===cat)) cat="ทั้งหมด";
   $("tabs").innerHTML="";
   cats.forEach(c=>{
     const b=document.createElement("button");
-    b.textContent=c;
-    b.className=c===cat?"active":"";
-    b.onclick=()=>{cat=c;renderTabs();renderMenu()};
+    b.textContent=c.label;
+    b.className=c.key===cat?"active":"";
+    b.onclick=()=>{cat=c.key;renderTabs();renderMenu()};
     $("tabs").appendChild(b);
   });
 }
@@ -330,7 +358,7 @@ function renderMenu(){
   }
 
   db.products
-    .filter(x=>x.is_active!==false&&(cat==="ทั้งหมด"||x.category===cat))
+    .filter(x=>{const visible=visibleCategoryKeys356(); return x.is_active!==false && (!visible || visible.has(x.category)) && (cat==="ทั้งหมด"||x.category===cat)})
     .forEach(p=>{
       const d=document.createElement("div");
       d.className="card";

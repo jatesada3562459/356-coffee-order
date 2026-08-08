@@ -27,6 +27,18 @@
       <button id="addMenuButton" class="add-menu-button" type="button">➕ เพิ่มเมนูใหม่</button>
     </section>
 
+
+    <section class="category-manager-panel">
+      <div class="category-manager-head">
+        <div>
+          <strong>🗂️ จัดการหมวดหมู่</strong>
+          <div class="category-manager-help">เพิ่ม เปลี่ยนชื่อ เรียงลำดับ หรือซ่อนหมวดหมู่ได้เอง</div>
+        </div>
+        <button id="addCategoryButton" class="add-category-button" type="button">➕ เพิ่มหมวดหมู่</button>
+      </div>
+      <div id="categoryManagerList" class="category-manager-list"></div>
+    </section>
+
     <section class="menu-settings-summary">
       <div><span>รายการทั้งหมด</span><strong id="allMenuCount">0</strong></div>
       <div><span>เปิดขาย</span><strong id="activeMenuCount">0</strong></div>
@@ -42,7 +54,7 @@
       </button>
     </div>
 
-    <footer class="version-label">356 POS V1.5.3 — Menu Images</footer>
+    <footer class="version-label">356 POS V1.6.5.4 — Custom Categories</footer>
   </main>
 
 
@@ -189,6 +201,45 @@
       </div>
     </section>
   </div>
+
+
+  <div id="categoryEditorModal" class="menu-editor-modal" aria-hidden="true">
+    <div class="menu-editor-backdrop" data-close-category-editor></div>
+    <section class="menu-editor-dialog category-editor-dialog" role="dialog" aria-modal="true">
+      <div class="menu-editor-header">
+        <h2 id="categoryEditorTitle">เพิ่มหมวดหมู่</h2>
+        <button id="closeCategoryEditorButton" type="button">✕</button>
+      </div>
+      <label class="menu-editor-field">
+        <span>ชื่อหมวดหมู่</span>
+        <input id="categoryDisplayName" type="text" maxlength="60" placeholder="เช่น ซิกเนเจอร์">
+      </label>
+      <label class="menu-active-editor">
+        <input id="categoryIsActive" type="checkbox" checked>
+        <span>แสดงหมวดนี้บนหน้าเว็บลูกค้า</span>
+      </label>
+      <div id="categoryEditorError" class="menu-editor-error"></div>
+      <div class="menu-editor-actions">
+        <button id="deleteCategoryButton" class="delete-menu-button hidden" type="button">ลบหมวดหมู่</button>
+        <button id="saveCategoryButton" class="primary" type="button">บันทึกหมวดหมู่</button>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    .category-manager-panel{background:#fff;border:1px solid #dfd8d0;border-radius:16px;padding:14px;margin:0 0 12px}
+    .category-manager-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .category-manager-help{font-size:13px;color:#736b64;margin-top:4px}
+    .add-category-button{border:0;border-radius:12px;padding:10px 14px;font-weight:900;min-height:44px}
+    .category-manager-list{display:grid;gap:8px;margin-top:12px}
+    .category-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #e5ddd5;border-radius:12px;padding:10px}
+    .category-row.hidden-category{opacity:.62;background:#f5f5f5}
+    .category-row-name{font-weight:900}.category-row-meta{font-size:12px;color:#766d65;margin-top:3px}
+    .category-row-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .category-row-actions button{border:0;border-radius:9px;min-width:38px;min-height:38px;padding:7px 10px;font-weight:800}
+    .category-move{background:#eee}.category-edit{background:#f1eee9;color:#1674c8}
+    @media(max-width:620px){.category-manager-head{align-items:stretch;flex-direction:column}.add-category-button{width:100%}.category-row{grid-template-columns:1fr}.category-row-actions{justify-content:flex-start}}
+  </style>
 
   <script src="settings.js"></script>
 </body>

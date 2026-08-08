@@ -12,6 +12,16 @@ const inactiveMenuCount = document.getElementById("inactiveMenuCount");
 const menuSettingsStatus = document.getElementById("menuSettingsStatus");
 const saveMenuSettingsButton = document.getElementById("saveMenuSettingsButton");
 const addMenuButton = document.getElementById("addMenuButton");
+const addCategoryButton = document.getElementById("addCategoryButton");
+const categoryManagerList = document.getElementById("categoryManagerList");
+const categoryEditorModal = document.getElementById("categoryEditorModal");
+const categoryEditorTitle = document.getElementById("categoryEditorTitle");
+const closeCategoryEditorButton = document.getElementById("closeCategoryEditorButton");
+const categoryDisplayName = document.getElementById("categoryDisplayName");
+const categoryIsActive = document.getElementById("categoryIsActive");
+const categoryEditorError = document.getElementById("categoryEditorError");
+const saveCategoryButton = document.getElementById("saveCategoryButton");
+const deleteCategoryButton = document.getElementById("deleteCategoryButton");
 
 const menuEditorModal = document.getElementById("menuEditorModal");
 const menuEditorTitle = document.getElementById("menuEditorTitle");
@@ -38,6 +48,8 @@ let editingItem = null;
 let pendingImageFile = null;
 let editorImageUrl = null;
 let removeCurrentImage = false;
+let categories = [];
+let editingCategory = null;
 
 function itemKey(item) {
   return `${item.item_type}:${item.item_name}`;
@@ -61,25 +73,61 @@ function updateSummary() {
   inactiveMenuCount.textContent = items.filter(item => !item.is_active).length.toLocaleString("th-TH");
 }
 
+function categoryLabel(key) {
+  return categories.find(c => c.category_key === key)?.display_name || key || "อื่น ๆ";
+}
+
+function activeCategoryRows() {
+  return categories
+    .filter(c => c.is_active !== false)
+    .sort((a,b) => Number(a.sort_order||0) - Number(b.sort_order||0));
+}
+
 function buildCategories() {
   const previous = menuSettingsCategory.value;
-  const categories = [...new Set(
-    items
-      .filter(item => item.item_type === "product")
-      .map(item => item.category)
-      .filter(Boolean)
-  )].sort((a,b)=>a.localeCompare(b,"th"));
+  const rows = categories.length
+    ? categories.slice().sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
+    : [...new Set(items.filter(i=>i.item_type==="product").map(i=>i.category).filter(Boolean))]
+        .map((name,index)=>({category_key:name,display_name:name,sort_order:index+1,is_active:true}));
 
   menuSettingsCategory.innerHTML =
     '<option value="ทั้งหมด">ทุกหมวดหมู่</option>' +
-    categories.map(category =>
-      `<option value="${category}">${category}</option>`
-    ).join("") +
+    rows.map(c => `<option value="${c.category_key}">${c.display_name}${c.is_active===false?" (ซ่อน)":""}</option>`).join("") +
     '<option value="ADD-ON">ADD-ON</option>';
+
+  editorCategory.innerHTML =
+    '<option value="">เลือกหมวดหมู่</option>' +
+    rows.filter(c=>c.is_active!==false).map(c => `<option value="${c.category_key}">${c.display_name}</option>`).join("");
 
   if ([...menuSettingsCategory.options].some(option => option.value === previous)) {
     menuSettingsCategory.value = previous;
   }
+}
+
+function renderCategoryManager(){
+  if(!categoryManagerList) return;
+  const rows=categories.slice().sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0));
+  if(!rows.length){
+    categoryManagerList.innerHTML='<div class="empty-state">ยังไม่มีข้อมูลหมวดหมู่</div>';
+    return;
+  }
+  categoryManagerList.innerHTML='';
+  rows.forEach((c,index)=>{
+    const row=document.createElement('div');
+    row.className=`category-row ${c.is_active===false?'hidden-category':''}`;
+    const count=items.filter(i=>i.item_type==='product'&&i.category===c.category_key).length;
+    row.innerHTML=`
+      <div><div class="category-row-name">${c.display_name}</div><div class="category-row-meta">${count} เมนู • ${c.is_active===false?'ซ่อนจากหน้าลูกค้า':'แสดงบนหน้าลูกค้า'}</div></div>
+      <div class="category-row-actions">
+        <button class="category-move up" type="button" ${index===0?'disabled':''}>↑</button>
+        <button class="category-move down" type="button" ${index===rows.length-1?'disabled':''}>↓</button>
+        <button class="category-edit" type="button">แก้ไข</button>
+      </div>`;
+    row.querySelector('.category-edit').addEventListener('click',()=>openCategoryEditor(c));
+    row.querySelector('.up').addEventListener('click',()=>moveCategory(c,-1));
+    row.querySelector('.down').addEventListener('click',()=>moveCategory(c,1));
+    categoryManagerList.appendChild(row);
+  });
 }
 
 function renderItems() {
@@ -116,7 +164,7 @@ function renderItems() {
       <div class="menu-setting-info">
         <div>
           <span class="menu-setting-category">
-            ${item.item_type === "addon" ? "ADD-ON" : item.category}
+            ${item.item_type === "addon" ? "ADD-ON" : categoryLabel(item.category)}
           </span>
           ${item.is_custom ? '<span class="custom-menu-badge">เมนูเพิ่มเอง</span>' : ""}
           <h3>${item.item_name}</h3>
@@ -199,6 +247,18 @@ async function loadSettings() {
     }))
   ];
 
+  const { data: categoryData, error: categoryError } = await sb
+    .from("menu_categories")
+    .select("category_key,display_name,sort_order,is_active")
+    .order("sort_order", { ascending: true });
+
+  if (categoryError) {
+    console.warn("โหลดหมวดหมู่แบบจัดการเองไม่สำเร็จ ใช้หมวดจากเมนูเดิมแทน", categoryError);
+    categories = [];
+  } else {
+    categories = categoryData || [];
+  }
+
   const { data: settings, error } = await sb
     .from("menu_settings")
     .select("item_type,item_name,category,price,is_active,is_custom,item_data,image_url");
@@ -245,6 +305,7 @@ async function loadSettings() {
   items = [...defaultItems, ...customItems];
   originalItems = cloneItems(items);
   buildCategories();
+  renderCategoryManager();
   updateSummary();
   renderItems();
   setDirty(false);
@@ -396,6 +457,11 @@ function openMenuEditor(item = null) {
       : "แก้ไขตัวเลือกเมนู";
     editorItemType.value = item.item_type;
     editorItemName.value = item.item_name;
+    if (item.item_type === "product" && item.category && ![...editorCategory.options].some(o=>o.value===item.category)) {
+      const opt=document.createElement("option");
+      opt.value=item.category; opt.textContent=categoryLabel(item.category)+" (ซ่อน)";
+      editorCategory.appendChild(opt);
+    }
     editorCategory.value = item.category || "";
     editorPrice.value = Number(item.price);
     editorIsActive.checked = Boolean(item.is_active);
@@ -511,6 +577,89 @@ async function requestManagerPin(title = "ยืนยันการเปล�
     setTimeout(() => input.focus(), 80);
   });
 }
+
+function openCategoryEditor(category=null){
+  editingCategory=category;
+  categoryEditorError.textContent="";
+  categoryEditorTitle.textContent=category?"แก้ไขหมวดหมู่":"เพิ่มหมวดหมู่";
+  categoryDisplayName.value=category?.display_name||"";
+  categoryIsActive.checked=category?category.is_active!==false:true;
+  deleteCategoryButton.classList.toggle("hidden",!category);
+  categoryEditorModal.classList.add("show");
+  categoryEditorModal.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+  setTimeout(()=>categoryDisplayName.focus(),80);
+}
+
+function closeCategoryEditor(){
+  categoryEditorModal.classList.remove("show");
+  categoryEditorModal.setAttribute("aria-hidden","true");
+  document.body.style.overflow="";
+  editingCategory=null;
+}
+
+async function saveCategoryOrder(){
+  const pin=await requestManagerPin("ยืนยันเรียงลำดับหมวดหมู่");
+  if(!pin) return false;
+  const payload=categories
+    .slice().sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
+    .map((c,index)=>({category_key:c.category_key,sort_order:index+1}));
+  const {error}=await sb.rpc("manager_reorder_menu_categories",{p_pin:pin,p_categories:payload});
+  if(error){alert("เรียงหมวดหมู่ไม่สำเร็จ: "+error.message);return false;}
+  return true;
+}
+
+async function moveCategory(category,direction){
+  const rows=categories.slice().sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0));
+  const index=rows.findIndex(c=>c.category_key===category.category_key);
+  const target=index+direction;
+  if(index<0||target<0||target>=rows.length) return;
+  [rows[index],rows[target]]=[rows[target],rows[index]];
+  rows.forEach((c,i)=>c.sort_order=i+1);
+  categories=rows;
+  renderCategoryManager(); buildCategories();
+  if(await saveCategoryOrder()){ await loadSettings(); }
+  else { await loadSettings(); }
+}
+
+saveCategoryButton.addEventListener("click",async()=>{
+  const name=categoryDisplayName.value.trim();
+  categoryEditorError.textContent="";
+  if(!name){categoryEditorError.textContent="กรุณากรอกชื่อหมวดหมู่";return;}
+  if(categories.some(c=>c.display_name.trim().toLowerCase()===name.toLowerCase()&&c!==editingCategory)){
+    categoryEditorError.textContent="มีชื่อหมวดหมู่นี้อยู่แล้ว";return;
+  }
+  const pin=await requestManagerPin(editingCategory?"ยืนยันแก้ไขหมวดหมู่":"ยืนยันเพิ่มหมวดหมู่");
+  if(!pin) return;
+  saveCategoryButton.disabled=true; saveCategoryButton.textContent="กำลังบันทึก...";
+  const {error}=await sb.rpc("manager_upsert_menu_category",{
+    p_pin:pin,
+    p_category_key:editingCategory?.category_key||null,
+    p_display_name:name,
+    p_is_active:categoryIsActive.checked,
+    p_sort_order:editingCategory?.sort_order||categories.length+1
+  });
+  saveCategoryButton.disabled=false; saveCategoryButton.textContent="บันทึกหมวดหมู่";
+  if(error){categoryEditorError.textContent="บันทึกไม่สำเร็จ: "+error.message;return;}
+  closeCategoryEditor(); await loadSettings();
+});
+
+deleteCategoryButton.addEventListener("click",async()=>{
+  if(!editingCategory) return;
+  const used=items.filter(i=>i.item_type==='product'&&i.category===editingCategory.category_key).length;
+  const msg=used?`หมวดนี้มี ${used} เมนู หากลบ หมวดและเมนูในหมวดนี้จะไม่แสดงบนหน้าลูกค้า แต่ข้อมูลเมนูจะไม่ถูกลบ\n\nยืนยันลบหมวด “${editingCategory.display_name}” หรือไม่?`:`ยืนยันลบหมวด “${editingCategory.display_name}” หรือไม่?`;
+  if(!confirm(msg)) return;
+  const pin=await requestManagerPin("ยืนยันลบหมวดหมู่"); if(!pin) return;
+  deleteCategoryButton.disabled=true; deleteCategoryButton.textContent="กำลังลบ...";
+  const {error}=await sb.rpc("manager_delete_menu_category",{p_pin:pin,p_category_key:editingCategory.category_key});
+  deleteCategoryButton.disabled=false; deleteCategoryButton.textContent="ลบหมวดหมู่";
+  if(error){categoryEditorError.textContent="ลบไม่สำเร็จ: "+error.message;return;}
+  closeCategoryEditor(); await loadSettings();
+});
+
+addCategoryButton.addEventListener("click",()=>openCategoryEditor());
+closeCategoryEditorButton.addEventListener("click",closeCategoryEditor);
+categoryEditorModal.querySelector("[data-close-category-editor]").addEventListener("click",closeCategoryEditor);
 
 saveMenuEditorButton.addEventListener("click", async () => {
   const type = editorItemType.value;
