@@ -214,17 +214,10 @@ async function loadMenu(){
     renderTabs();
     renderMenu();
 
-    const [{data:settings,error},{data:categoryRows,error:categoryError}]=await Promise.all([
-      sb.from("menu_settings").select("item_type,item_name,category,price,is_active,is_custom,item_data,image_url"),
-      sb.from("menu_categories").select("category_key,display_name,sort_order,is_active").order("sort_order",{ascending:true})
-    ]);
-
-    if(categoryError){
-      console.warn("โหลดการจัดการหมวดหมู่ไม่สำเร็จ ใช้หมวดจากเมนูเดิมแทน",categoryError);
-      menuCategories356=[];
-    }else{
-      menuCategories356=categoryRows||[];
-    }
+    // โหลดข้อมูลเมนูก่อน เพื่อให้ราคา/รูปแสดงทันที ไม่ต้องรอข้อมูลหมวดหมู่
+    const {data:settings,error}=await sb
+      .from("menu_settings")
+      .select("item_type,item_name,category,price,is_active,is_custom,item_data,image_url");
 
     if(error){
       console.warn("โหลดการตั้งค่าเมนูไม่สำเร็จ ใช้ราคาในไฟล์เดิมแทน",error);
@@ -275,6 +268,7 @@ async function loadMenu(){
           category:item.category||"อื่น ๆ",
           price:Number(item.price),
           groups:Array.isArray(item.item_data?.groups)?item.item_data.groups:[],
+          recommended:Boolean(item.item_data?.recommended),
           is_active:item.is_active,
           is_custom:true,
           image_url:item.image_url||null
@@ -293,6 +287,23 @@ async function loadMenu(){
 
       db.products.push(...customProducts);
       db.addons.push(...customAddons);
+    }
+
+    // ตอนนี้ข้อมูลรูป/ราคาได้แล้ว แสดงก่อนทันที
+    renderTabs();
+    renderMenu();
+
+    // โหลดหมวดหมู่แยกภายหลัง เพื่อไม่ให้การโหลดหมวดใหม่ทำให้รูปเมนูหาย/ค้าง
+    const {data:categoryRows,error:categoryError}=await sb
+      .from("menu_categories")
+      .select("category_key,display_name,sort_order,is_active")
+      .order("sort_order",{ascending:true});
+
+    if(categoryError){
+      console.warn("โหลดการจัดการหมวดหมู่ไม่สำเร็จ ใช้หมวดจากเมนูเดิมแทน",categoryError);
+      menuCategories356=[];
+    }else{
+      menuCategories356=categoryRows||[];
     }
 
     renderTabs();
@@ -314,18 +325,32 @@ function visibleCategoryKeys356(){
 function renderTabs(){
   let cats;
   if(menuCategories356.length){
-    const activeProducts=db.products.filter(x=>x.is_active!==false);
-    cats=[{key:"ทั้งหมด",label:"ทั้งหมด"},
+    cats=[
+      {key:"ทั้งหมด",label:"ทั้งหมด"},
+      {key:"แนะนำ",label:"แนะนำ"},
       ...menuCategories356
         .filter(c=>c.is_active!==false)
         .sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
-        .filter(c=>activeProducts.some(p=>p.category===c.category_key))
         .map(c=>({key:c.category_key,label:c.display_name})),
-      {key:"ADD-ON",label:"ADD-ON"}];
+      {key:"ADD-ON",label:"ADD-ON"}
+    ];
   }else{
-    cats=[{key:"ทั้งหมด",label:"ทั้งหมด"},...new Set(db.products.filter(x=>x.is_active!==false).map(x=>x.category))].map(x=>({key:x,label:x}));
-    cats.push({key:"ADD-ON",label:"ADD-ON"});
+    cats=[
+      {key:"ทั้งหมด",label:"ทั้งหมด"},
+      {key:"แนะนำ",label:"แนะนำ"},
+      ...[...new Set(db.products.filter(x=>x.is_active!==false).map(x=>x.category))].map(x=>({key:x,label:x})),
+      {key:"ADD-ON",label:"ADD-ON"}
+    ];
   }
+
+  // กันชื่อซ้ำ เช่น มีหมวดชื่อ “แนะนำ” หรือ ADD-ON อยู่ในฐานข้อมูล
+  const seen=new Set();
+  cats=cats.filter(c=>{
+    if(seen.has(c.key)) return false;
+    seen.add(c.key);
+    return true;
+  });
+
   if(cat!=="ทั้งหมด"&&!cats.some(c=>c.key===cat)) cat="ทั้งหมด";
   $("tabs").innerHTML="";
   cats.forEach(c=>{
@@ -345,7 +370,7 @@ function renderMenu(){
       d.className="card";
       d.innerHTML=`
         ${a.image_url
-          ? `<img class="menu-card-image" src="${a.image_url}" alt="${a.name}" loading="lazy">`
+          ? `<img class="menu-card-image" src="${a.image_url}" alt="${a.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="menu-card-placeholder" style="display:none">356</div>`
           : `<div class="menu-card-placeholder">356</div>`}
         <div class="name">${a.name}</div>
         <div class="price">+฿${a.price}</div>
@@ -358,13 +383,13 @@ function renderMenu(){
   }
 
   db.products
-    .filter(x=>{const visible=visibleCategoryKeys356(); return x.is_active!==false && (!visible || visible.has(x.category)) && (cat==="ทั้งหมด"||x.category===cat)})
+    .filter(x=>{const visible=visibleCategoryKeys356(); return x.is_active!==false && (!visible || visible.has(x.category)) && (cat==="ทั้งหมด"||(cat==="แนะนำ"&&x.recommended===true)||x.category===cat)})
     .forEach(p=>{
       const d=document.createElement("div");
       d.className="card";
       d.innerHTML=`
         ${p.image_url
-          ? `<img class="menu-card-image" src="${p.image_url}" alt="${p.name}" loading="lazy">`
+          ? `<img class="menu-card-image" src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="menu-card-placeholder" style="display:none">356</div>`
           : `<div class="menu-card-placeholder">356</div>`}
         <div class="name">${p.name}</div>
         <div class="price">฿${p.price}</div>
