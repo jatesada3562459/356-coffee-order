@@ -2607,501 +2607,373 @@ html[lang="en"] .card .name{
   }
 }
 
-
 /* =========================================================
-   356 POS — BACK OFFICE TABLE RESTORE PACK
-   Restores table/card layouts across Reports + Stock modules
-   without changing data, JS, Supabase, or business logic.
+   356 POS — VERIFIED BACK-OFFICE CARD GRID
+   Built from real selectors in the uploaded project ZIP.
+   Target visual: same 2-column rounded-card language as stock.html.
    ========================================================= */
 
-/* ---------- Shared table surface ---------- */
-.table-wrap,
-.table-container,
-.data-table-wrap,
-.report-table-wrap,
-.stock-table-wrap,
-.responsive-table{
-  width:100%;
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
+/* ---------- Shared page width ---------- */
+body:has(.bulk-issue-list) main,
+body:has(.bulk-receive-list) main,
+body:has(.reorder-list) main,
+body:has(.stock-report-filter) main,
+body:has(.stock-count-list) main,
+body:has(.stock-history-list) main,
+body:has(.stock-rule-list) main,
+body:has(.report-summary-grid) main{
+  max-width:1100px;
+}
+
+/* ---------- Shared white panels ---------- */
+.bulk-issue-help,.bulk-receive-help,.reorder-help,
+.bulk-issue-summary,.bulk-receive-summary,.reorder-summary,
+.bulk-issue-toolbar,.bulk-receive-toolbar,.reorder-toolbar,
+.reorder-selected-summary,.reorder-note-panel,
+.stock-report-filter,.stock-report-summary,.stock-report-section,
+.stock-count-help,.stock-count-summary,.stock-count-toolbar,.stock-count-save-panel,
+.stock-rule-help,.stock-standard-panel,.stock-rule-audit,.stock-rule-editor,
+.report-export-panel,.report-filter-panel,.report-section,
+.report-chart-card{
   background:#fff;
   border:1px solid var(--line);
   border-radius:16px;
-  margin:12px 0;
+  padding:14px;
+  margin-bottom:12px;
+  min-width:0;
 }
 
-main table,
-.data-table,
-.report-table,
-.sales-table,
-.stock-table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  background:#fff;
-  color:var(--ink);
-  font-size:14px;
+/* ---------- Summary chips / counters ---------- */
+.bulk-issue-summary,.bulk-receive-summary,.reorder-summary,
+.stock-report-summary,.stock-rule-audit-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+.bulk-issue-summary > *, .bulk-receive-summary > *, .reorder-summary > *,
+.stock-report-summary > *, .stock-rule-audit-summary > *{
+  background:#f4f1ed;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  min-width:0;
 }
 
-main table th,
-main table td,
-.data-table th,.data-table td,
-.report-table th,.report-table td,
-.sales-table th,.sales-table td,
-.stock-table th,.stock-table td{
-  padding:11px 12px;
-  text-align:left;
-  vertical-align:middle;
-  border-bottom:1px solid var(--line);
-}
-
-main table th,
-.data-table th,
-.report-table th,
-.sales-table th,
-.stock-table th{
-  background:#f3efea;
-  color:var(--ink);
-  font-weight:900;
-  white-space:nowrap;
-  position:sticky;
-  top:0;
-  z-index:1;
-}
-
-main table tr:last-child td,
-.data-table tr:last-child td,
-.report-table tr:last-child td,
-.sales-table tr:last-child td,
-.stock-table tr:last-child td{border-bottom:0}
-
-main table tbody tr:hover,
-.data-table tbody tr:hover,
-.report-table tbody tr:hover,
-.sales-table tbody tr:hover,
-.stock-table tbody tr:hover{background:#faf8f5}
-
-/* ---------- Shared toolbar / filters ---------- */
-.stock-page-toolbar,
-.bulk-stock-toolbar,
-.report-toolbar,
-.report-filters,
-.stock-filters,
-.filter-bar,
-.filters{
-  display:flex;
-  flex-wrap:wrap;
+/* ---------- Toolbars / filters ---------- */
+.bulk-issue-toolbar,.bulk-receive-toolbar,.reorder-toolbar,
+.stock-count-toolbar,.stock-report-filter,.report-filter-panel{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(180px,.65fr) auto;
   gap:10px;
   align-items:end;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:12px;
-  margin:12px 0;
 }
-
-.stock-page-toolbar input,
-.stock-page-toolbar select,
-.bulk-stock-toolbar input,
-.bulk-stock-toolbar select,
-.report-toolbar input,
-.report-toolbar select,
-.report-filters input,
-.report-filters select,
-.stock-filters input,
-.stock-filters select,
-.filter-bar input,.filter-bar select,
-.filters input,.filters select{
-  min-height:42px;
+.bulk-issue-toolbar input,.bulk-issue-toolbar select,
+.bulk-receive-toolbar input,.bulk-receive-toolbar select,
+.reorder-toolbar input,.reorder-toolbar select,
+.stock-count-toolbar input,.stock-count-toolbar select,
+.stock-report-filter input,.stock-report-filter select,
+.report-filter-panel input,.report-filter-panel select{
+  width:100%;
+  min-height:44px;
   border:1px solid #d6cec6;
-  border-radius:10px;
+  border-radius:12px;
   padding:9px 11px;
   background:#fff;
   font:inherit;
 }
 
-/* ---------- Stock sub-pages: restore row/card grid ---------- */
-#stockIssueList,
-#stockReceiveList,
-#stockOrderList,
-#stockReportList,
-#stockCountList,
-#stockHistoryList,
-#stockRulesList,
-#issueList,
-#receiveList,
-#orderList,
-#reportList,
-#countList,
-#historyList,
-#rulesList,
-.bulk-stock-list,
-.stock-issue-list,
-.stock-receive-list,
-.stock-order-list,
-.stock-report-list,
-.stock-count-list,
-.stock-history-list,
-.stock-rules-list{
+/* =========================================================
+   STOCK ISSUE / RECEIVE
+   Real: .bulk-issue-list > .bulk-issue-card
+         .bulk-receive-list > .bulk-receive-card
+   ========================================================= */
+.bulk-issue-list,.bulk-receive-list{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-  margin-top:12px;
-}
-
-/* direct rows/items from the stock sub-page renderers */
-#stockIssueList > *,#stockReceiveList > *,#stockOrderList > *,
-#stockReportList > *,#stockCountList > *,#stockHistoryList > *,#stockRulesList > *,
-#issueList > *,#receiveList > *,#orderList > *,#reportList > *,#countList > *,
-#historyList > *,#rulesList > *,
-.bulk-stock-list > *,
-.stock-issue-list > *,
-.stock-receive-list > *,
-.stock-order-list > *,
-.stock-report-list > *,
-.stock-count-list > *,
-.stock-history-list > *,
-.stock-rules-list > *{
-  min-width:0;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px;
-}
-
-/* probable renderer row class names used by the stock modules */
-.stock-row,.stock-item-row,.bulk-stock-row,.bulk-item,
-.issue-row,.receive-row,.order-stock-row,.count-row,.history-row,.rule-row,
-.stock-report-row,.stock-rule-row,.stock-history-row,.stock-count-row{
-  display:grid;
-  grid-template-columns:minmax(180px,1.6fr) minmax(120px,.8fr) minmax(140px,1fr);
-  gap:10px;
-  align-items:center;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px;
-  margin:8px 0;
-}
-
-.stock-row input[type="number"],.stock-item-row input[type="number"],
-.bulk-stock-row input[type="number"],.bulk-item input[type="number"],
-.issue-row input[type="number"],.receive-row input[type="number"],
-.count-row input[type="number"],.rule-row input[type="number"],
-.stock-count-row input[type="number"],.stock-rule-row input[type="number"]{
-  width:100%;
-  min-height:40px;
-  border:1px solid #d6cec6;
-  border-radius:9px;
-  padding:8px 10px;
-  background:#fff;
-  font:inherit;
-}
-
-/* ---------- Sales report page ---------- */
-.report-summary,
-.sales-summary,
-.report-summary-grid,
-.sales-summary-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px;
+  gap:12px;
   margin:12px 0;
 }
-
-.report-summary > *,
-.sales-summary > *,
-.report-summary-grid > *,
-.sales-summary-grid > *{
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px;
-  min-width:0;
-}
-
-/* Lists on report page that previously visually read as a table */
-#salesReportTable,
-#reportTable,
-#salesTable,
-#topMenuTable,
-#menuSalesTable{
-  width:100%;
-}
-
-.report-list,
-.sales-list,
-#reportRows,
-#salesRows,
-#topMenus,
-#topMenuList{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:0;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:16px;
-  overflow:hidden;
-  margin:12px 0;
-}
-
-.report-list > *,
-.sales-list > *,
-#reportRows > *,
-#salesRows > *,
-#topMenus > *,
-#topMenuList > *{
-  display:grid;
-  grid-template-columns:50px minmax(180px,1fr) 110px 120px;
-  gap:10px;
-  align-items:center;
-  padding:10px 12px;
-  border-bottom:1px solid var(--line);
-  min-width:0;
-}
-.report-list > *:last-child,
-.sales-list > *:last-child,
-#reportRows > *:last-child,
-#salesRows > *:last-child,
-#topMenus > *:last-child,
-#topMenuList > *:last-child{border-bottom:0}
-
-/* ---------- History / rules utility cards ---------- */
-.stock-history-card,.history-card,.stock-rule-card,.rule-card,
-.stock-order-card,.stock-report-card,.stock-count-card,
-.stock-receive-card,.stock-issue-card{
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px;
-  margin:8px 0;
-}
-
-/* ---------- Keep page actions aligned ---------- */
-.page-actions,
-.stock-actions,
-.report-actions,
-.bulk-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  align-items:center;
-  margin:10px 0;
-}
-
-/* ---------- Tablet / phone ---------- */
-@media(max-width:760px){
-  #stockIssueList,#stockReceiveList,#stockOrderList,#stockReportList,
-  #stockCountList,#stockHistoryList,#stockRulesList,
-  #issueList,#receiveList,#orderList,#reportList,#countList,#historyList,#rulesList,
-  .bulk-stock-list,.stock-issue-list,.stock-receive-list,.stock-order-list,
-  .stock-report-list,.stock-count-list,.stock-history-list,.stock-rules-list{
-    grid-template-columns:1fr;
-  }
-
-  .stock-row,.stock-item-row,.bulk-stock-row,.bulk-item,
-  .issue-row,.receive-row,.order-stock-row,.count-row,.history-row,.rule-row,
-  .stock-report-row,.stock-rule-row,.stock-history-row,.stock-count-row{
-    grid-template-columns:1fr;
-  }
-
-  .report-summary,.sales-summary,.report-summary-grid,.sales-summary-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-
-  main table,
-  .data-table,.report-table,.sales-table,.stock-table{
-    min-width:680px;
-  }
-
-  .report-list > *,
-  .sales-list > *,
-  #reportRows > *,
-  #salesRows > *,
-  #topMenus > *,
-  #topMenuList > *{
-    grid-template-columns:36px minmax(145px,1fr) 80px 90px;
-    padding:9px 10px;
-    font-size:13px;
-  }
-}
-
-@media(max-width:480px){
-  .report-summary,.sales-summary,.report-summary-grid,.sales-summary-grid{
-    grid-template-columns:1fr 1fr;
-  }
-}
-
-/* =========================================================
-   356 POS — VERIFIED STOCK SUBPAGE LAYOUT FIX
-   Selectors verified from current HTML/JS source, 2026-08-08
-   ========================================================= */
-
-/* All stock sub-page item containers: same 2-column card rhythm as stock overview */
-.bulk-issue-list,
-.bulk-receive-list,
-.reorder-list,
-.stock-count-list,
-.stock-history-list,
-.stock-rule-list,
-.stock-attention-list,
-.stock-usage-summary-list,
-.stock-report-movement-list {
-  display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  gap:12px !important;
-  align-items:stretch;
-}
-
-/* Actual item classes emitted by each page's JS */
-.bulk-issue-card,
-.bulk-receive-card,
-.reorder-card,
-.stock-count-card,
-.stock-history-item,
-.stock-rule-card,
-.stock-attention-card,
-.stock-usage-row,
-.stock-report-movement {
-  min-width:0;
-  width:100%;
-  margin:0 !important;
+.bulk-issue-card,.bulk-receive-card{
   background:#fff;
   border:1px solid var(--line);
   border-radius:16px;
   padding:14px;
-  box-shadow:none;
+  min-width:0;
 }
+.bulk-issue-card.filled,.bulk-receive-card.filled{
+  border-color:#d8c47a;
+  background:#fffdf4;
+}
+.bulk-issue-card.invalid{border-color:#dfaaa4;background:#fff8f7}
+.bulk-issue-info,.bulk-receive-info{min-width:0}
+.bulk-issue-info h3,.bulk-receive-info h3{margin:6px 0 8px;font-size:19px}
+.bulk-issue-current,.bulk-receive-current{color:var(--muted);line-height:1.55}
+.bulk-issue-input,.bulk-receive-input{display:block;margin-top:12px;font-weight:800}
+.bulk-issue-input input,.bulk-receive-input input{
+  width:100%;min-height:42px;border:1px solid #d6cec6;border-radius:11px;padding:9px 10px;font:inherit;background:#fff
+}
+.bulk-issue-save,.bulk-receive-save{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px}
 
-/* Bulk issue / receive */
-.bulk-issue-card,
-.bulk-receive-card {
+/* =========================================================
+   REORDER LIST
+   Real: .reorder-list > .reorder-card
+   ========================================================= */
+.reorder-list{
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(145px,.72fr);
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:12px;
-  align-items:center;
+  margin:12px 0;
 }
-.bulk-issue-info h3,
-.bulk-receive-info h3,
-.reorder-card h3,
-.stock-count-card h3,
-.stock-rule-card h3 { margin:5px 0 8px; }
-.bulk-issue-input input,
-.bulk-receive-input input,
-.stock-count-input-wrap input {
-  width:100%;
-  min-height:44px;
-  border:1px solid #d6cec6;
-  border-radius:11px;
-  padding:10px;
-  background:#fff;
-  font:inherit;
-}
-
-/* Reorder cards */
-.reorder-card {
+.reorder-card{
+  position:relative;
   display:grid;
   grid-template-columns:auto minmax(0,1fr);
-  gap:10px;
+  gap:12px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
+}
+.reorder-card.selected{border-color:#cdbd75;background:#fffdf4}
+.reorder-card.out{border-color:#dfaaa4;background:#fff8f7}
+.reorder-card.low{border-color:#e6cd67;background:#fffdf4}
+.reorder-card-info,.reorder-quantity{min-width:0}
+.reorder-card-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.reorder-card-title h3{margin:5px 0 0;font-size:19px}
+.reorder-status{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;white-space:nowrap}
+.reorder-status.out{background:#fff0ef;color:#a33229}
+.reorder-status.low{background:#fff3c9;color:#775b00}
+.reorder-status.ok{background:#eaf7ef;color:#166c41}
+.reorder-current-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.reorder-current-grid > div{background:#f7f4ef;border-radius:10px;padding:9px}
+.reorder-current-grid span{display:block;color:var(--muted);font-size:12px}
+.reorder-current-grid b{display:block;margin-top:4px}
+.reorder-quantity{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+.reorder-quantity input{width:100%;min-height:40px;border:1px solid #d6cec6;border-radius:10px;padding:8px 10px;font:inherit}
+.reorder-toolbar-actions,.reorder-share-actions,.stock-report-filter-actions,.stock-report-actions,.stock-count-toolbar-actions,.report-quick-actions{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center
+}
+
+/* =========================================================
+   STOCK REPORT
+   Real: .stock-attention-list > .stock-attention-card
+         .stock-usage-summary-list > .stock-usage-row
+         .stock-report-movement-list > .stock-report-movement
+   ========================================================= */
+.stock-attention-list,.stock-usage-summary-list,.stock-report-movement-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.stock-attention-card,.stock-usage-row,.stock-report-movement{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
+}
+.stock-attention-card.low{border-color:#e6cd67;background:#fffdf4}
+.stock-attention-card.out{border-color:#dfaaa4;background:#fff8f7}
+.stock-attention-value{font-size:20px;font-weight:900;margin-top:8px}
+.stock-usage-main strong,.stock-report-movement-title{font-weight:900}
+.stock-usage-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.stock-usage-metrics > div{background:#f7f4ef;border-radius:10px;padding:9px}
+.stock-usage-metrics span{display:block;color:var(--muted);font-size:12px}
+.stock-usage-metrics b{display:block;margin-top:4px}
+.stock-report-movement{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.stock-report-movement-main{min-width:0}
+.stock-report-movement-value{font-weight:900;white-space:nowrap}
+.stock-report-movement.in{border-left:4px solid #198754}
+.stock-report-movement.out{border-left:4px solid #d92d20}
+.stock-report-movement.set{border-left:4px solid #c77b32}
+.stock-report-section-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+
+/* =========================================================
+   STOCK COUNT
+   Real: .stock-count-list > .stock-count-card
+   ========================================================= */
+.stock-count-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin:12px 0;
+}
+.stock-count-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
+}
+.stock-count-card.positive{border-color:#b8ddc7;background:#f7fcf9}
+.stock-count-card.negative{border-color:#e7b8b3;background:#fff8f7}
+.stock-count-card-info h3{margin:5px 0 8px;font-size:19px}
+.stock-count-input-wrap{display:block;margin-top:10px;font-weight:800}
+.stock-count-input-wrap input{width:100%;min-height:42px;border:1px solid #d6cec6;border-radius:11px;padding:9px 10px;font:inherit}
+.stock-count-difference{display:block;margin-top:6px;color:var(--muted)}
+
+/* =========================================================
+   STOCK HISTORY
+   Real: .stock-history-list > .stock-history-item
+   ========================================================= */
+.stock-history-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.stock-history-item{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
+}
+.stock-history-item.in{border-left:4px solid #198754}
+.stock-history-item.out{border-left:4px solid #d92d20}
+.stock-history-item.set{border-left:4px solid #c77b32}
+.stock-history-title{font-weight:900}
+.stock-history-values{margin-top:8px;font-weight:900}
+
+/* =========================================================
+   STOCK RULES / AUTO DEDUCTION
+   Real: #stockRuleList.stock-rule-list > .stock-rule-card
+         .stock-rule-audit-result > .stock-rule-audit-card
+   ========================================================= */
+.stock-rule-list,.stock-rule-audit-result{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin:12px 0;
   align-items:start;
 }
-.reorder-current-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-
-/* Count cards */
-.stock-count-card {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(150px,.8fr);
-  gap:12px;
-  align-items:center;
+.stock-rule-card,.stock-rule-audit-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
 }
-
-/* History */
-.stock-history-item {
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:flex-start;
-}
-.stock-history-values { flex:0 0 auto; text-align:right; }
-
-/* Automatic stock deduction recipe page — verified classes */
-.stock-rule-card { display:block !important; }
-.stock-rule-lines {
-  display:grid;
-  gap:8px;
-  margin-top:10px;
-}
-.stock-rule-row {
-  display:grid !important;
-  grid-template-columns:minmax(0,1fr) auto !important;
-  gap:10px;
-  align-items:center;
-  background:#faf7f2;
-  border:1px solid #eee5dc;
-  border-radius:12px;
-  padding:10px 12px;
-}
-.stock-rule-row > div { min-width:0; }
-.stock-rule-row strong,
-.stock-rule-row small { display:block; }
-.stock-rule-delete { flex:0 0 auto; }
-
-/* Stock report sub-sections */
-.stock-attention-card,
-.stock-report-movement {
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:flex-start;
-}
-.stock-usage-row {
+.stock-rule-card h3{margin:0 0 10px;font-size:19px}
+.stock-rule-lines{display:grid;gap:8px}
+.stock-rule-row{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  background:#f7f4ef;
+  border-radius:11px;
+  padding:10px;
+}
+.stock-rule-row small{display:block;color:var(--muted);margin-top:3px}
+.stock-rule-delete{background:#fff0ef;color:#a33229;padding:8px 10px}
+.stock-rule-audit-card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.stock-rule-audit-card.ok{border-color:#b8ddc7}
+.stock-rule-audit-card.check,.stock-rule-audit-card.missing{border-color:#e6cd67;background:#fffdf4}
+.audit-rule-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.audit-rule-chip{background:#f0ece7;border-radius:999px;padding:5px 8px;font-size:12px;font-weight:800}
+.stock-rule-editor{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end}
+.stock-rule-editor .stock-field{margin:0}
+.stock-rule-editor #stockRuleError,.stock-rule-editor #addStockRuleButton{grid-column:1 / -1}
+
+/* =========================================================
+   SALES REPORT
+   Real: .report-summary-grid > .report-summary-card
+         .report-list > .report-row
+         .category-sales-grid > .category-sales-card
+   ========================================================= */
+.report-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:12px;
+  margin:12px 0;
+}
+.report-summary-card{
+  background:#fff;
+  color:var(--ink);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
+  min-height:96px;
+}
+/* Fix the previously invisible net-sales card: its .hero class must stay dark. */
+.report-summary-card.hero{
+  background:#241f1a !important;
+  color:#fff !important;
+  border-color:#241f1a !important;
+}
+.report-summary-card span{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}
+.report-summary-card.hero span{color:#e8e1db}
+.report-summary-card strong{display:block;font-size:24px;overflow-wrap:anywhere}
+
+.report-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.report-row{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
   align-items:center;
 }
-.stock-usage-metrics { min-width:0; }
-.stock-attention-value,
-.stock-report-movement-value { flex:0 0 auto; text-align:right; }
-
-/* Reports: keep list data in clear white bordered rows/cards */
-.report-list {
-  display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  gap:12px !important;
-  background:transparent !important;
-  border:0 !important;
-  border-radius:0 !important;
-  overflow:visible !important;
+.top-menu-row{grid-template-columns:auto minmax(0,1fr)}
+.report-rank{width:32px;height:32px;border-radius:999px;background:#171513;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
+.report-row-main{min-width:0}
+.report-row-main small{display:block;color:var(--muted);margin-top:4px}
+.top-menu-title-line{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.category-badge{background:#f0ece7;border-radius:999px;padding:4px 7px;font-size:12px;font-weight:800}
+.report-progress,.category-progress{height:7px;background:#eee7df;border-radius:999px;overflow:hidden;margin-top:8px}
+.report-progress span,.category-progress span{display:block;height:100%;background:var(--accent);border-radius:999px}
+.category-sales-grid,.comparison-summary-grid,.report-chart-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
 }
-.report-list > .report-row,
-.report-list > * {
-  display:block !important;
+.category-sales-card,.comparison-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
   min-width:0;
-  background:#fff !important;
-  border:1px solid var(--line) !important;
-  border-radius:16px !important;
-  padding:14px !important;
-  margin:0 !important;
+}
+.category-sales-head{display:flex;justify-content:space-between;gap:10px}
+.category-sales-value{font-size:23px;font-weight:900;margin:8px 0}
+.comparison-card.full{grid-column:1 / -1}
+
+/* ---------- Empty states inside card grids span full width ---------- */
+.bulk-issue-list > .empty-state,.bulk-receive-list > .empty-state,.reorder-list > .empty-state,
+.stock-attention-list > .empty-state,.stock-usage-summary-list > .empty-state,.stock-report-movement-list > .empty-state,
+.stock-count-list > .empty-state,.stock-history-list > .empty-state,.stock-rule-list > .empty-state,
+.stock-rule-audit-result > .empty-state,.report-list > .empty-state,.category-sales-grid > .empty-state{
+  grid-column:1 / -1;
 }
 
-@media (max-width:700px){
-  .bulk-issue-list,
-  .bulk-receive-list,
-  .reorder-list,
-  .stock-count-list,
-  .stock-history-list,
-  .stock-rule-list,
-  .stock-attention-list,
-  .stock-usage-summary-list,
-  .stock-report-movement-list,
-  .report-list {
-    grid-template-columns:1fr !important;
-  }
-  .bulk-issue-card,
-  .bulk-receive-card,
-  .stock-count-card,
-  .stock-usage-row {
+/* ---------- iPad stays 2 columns; phones collapse ---------- */
+@media(max-width:700px){
+  .bulk-issue-list,.bulk-receive-list,.reorder-list,
+  .stock-attention-list,.stock-usage-summary-list,.stock-report-movement-list,
+  .stock-count-list,.stock-history-list,.stock-rule-list,.stock-rule-audit-result,
+  .report-summary-grid,.report-list,.category-sales-grid,.comparison-summary-grid,.report-chart-grid{
     grid-template-columns:1fr;
   }
+  .bulk-issue-summary,.bulk-receive-summary,.reorder-summary,.stock-report-summary,.stock-rule-audit-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .bulk-issue-toolbar,.bulk-receive-toolbar,.reorder-toolbar,
+  .stock-count-toolbar,.stock-report-filter,.report-filter-panel,
+  .stock-rule-editor{
+    grid-template-columns:1fr;
+  }
+  .stock-rule-editor #stockRuleError,.stock-rule-editor #addStockRuleButton{grid-column:auto}
+  .comparison-card.full{grid-column:auto}
 }
