@@ -1,0 +1,2609 @@
+
+:root{
+  --bg:#f5f1ea;
+  --card:#ffffff;
+  --ink:#171513;
+  --muted:#736b64;
+  --line:#e5ddd5;
+  --accent:#c77b32;
+  --red:#d92d20;
+  --yellow:#f4c430;
+  --green:#198754;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  padding:14px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header b{font-size:20px}
+button{
+  font:inherit;
+  border:0;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:800;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+button:active{transform:scale(.98)}
+main{
+  max-width:900px;
+  margin:auto;
+  padding:16px 16px 100px;
+}
+.hero{
+  background:#241f1a;
+  color:#fff;
+  padding:22px;
+  border-radius:20px;
+}
+.hero h1{margin:0 0 12px}
+.tabs{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:16px 0;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  flex:0 0 auto;
+  white-space:nowrap;
+  background:#eee;
+  color:#0878e6;
+}
+.tabs button.active{
+  background:var(--ink);
+  color:#fff;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  cursor:pointer;
+  min-width:0;
+}
+.card .name{
+  font-weight:800;
+  min-height:44px;
+  overflow-wrap:anywhere;
+}
+.card .price{
+  font-weight:900;
+  color:var(--accent);
+  margin:8px 0;
+  font-size:18px;
+}
+.card button{background:#eee;color:#0878e6}
+.primary{
+  width:100%;
+  background:var(--ink);
+  color:#fff;
+  padding:14px;
+}
+.panel{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  display:none;
+  overflow:auto;
+  z-index:20;
+}
+.panel.show{display:block}
+.wrap{
+  max-width:800px;
+  margin:auto;
+  padding:16px 16px 100px;
+}
+.opts label{
+  display:block;
+  padding:9px 0;
+  border-bottom:1px solid #eee;
+}
+.qty{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.qty button{
+  width:42px;
+  height:42px;
+  font-size:22px;
+}
+.qty span{
+  min-width:30px;
+  text-align:center;
+  font-size:20px;
+  font-weight:900;
+}
+.row{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  margin:10px 0;
+}
+.actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.actions button{flex:1}
+.muted{
+  color:var(--muted);
+  font-size:14px;
+  margin-top:4px;
+}
+.total{
+  font-size:22px;
+  font-weight:900;
+  margin:16px 0;
+}
+input[type=text]{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:12px;
+  font:inherit;
+}
+
+/* หลังร้าน */
+.order{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  margin:12px 0;
+}
+.order-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+.order-top h3{margin:10px 0 6px}
+.order-meta{
+  line-height:1.7;
+  margin:10px 0;
+}
+.status{
+  display:inline-block;
+  padding:7px 11px;
+  border-radius:999px;
+  font-weight:900;
+}
+.status-new{background:var(--red);color:#fff}
+.status-making{background:var(--yellow);color:#111}
+.status-ready{background:var(--green);color:#fff}
+.price{
+  font-weight:900;
+  color:var(--accent);
+}
+.addon-card{border-style:dashed}
+
+@media(min-width:650px){
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+
+/* ===== 356 POS V1.1: Dashboard / Search / Version ===== */
+.header-actions{display:flex;gap:8px;align-items:center}
+.dashboard{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.dashboard-title{
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:12px;
+}
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.summary-card{
+  background:#f7f4ef;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  min-width:0;
+}
+.summary-card span{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:5px;
+}
+.summary-card strong{
+  display:block;
+  font-size:21px;
+  overflow-wrap:anywhere;
+}
+.search-panel{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px;
+  margin-bottom:12px;
+}
+.search-panel label{
+  display:block;
+  font-weight:900;
+  margin-bottom:8px;
+}
+.search-panel input[type="search"]{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:12px;
+  font:inherit;
+  background:#fff;
+}
+.search-result-count{
+  min-height:18px;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:7px;
+}
+.empty-state{
+  background:#fff;
+  border:1px dashed var(--line);
+  border-radius:14px;
+  padding:24px;
+  text-align:center;
+  color:var(--muted);
+}
+.version-label{
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  padding:24px 0 8px;
+}
+@media(min-width:700px){
+  .dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+/* ===== 356 POS V1.1.1: ออเดอร์ใหม่อยู่บนสุด + แท็บสถานะ ===== */
+.status-counts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.status-counts span{padding:7px 10px;border-radius:999px;font-size:13px;font-weight:900}
+.count-new{background:#fde4e1;color:#a61b12}
+.count-making{background:#fff2b8;color:#594700}
+.count-ready{background:#dff3e7;color:#0f5d35}
+.order-tabs{display:flex;gap:8px;overflow-x:auto;margin:12px 0;padding-bottom:2px;scrollbar-width:none}
+.order-tabs::-webkit-scrollbar{display:none}
+.order-tab{flex:0 0 auto;background:#fff;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.order-tab.active{background:var(--ink);color:#fff}
+.order-tab span{display:inline-block;min-width:22px;padding:2px 6px;margin-left:4px;border-radius:999px;background:rgba(255,255,255,.22)}
+
+/* หน้าต่างคิดเงิน V1.1.3 */
+.checkout-modal{position:fixed;inset:0;display:none;z-index:1000}
+.checkout-modal.show{display:block}
+.checkout-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.checkout-dialog{position:relative;width:calc(100% - 32px);max-width:480px;margin:8vh auto 0;background:#fff;border-radius:20px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.checkout-close{position:absolute;right:12px;top:10px;background:#eee;width:40px;height:40px;font-size:24px;line-height:1;padding:0}
+.checkout-order-info{line-height:1.7;background:#f7f3ee;border-radius:12px;padding:12px;margin:14px 0}
+.checkout-total-row{display:flex;justify-content:space-between;align-items:center;font-size:20px;padding:16px 0;border-top:1px solid #e5ddd5;border-bottom:1px solid #e5ddd5}
+.checkout-total-row strong{font-size:26px;color:#c77b32}
+.checkout-note{color:#736b64;font-size:14px;line-height:1.6}
+.checkout-btn{background:#171513;color:#fff}
+
+
+/* V1.1.3.1 ส่วนลดและยอดสุทธิ */
+.checkout-field{display:block;margin:14px 0}
+.checkout-field span{display:block;font-weight:800;margin-bottom:7px}
+.checkout-field input{width:100%;padding:12px;border:1px solid #cfc6bd;border-radius:12px;background:#fff;font:inherit}
+.checkout-net-row{background:#fff8e9;border-radius:12px;padding:14px;margin-top:10px}
+.checkout-error{min-height:20px;color:#b42318;font-weight:700;margin:8px 0}
+
+
+/* V1.1.3.2 เหตุผลส่วนลด */
+.checkout-field select{
+  width:100%;
+  padding:12px;
+  border:1px solid #cfc6bd;
+  border-radius:12px;
+  background:#fff;
+  font:inherit;
+}
+.checkout-field.hidden{display:none}
+
+
+/* V1.1.3.3 วิธีชำระ รับเงิน และเงินทอน */
+.payment-fieldset{
+  border:1px solid #d8d0c7;
+  border-radius:14px;
+  padding:12px;
+  margin:14px 0;
+}
+.payment-fieldset legend{
+  font-weight:900;
+  padding:0 6px;
+}
+.payment-fieldset label{
+  display:block;
+  padding:8px 0;
+}
+.change-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#eef8f1;
+  border-radius:12px;
+  padding:13px;
+  margin:10px 0 14px;
+}
+.change-row strong{
+  font-size:22px;
+  color:#198754;
+}
+
+
+/* V1.1.3.4 บันทึกการชำระเงินจริง */
+.paid-badge{
+  display:inline-block;
+  background:#e0f2e8;
+  color:#11623a;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  margin-left:6px;
+}
+#checkoutDoneButton:disabled{opacity:.6}
+
+
+/* V1.1.3.5 ประวัติออเดอร์และเลือกวันที่ */
+.history-date-filter{
+  background:#fff;
+  border:1px solid #ded7cf;
+  border-radius:16px;
+  padding:14px;
+  margin:12px 0;
+}
+.history-date-filter.hidden{display:none}
+.history-date-filter > label{
+  display:block;
+  font-weight:900;
+  margin-bottom:9px;
+}
+.history-date-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:8px;
+}
+.history-date-row input,
+.history-date-row button{
+  min-height:44px;
+  border:1px solid #d8d0c7;
+  border-radius:12px;
+  padding:8px 10px;
+  background:#fff;
+  font:inherit;
+}
+.payment-summary{
+  background:#faf7f2;
+  border:1px solid #e4ddd5;
+  border-radius:12px;
+  padding:11px 12px;
+  margin-top:10px;
+}
+.payment-summary > div{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:4px 0;
+}
+.payment-summary-net{
+  border-top:1px solid #ded7cf;
+  margin-top:5px;
+  padding-top:9px!important;
+  font-size:17px;
+}
+@media (max-width:560px){
+  .history-date-row{grid-template-columns:1fr 1fr}
+  .history-date-row input{grid-column:1 / -1}
+}
+
+/* แก้หน้าคิดเงินให้เลื่อนขึ้นลงและไม่ชิดขอบล่าง */
+.checkout-modal{
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:20px 12px max(80px, env(safe-area-inset-bottom));
+}
+.checkout-dialog{
+  margin:0 auto;
+  max-height:none;
+  padding-bottom:36px;
+}
+
+
+/* ===== V1.2.0 ระบบสมาชิก ขั้นที่ 1 ===== */
+.header-link-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color:#0878de;
+  background:#efefef;
+  border-radius:13px;
+  padding:11px 14px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.member-panel{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+}
+.member-panel h2{
+  margin:0 0 14px;
+}
+.member-field{
+  display:block;
+  margin:12px 0;
+}
+.member-field span,
+.member-search-label{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.member-field input,
+#memberSearch{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  padding:12px;
+  border:1px solid #cfc6bd;
+  border-radius:13px;
+  font:inherit;
+  background:#fff;
+}
+.member-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+  margin:8px 0;
+}
+.member-count{
+  margin-top:9px;
+  color:#6f655d;
+  font-weight:700;
+}
+.member-list{
+  display:grid;
+  gap:12px;
+}
+.member-card{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:18px;
+  padding:15px;
+}
+.member-card-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.member-card h3{
+  margin:0 0 5px;
+  font-size:20px;
+}
+.member-phone{
+  color:#5f5750;
+}
+.member-stamp{
+  background:#fff3cd;
+  color:#7a5200;
+  border-radius:999px;
+  padding:7px 11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.member-meta{
+  margin-top:12px;
+  line-height:1.7;
+}
+.edit-member-button{
+  width:100%;
+  margin-top:12px;
+  min-height:44px;
+  border:0;
+  border-radius:12px;
+  color:#0878de;
+  background:#eeeeee;
+  font-weight:900;
+  font-size:16px;
+}
+
+
+/* ===== V1.2.1 เชื่อมสมาชิกกับหน้าคิดเงิน ===== */
+.checkout-member-box{
+  background:#f7f4ef;
+  border:1px solid #ddd5cc;
+  border-radius:14px;
+  padding:12px;
+  margin:14px 0;
+}
+.checkout-member-title{
+  font-weight:900;
+  margin-bottom:8px;
+}
+#checkoutMemberSearch{
+  width:100%;
+  box-sizing:border-box;
+  min-height:45px;
+  border:1px solid #cfc6bd;
+  border-radius:12px;
+  padding:11px;
+  font:inherit;
+  background:#fff;
+}
+.checkout-member-results{
+  display:grid;
+  gap:7px;
+  margin-top:8px;
+}
+.checkout-member-result{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  border:1px solid #ded6cd;
+  border-radius:11px;
+  padding:10px;
+  background:#fff;
+  color:#171513;
+}
+.member-result-empty{
+  color:#746b63;
+  padding:8px 2px;
+}
+.selected-member-box{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  background:#eaf7ef;
+  border:1px solid #b8ddc7;
+  border-radius:12px;
+  padding:11px;
+  margin-top:9px;
+  line-height:1.55;
+}
+.selected-member-box.hidden{display:none}
+#clearSelectedMember{
+  flex:0 0 auto;
+  background:#fff;
+  color:#b42318;
+  border:1px solid #e1b7b2;
+  border-radius:10px;
+  padding:8px;
+}
+.cup-count-preview{
+  margin-top:9px;
+  color:#5d554e;
+  font-weight:800;
+  font-size:14px;
+}
+
+
+/* ===== V1.2.2 ใช้สิทธิ์ลด 30 บาท ===== */
+.reward-use-box{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:#fff7d6;
+  border:1px solid #ead078;
+  border-radius:12px;
+  padding:11px;
+  margin-top:10px;
+}
+.reward-use-box.hidden{display:none}
+.reward-use-message{
+  margin-top:4px;
+  color:#695616;
+  font-size:13px;
+  line-height:1.4;
+}
+.reward-switch{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex:0 0 auto;
+  font-weight:900;
+}
+.reward-switch input{
+  width:22px;
+  height:22px;
+}
+@media (max-width:560px){
+  .reward-use-box{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+
+
+/* ===== V1.2.2 Final: ข้อความสมาชิกอ่านง่าย ===== */
+.member-meta{
+  line-height:1.8;
+}
+
+
+/* ===== Step 9 Dashboard สรุปยอดขาย ===== */
+.dashboard-grid-step9{
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+.dashboard-grid-step9 .summary-card{
+  min-height:88px;
+}
+.dashboard-grid-step9 .summary-card span{
+  line-height:1.35;
+}
+.dashboard-grid-step9 .summary-card strong{
+  font-size:23px;
+}
+@media (min-width:760px){
+  .dashboard-grid-step9{
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+  }
+}
+
+
+/* ===== Step 9.1 Dashboard เต็ม ===== */
+.dashboard-full{
+  padding:16px;
+}
+.dashboard-heading-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:14px;
+}
+.dashboard-date{
+  margin-top:4px;
+  color:#6b625b;
+  font-size:14px;
+}
+.dashboard-live-badge{
+  background:#e9f7ee;
+  color:#187143;
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.dashboard-hero{
+  background:linear-gradient(135deg,#171513,#4b4036);
+  color:#fff;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:14px;
+}
+.dashboard-hero span,
+.dashboard-hero small{
+  display:block;
+}
+.dashboard-hero strong{
+  display:block;
+  margin:5px 0 6px;
+  font-size:34px;
+  line-height:1.1;
+}
+.dashboard-hero small{
+  color:#e8e1db;
+}
+.top-products-panel{
+  margin-top:14px;
+  background:#fff;
+  border:1px solid #e1d9d1;
+  border-radius:16px;
+  padding:14px;
+}
+.top-products-title{
+  font-weight:900;
+  margin-bottom:10px;
+}
+.top-products-list{
+  display:grid;
+  gap:8px;
+}
+.top-product-row{
+  display:grid;
+  grid-template-columns:32px minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  background:#faf7f2;
+  border-radius:12px;
+  padding:10px;
+}
+.top-product-rank{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#171513;
+  color:#fff;
+  font-weight:900;
+}
+.top-product-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight:800;
+}
+.top-product-empty{
+  color:#776d65;
+  padding:8px 2px;
+}
+@media (max-width:560px){
+  .dashboard-heading-row{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .dashboard-live-badge{
+    align-self:flex-start;
+  }
+}
+
+
+/* ===== V1.4.0 เงินในเก๊ะและปิดยอด ===== */
+.cash-panel{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+}
+.cash-panel h2{
+  margin:0 0 12px;
+}
+.cash-field{
+  display:block;
+  margin:12px 0;
+}
+.cash-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.cash-field input,
+.cash-field select{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  padding:12px;
+  border:1px solid #cfc6bd;
+  border-radius:13px;
+  font:inherit;
+  background:#fff;
+}
+.cash-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+  margin:8px 0;
+}
+.cash-heading-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.cash-status-badge{
+  background:#e9f7ee;
+  color:#187143;
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:13px;
+  font-weight:900;
+}
+.cash-status-badge.closed{
+  background:#eee;
+  color:#666;
+}
+.cash-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+.cash-summary-card{
+  background:#faf7f2;
+  border-radius:14px;
+  padding:12px;
+}
+.cash-summary-card span{
+  display:block;
+  color:#6a6159;
+  font-size:13px;
+}
+.cash-summary-card strong{
+  display:block;
+  margin-top:6px;
+  font-size:20px;
+}
+.cash-summary-card.highlight{
+  background:#fff4cf;
+}
+.cash-action-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.cash-action-button{
+  min-height:48px;
+  border:0;
+  border-radius:13px;
+  font-weight:900;
+  font-size:16px;
+}
+.cash-action-button.cash-in{
+  background:#e8f7ee;
+  color:#166c41;
+}
+.cash-action-button.cash-out{
+  background:#fff0ef;
+  color:#a33229;
+}
+.cash-movement-form{
+  margin-top:14px;
+  border-top:1px solid #e2dbd3;
+  padding-top:14px;
+}
+.cash-movement-form.hidden{display:none}
+.cash-form-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.cash-form-actions button{
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  font-weight:900;
+}
+.cash-movement-list{
+  display:grid;
+  gap:9px;
+  margin-top:14px;
+}
+.cash-movement-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  border-radius:13px;
+  padding:12px;
+}
+.cash-movement-item.in{
+  background:#eef8f2;
+}
+.cash-movement-item.out{
+  background:#fff2f1;
+}
+.cash-movement-item div div{
+  margin-top:3px;
+}
+.cash-movement-item small{
+  color:#756b63;
+}
+.cash-movement-item > strong{
+  white-space:nowrap;
+}
+.reconcile-grid{
+  display:grid;
+  gap:10px;
+  margin:14px 0;
+}
+.reconcile-card{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  background:#faf7f2;
+  border-radius:13px;
+  padding:12px;
+}
+.reconcile-card.total{
+  border:2px solid #cfc6bd;
+}
+.difference-positive{color:#187143}
+.difference-negative{color:#b42318}
+.difference-zero{color:#171513}
+.reconcile-message{
+  border-radius:12px;
+  padding:11px;
+  margin:10px 0;
+  font-weight:800;
+}
+.reconcile-message:empty{display:none}
+.reconcile-ok{background:#e8f7ee;color:#166c41}
+.reconcile-warning{background:#fff5cf;color:#775b00}
+.reconcile-error{background:#fff0ef;color:#a33229}
+.danger-primary{
+  background:#b42318!important;
+}
+@media (min-width:760px){
+  .cash-summary-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .reconcile-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .reconcile-card{
+    display:block;
+  }
+  .reconcile-card strong{
+    display:block;
+    margin-top:7px;
+    font-size:22px;
+  }
+}
+
+
+/* ===== V1.4.1 ประวัติปิดยอดและรายการผิดปกติ ===== */
+.closing-filter-panel{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:end;
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.closing-filter-panel label{
+  grid-column:1 / -1;
+  font-weight:900;
+}
+.closing-filter-panel input,
+.closing-filter-panel button{
+  min-height:46px;
+  border:1px solid #d6cec6;
+  border-radius:12px;
+  padding:10px;
+  background:#fff;
+  font:inherit;
+}
+.closing-summary-panel{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+.closing-summary-card{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:15px;
+  padding:12px;
+}
+.closing-summary-card span{
+  display:block;
+  color:#6d645c;
+  font-size:13px;
+}
+.closing-summary-card strong{
+  display:block;
+  margin-top:6px;
+  font-size:20px;
+}
+.closing-list{
+  display:grid;
+  gap:12px;
+}
+.closing-card{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:17px;
+  padding:14px;
+}
+.closing-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+}
+.closing-card h3{
+  margin:0 0 5px;
+}
+.closing-card-meta{
+  margin:11px 0;
+  line-height:1.7;
+}
+.view-closing-button{
+  width:100%;
+  min-height:44px;
+  border:0;
+  border-radius:12px;
+  background:#eeeeee;
+  color:#0878de;
+  font-weight:900;
+}
+.closing-detail-panel{
+  background:#fff;
+  border:2px solid #d7cec5;
+  border-radius:18px;
+  padding:15px;
+  margin-top:16px;
+}
+.closing-detail-panel.hidden{display:none}
+.closing-detail-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.closing-detail-header h2{
+  margin:0 0 5px;
+}
+.closing-detail-header button{
+  border:0;
+  border-radius:10px;
+  padding:9px 12px;
+}
+.closing-detail-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:14px 0;
+}
+.closing-detail-grid > div{
+  background:#faf7f2;
+  border-radius:12px;
+  padding:11px;
+}
+.closing-detail-grid span{
+  display:block;
+  color:#6d645c;
+  font-size:13px;
+}
+.closing-detail-grid strong{
+  display:block;
+  margin-top:5px;
+}
+.closing-note{
+  background:#fff8d8;
+  border-radius:11px;
+  padding:10px;
+  margin:10px 0 16px;
+}
+.anomaly-list{
+  display:grid;
+  gap:8px;
+}
+.anomaly-item{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  background:#fff3f1;
+  border-radius:12px;
+  padding:11px;
+}
+.anomaly-item small{
+  display:block;
+  color:#765f5b;
+  margin-top:3px;
+}
+.anomaly-ok{
+  background:#eaf7ef;
+  color:#166c41;
+  border-radius:12px;
+  padding:11px;
+  font-weight:800;
+}
+@media (max-width:600px){
+  .closing-summary-panel{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* ===== V1.4.2 โหมดผู้จัดการและ Audit Log ===== */
+.manager-lock-overlay{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(20,17,15,.78);
+  backdrop-filter:blur(5px);
+}
+.manager-lock-card{
+  width:min(100%,380px);
+  background:#fff;
+  border-radius:20px;
+  padding:22px;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.28);
+}
+.manager-lock-icon{
+  font-size:42px;
+}
+.manager-lock-card h2{
+  margin:8px 0 4px;
+}
+.manager-lock-card p{
+  color:#6b625b;
+}
+.manager-lock-card input{
+  width:100%;
+  box-sizing:border-box;
+  min-height:58px;
+  border:1px solid #cbc2b9;
+  border-radius:14px;
+  padding:12px;
+  font-size:28px;
+  text-align:center;
+  letter-spacing:10px;
+}
+.manager-lock-card .primary{
+  width:100%;
+  margin-top:12px;
+}
+.manager-back-link{
+  display:block;
+  margin-top:14px;
+  color:#0878de;
+  text-decoration:none;
+  font-weight:800;
+}
+.manager-pin-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+  margin-top:8px;
+}
+.manager-panel{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+}
+.manager-panel h2{
+  margin:0 0 12px;
+}
+.manager-panel.hidden{display:none}
+.manager-field{
+  display:block;
+  margin:12px 0;
+}
+.manager-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.manager-field input{
+  width:100%;
+  box-sizing:border-box;
+  min-height:52px;
+  border:1px solid #cfc6bd;
+  border-radius:13px;
+  padding:12px;
+  text-align:center;
+  letter-spacing:8px;
+  font-size:24px;
+}
+.manager-lock-now-button{
+  width:100%;
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  background:#fff0ef;
+  color:#a33229;
+  font-weight:900;
+}
+.audit-filter-panel{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.audit-filter-panel label{
+  grid-column:1 / -1;
+  font-weight:900;
+}
+.audit-filter-panel input,
+.audit-filter-panel button{
+  min-height:46px;
+  border:1px solid #d6cec6;
+  border-radius:12px;
+  padding:10px;
+  background:#fff;
+  font:inherit;
+}
+.audit-list{
+  display:grid;
+  gap:10px;
+}
+.audit-item{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:16px;
+  padding:13px;
+}
+.audit-item-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+}
+.audit-item-top time{
+  color:#746a62;
+  font-size:13px;
+}
+.audit-actor{
+  margin-top:5px;
+  color:#6d645c;
+  font-size:13px;
+}
+.audit-details{
+  display:grid;
+  gap:5px;
+  margin-top:10px;
+  background:#faf7f2;
+  border-radius:11px;
+  padding:9px;
+}
+.audit-details > div{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.audit-details span{
+  color:#6d645c;
+}
+
+
+/* ===== V1.4.3 Manager Approval ===== */
+.approval-overlay{
+  position:fixed;
+  inset:0;
+  z-index:100000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(20,17,15,.78);
+  backdrop-filter:blur(5px);
+}
+.approval-card{
+  width:min(100%,400px);
+  background:#fff;
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.approval-icon{
+  text-align:center;
+  font-size:42px;
+}
+.approval-card h2{
+  text-align:center;
+  margin:7px 0;
+}
+.approval-card p{
+  text-align:center;
+  color:#665d55;
+  line-height:1.5;
+}
+.approval-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.approval-pin{
+  width:100%;
+  box-sizing:border-box;
+  min-height:58px;
+  border:1px solid #cbc2b9;
+  border-radius:14px;
+  padding:12px;
+  font-size:28px;
+  text-align:center;
+  letter-spacing:10px;
+}
+.approval-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+  margin:8px 0;
+}
+.approval-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.approval-actions button{
+  min-height:48px;
+  border:0;
+  border-radius:12px;
+  font-weight:900;
+}
+.approval-cancel{
+  background:#eee;
+}
+.danger-action{
+  background:#fff0ef!important;
+  color:#a33229!important;
+}
+.refund-action{
+  background:#fff5cf!important;
+  color:#775b00!important;
+}
+.cancelled-badge,
+.refund-badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  margin-left:6px;
+}
+.cancelled-badge{
+  background:#eee;
+  color:#666;
+}
+.refund-badge{
+  background:#fff0d6;
+  color:#855d00;
+}
+
+
+/* ===== V1.5.0 ตั้งค่าเมนูและราคา ===== */
+.menu-settings-toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(140px,220px);
+  gap:10px;
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.menu-settings-toolbar label{
+  grid-column:1 / -1;
+  font-weight:900;
+}
+.menu-settings-toolbar input,
+.menu-settings-toolbar select{
+  min-height:46px;
+  border:1px solid #d3cbc3;
+  border-radius:12px;
+  padding:10px;
+  background:#fff;
+  font:inherit;
+}
+.menu-settings-summary{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;
+  margin-bottom:12px;
+}
+.menu-settings-summary > div{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:14px;
+  padding:11px;
+}
+.menu-settings-summary span{
+  display:block;
+  color:#6d645c;
+  font-size:13px;
+}
+.menu-settings-summary strong{
+  display:block;
+  margin-top:5px;
+  font-size:21px;
+}
+.menu-settings-list{
+  display:grid;
+  gap:10px;
+  padding-bottom:100px;
+}
+.menu-setting-card{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:16px;
+  padding:13px;
+}
+.menu-setting-card.inactive{
+  opacity:.65;
+  background:#f3f3f3;
+}
+.menu-setting-info{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.menu-setting-category{
+  display:inline-block;
+  background:#f0ece7;
+  color:#685e55;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:12px;
+  font-weight:800;
+}
+.menu-setting-card h3{
+  margin:7px 0 0;
+}
+.menu-active-switch{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.menu-active-switch input{
+  width:22px;
+  height:22px;
+}
+.menu-price-field{
+  display:block;
+  margin-top:12px;
+}
+.menu-price-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:6px;
+}
+.menu-price-field input{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  border:1px solid #cbc2b9;
+  border-radius:12px;
+  padding:11px;
+  font-size:18px;
+}
+.menu-settings-save-bar{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:#fff;
+  border-top:1px solid #d9d1c9;
+  padding:12px max(14px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(14px, env(safe-area-inset-left));
+  box-shadow:0 -8px 25px rgba(0,0,0,.08);
+}
+.menu-settings-save-bar button{
+  flex:0 0 auto;
+}
+@media (max-width:600px){
+  .menu-settings-toolbar{
+    grid-template-columns:1fr;
+  }
+  .menu-settings-toolbar label{
+    grid-column:auto;
+  }
+  .menu-settings-summary{
+    grid-template-columns:1fr;
+  }
+  .menu-settings-save-bar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .menu-settings-save-bar button{
+    width:100%;
+  }
+}
+
+
+/* ===== V1.5.1 เพิ่ม/แก้ไข/ลบเมนู ===== */
+.add-menu-button{
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  background:#171513;
+  color:#fff;
+  font-weight:900;
+  padding:10px 14px;
+}
+.menu-settings-toolbar .add-menu-button{
+  grid-column:1 / -1;
+}
+.custom-menu-badge{
+  display:inline-block;
+  margin-left:5px;
+  background:#eaf7ef;
+  color:#166c41;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:12px;
+  font-weight:900;
+}
+.edit-menu-button{
+  width:100%;
+  min-height:43px;
+  margin-top:10px;
+  border:0;
+  border-radius:11px;
+  background:#eee;
+  color:#0878de;
+  font-weight:900;
+}
+.menu-editor-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:50000;
+  overflow-y:auto;
+  padding:18px 12px max(50px,env(safe-area-inset-bottom));
+}
+.menu-editor-modal.show{display:block}
+.menu-editor-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(20,17,15,.72);
+}
+.menu-editor-dialog{
+  position:relative;
+  z-index:1;
+  width:min(100%,620px);
+  margin:0 auto;
+  background:#fff;
+  border-radius:20px;
+  padding:18px;
+}
+.menu-editor-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+.menu-editor-header h2{margin:0}
+.menu-editor-header button{
+  border:0;
+  border-radius:10px;
+  padding:8px 11px;
+}
+.menu-editor-field{
+  display:block;
+  margin:13px 0;
+}
+.menu-editor-field.hidden{display:none}
+.menu-editor-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:7px;
+}
+.menu-editor-field input,
+.menu-editor-field select{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  border:1px solid #cbc2b9;
+  border-radius:12px;
+  padding:11px;
+  font:inherit;
+  background:#fff;
+}
+.menu-option-panel{
+  background:#faf7f2;
+  border-radius:14px;
+  padding:12px;
+  margin:13px 0;
+}
+.menu-option-panel.hidden{display:none}
+.menu-option-panel h3{margin:0 0 8px}
+.menu-option-panel label{
+  display:block;
+  padding:7px 0;
+}
+.menu-option-panel input{
+  width:20px;
+  height:20px;
+  vertical-align:middle;
+  margin-right:6px;
+}
+.menu-active-editor{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:900;
+  margin:14px 0;
+}
+.menu-active-editor input{
+  width:22px;
+  height:22px;
+}
+.menu-editor-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+}
+.menu-editor-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+.menu-editor-actions button{
+  min-height:48px;
+  border:0;
+  border-radius:12px;
+  font-weight:900;
+}
+.delete-menu-button{
+  background:#fff0ef;
+  color:#a33229;
+}
+.delete-menu-button.hidden{display:none}
+@media(max-width:600px){
+  .menu-editor-actions{grid-template-columns:1fr}
+}
+
+
+/* ===== V1.5.2 หมวดหมู่และตัวเลือกแบบอ่านง่าย ===== */
+.editor-option-group{
+  background:#fff;
+  border:1px solid #e1d9d1;
+  border-radius:13px;
+  padding:11px;
+  margin-top:10px;
+}
+.editor-option-title{
+  font-weight:900;
+  font-size:17px;
+  margin-bottom:5px;
+}
+.editor-option-group label{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  line-height:1.45;
+  padding:8px 2px;
+}
+.editor-option-group input[type="radio"],
+.editor-option-group input[type="checkbox"]{
+  flex:0 0 auto;
+  width:21px;
+  height:21px;
+  margin:0;
+  margin-top:1px;
+}
+
+
+/* ===== V1.5.3 รูปภาพเมนู ===== */
+.menu-card-image{
+  display:block;
+  width:100%;
+  aspect-ratio:1 / 1;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:10px;
+  background:#f1ede8;
+}
+.menu-card-placeholder{
+  width:100%;
+  aspect-ratio:1 / 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  margin-bottom:10px;
+  background:linear-gradient(135deg,#eee8e1,#faf8f5);
+  color:#9b8f84;
+  font-size:25px;
+  font-weight:900;
+}
+.menu-setting-thumb,
+.menu-setting-thumb-placeholder{
+  display:block;
+  width:100%;
+  aspect-ratio:16 / 7;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:11px;
+  background:#f2eee9;
+}
+.menu-setting-thumb-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#9b8f84;
+  font-size:24px;
+  font-weight:900;
+}
+.menu-image-editor{
+  background:#faf7f2;
+  border:1px solid #e0d8d0;
+  border-radius:14px;
+  padding:12px;
+  margin:14px 0;
+}
+.menu-image-editor-title{
+  font-weight:900;
+  font-size:17px;
+  margin-bottom:9px;
+}
+.menu-image-preview-wrap{
+  width:min(100%,320px);
+  margin:0 auto 10px;
+}
+.menu-image-preview,
+.menu-image-placeholder{
+  display:block;
+  width:100%;
+  aspect-ratio:1 / 1;
+  object-fit:cover;
+  border-radius:14px;
+  background:#eee9e3;
+}
+.menu-image-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#877b70;
+  font-weight:900;
+}
+.menu-image-preview.hidden,
+.menu-image-placeholder.hidden{
+  display:none;
+}
+.menu-image-file{
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+}
+.menu-image-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.choose-image-button,
+.remove-image-button{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  border:0;
+  border-radius:11px;
+  padding:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+.choose-image-button{
+  background:#171513;
+  color:#fff;
+}
+.remove-image-button{
+  background:#fff0ef;
+  color:#a33229;
+}
+.remove-image-button:disabled{
+  opacity:.45;
+}
+.menu-image-editor small{
+  display:block;
+  margin-top:9px;
+  color:#70665e;
+  line-height:1.45;
+}
+
+
+/* ===== V1.5.4 รูปหน้าปกและโลโก้ร้าน ===== */
+.store-hero{
+  overflow:hidden;
+  background:#fff;
+  border:1px solid #e1d9d1;
+  border-radius:18px;
+  margin-bottom:14px;
+}
+.store-cover-wrap{
+  width:100%;
+  aspect-ratio:16 / 7;
+  background:#eee8e1;
+}
+.store-cover-image,
+.store-cover-placeholder{
+  width:100%;
+  height:100%;
+}
+.store-cover-image{
+  display:block;
+  object-fit:cover;
+}
+.store-cover-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#171513,#5a4c40);
+  color:#fff;
+  font-size:26px;
+  font-weight:900;
+}
+.store-profile-row{
+  display:flex;
+  gap:13px;
+  align-items:flex-start;
+  padding:0 15px 12px;
+}
+.store-logo-wrap{
+  flex:0 0 82px;
+  width:82px;
+  height:82px;
+  margin-top:-28px;
+  border:4px solid #fff;
+  border-radius:18px;
+  background:#fff;
+  overflow:hidden;
+  box-shadow:0 5px 15px rgba(0,0,0,.12);
+}
+.store-logo-image,
+.store-logo-placeholder{
+  width:100%;
+  height:100%;
+}
+.store-logo-image{
+  object-fit:cover;
+}
+.store-logo-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#171513;
+  color:#fff;
+  font-size:24px;
+  font-weight:900;
+}
+.store-profile-text{
+  min-width:0;
+  padding-top:10px;
+}
+.store-profile-text h1{
+  margin:0;
+  font-size:22px;
+}
+.store-profile-text p{
+  margin:5px 0;
+  color:#6d645c;
+  line-height:1.4;
+}
+.store-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  align-items:center;
+  font-size:13px;
+}
+.store-status-badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#e8f7ee;
+  color:#166c41;
+  font-weight:900;
+}
+.store-status-badge.closed{
+  background:#fff0ef;
+  color:#a33229;
+}
+.store-order-location{
+  margin:0 15px 15px;
+  border-radius:12px;
+  background:#faf7f2;
+  padding:10px 12px;
+  font-weight:900;
+}
+.store-settings-panel{
+  background:#fff;
+  border:1px solid #dfd8d0;
+  border-radius:18px;
+  padding:15px;
+  margin-bottom:13px;
+}
+.store-settings-panel h2{
+  margin:0 0 5px;
+}
+.store-cover-editor{
+  width:100%;
+  aspect-ratio:16 / 7;
+  margin:12px 0;
+  border-radius:14px;
+  overflow:hidden;
+  background:#eee9e3;
+}
+.store-cover-edit-preview,
+.store-cover-edit-placeholder{
+  width:100%;
+  height:100%;
+}
+.store-cover-edit-preview{
+  display:block;
+  object-fit:cover;
+}
+.store-cover-edit-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#7d7167;
+  font-weight:900;
+}
+.store-logo-editor{
+  width:150px;
+  height:150px;
+  margin:12px auto;
+  border-radius:24px;
+  overflow:hidden;
+  background:#eee9e3;
+}
+.store-logo-edit-preview,
+.store-logo-edit-placeholder{
+  width:100%;
+  height:100%;
+}
+.store-logo-edit-preview{
+  display:block;
+  object-fit:cover;
+}
+.store-logo-edit-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#171513;
+  color:#fff;
+  font-size:35px;
+  font-weight:900;
+}
+.hidden-file-input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+}
+.store-image-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.store-settings-field{
+  display:block;
+  margin:12px 0;
+}
+.store-settings-field span{
+  display:block;
+  margin-bottom:6px;
+  font-weight:900;
+}
+.store-settings-field input,
+.store-settings-field textarea{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  border:1px solid #cbc2b9;
+  border-radius:12px;
+  padding:11px;
+  font:inherit;
+}
+.store-settings-field textarea{
+  min-height:90px;
+  resize:vertical;
+}
+.store-time-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.store-accepting-toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:900;
+  margin-top:12px;
+}
+.store-accepting-toggle input{
+  width:22px;
+  height:22px;
+}
+.store-settings-error{
+  min-height:24px;
+  color:#b42318;
+  font-weight:800;
+  margin:8px 0;
+}
+.store-save-button{
+  width:100%;
+}
+@media(max-width:600px){
+  .store-time-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* ===== V1.5.5 แก้รูปหน้าปกและโลโก้ไม่แสดง ===== */
+.store-cover-image,
+.store-logo-image,
+.store-cover-edit-preview,
+.store-logo-edit-preview{
+  display:block;
+}
+.store-cover-image.hidden,
+.store-logo-image.hidden,
+.store-cover-edit-preview.hidden,
+.store-logo-edit-preview.hidden{
+  display:none!important;
+}
+
+
+/* ===== V1.5.6 แก้โลโก้หน้าลูกค้า ===== */
+.store-logo-wrap{
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+.store-logo-image{
+  position:relative;
+  z-index:2;
+  display:block;
+}
+.store-logo-placeholder{
+  position:relative;
+  z-index:1;
+}
+
+
+/* ===== V1.5.7 ปรับหน้าปกลูกค้าให้กระชับ ===== */
+.store-hero{
+  overflow:hidden !important;
+}
+
+.store-cover-wrap{
+  position:relative !important;
+  width:100% !important;
+  height:150px !important;
+  min-height:150px !important;
+  max-height:150px !important;
+  aspect-ratio:auto !important;
+  overflow:hidden !important;
+  background:#171513 !important;
+}
+
+.store-cover-image{
+  position:absolute !important;
+  inset:0 !important;
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  max-height:none !important;
+  object-fit:cover !important;
+  object-position:center 62% !important;
+  border-radius:0 !important;
+}
+
+.store-cover-placeholder{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px !important;
+}
+
+.store-profile-row{
+  padding-top:0 !important;
+}
+
+.store-logo-wrap{
+  margin-top:-24px !important;
+}
+
+@media (max-width:600px){
+  .store-cover-wrap{
+    height:125px !important;
+    min-height:125px !important;
+    max-height:125px !important;
+  }
+
+  .store-cover-image{
+    object-position:center 65% !important;
+  }
+}
+
+
+/* ===== V1.5.8 Compact Menu Grid — ตั้งค่าเมนูแบบ 2 คอลัมน์ ===== */
+.menu-settings-list{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:10px !important;
+  padding-bottom:100px !important;
+}
+
+.menu-setting-card{
+  padding:10px !important;
+  border-radius:14px !important;
+  min-width:0 !important;
+}
+
+.menu-setting-thumb,
+.menu-setting-thumb-placeholder{
+  width:100% !important;
+  aspect-ratio:16 / 9 !important;
+  height:auto !important;
+  max-height:130px !important;
+  object-fit:cover !important;
+  border-radius:10px !important;
+  margin-bottom:8px !important;
+}
+
+.menu-setting-info{
+  gap:7px !important;
+}
+
+.menu-setting-category,
+.custom-menu-badge{
+  padding:3px 6px !important;
+  font-size:10px !important;
+}
+
+.menu-setting-card h3{
+  margin:5px 0 0 !important;
+  font-size:15px !important;
+  line-height:1.25 !important;
+  display:-webkit-box !important;
+  -webkit-line-clamp:2 !important;
+  -webkit-box-orient:vertical !important;
+  overflow:hidden !important;
+}
+
+.menu-active-switch{
+  gap:4px !important;
+  font-size:11px !important;
+  flex-direction:column !important;
+  align-items:center !important;
+}
+
+.menu-active-switch input{
+  width:19px !important;
+  height:19px !important;
+}
+
+.menu-price-field{
+  margin-top:8px !important;
+}
+
+.menu-price-field span{
+  margin-bottom:4px !important;
+  font-size:11px !important;
+}
+
+.menu-price-field input{
+  min-height:40px !important;
+  padding:8px !important;
+  font-size:16px !important;
+  border-radius:10px !important;
+}
+
+.edit-menu-button{
+  min-height:38px !important;
+  margin-top:7px !important;
+  padding:7px 5px !important;
+  font-size:12px !important;
+  border-radius:9px !important;
+}
+
+/* iPad แนวตั้ง/แนวนอน: 2 คอลัมน์ */
+@media (min-width:601px){
+  .menu-settings-list{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+/* มือถือจอแคบ: 1 คอลัมน์ เพื่อไม่ให้ข้อความเบียด */
+@media (max-width:600px){
+  .menu-settings-list{
+    grid-template-columns:1fr !important;
+  }
+
+  .menu-setting-thumb,
+  .menu-setting-thumb-placeholder{
+    max-height:150px !important;
+  }
+}
+
+/* ===== 356 Customer TH / EN Language Switch ===== */
+.customer-header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.language-switch{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  padding:3px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#f5f1ea;
+}
+.lang-btn{
+  min-width:42px;
+  padding:7px 9px;
+  border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:900;
+}
+.lang-btn.active{
+  background:var(--ink);
+  color:#fff;
+}
+html[lang="en"] .card .name{
+  line-height:1.28;
+}
+@media(max-width:420px){
+  header{padding:11px 10px}
+  header b{font-size:16px}
+  .customer-header-actions{gap:5px}
+  .language-switch{gap:2px;padding:2px}
+  .lang-btn{min-width:36px;padding:6px 7px;font-size:12px}
+  .customer-header-actions>button{padding:8px 9px;font-size:13px}
+}
+
+
+/* ===== FIX: Stock Center layout restored ===== */
+.stock-center-overview{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.stock-center-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.stock-center-head > div{
+  min-width:0;
+}
+.stock-center-head strong{
+  display:block;
+  font-size:18px;
+  margin-bottom:4px;
+}
+.stock-center-head span{
+  color:var(--muted);
+  font-size:14px;
+}
+.stock-center-head button{
+  flex:0 0 auto;
+  background:#eee;
+  color:#0878e6;
+}
+.stock-center-problem-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:12px;
+}
+.stock-center-problem{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  background:#faf7f2;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  color:var(--ink);
+}
+.stock-center-problem.low{
+  background:#fff8db;
+  border-color:#f0d778;
+}
+.stock-center-problem.out{
+  background:#fff0ef;
+  border-color:#e7b8b3;
+}
+.stock-center-problem small{
+  display:block;
+  color:var(--muted);
+  margin-top:3px;
+}
+.stock-center-problem-qty{
+  text-align:right;
+  white-space:nowrap;
+}
+.stock-center-ok{
+  background:#eaf7ef;
+  color:#166c41;
+  border-radius:12px;
+  padding:11px;
+  font-weight:800;
+}
+.stock-center-totals{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:12px;
+}
+.stock-center-totals button{
+  background:#f4f1ed;
+  color:var(--ink);
+  min-height:44px;
+}
+.stock-center-totals b{
+  margin-left:4px;
+}
+.stock-toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(220px,1fr) 180px;
+  gap:10px;
+  align-items:end;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px;
+  margin-bottom:12px;
+}
+.stock-toolbar label{
+  display:block;
+}
+.stock-toolbar label span{
+  display:block;
+  font-weight:900;
+  margin-bottom:6px;
+}
+.stock-toolbar input[type="search"],
+.stock-toolbar select{
+  width:100%;
+  min-height:44px;
+  border:1px solid #d6cec6;
+  border-radius:12px;
+  padding:10px 12px;
+  background:#fff;
+  font:inherit;
+}
+.stock-add-item-button{
+  min-height:44px;
+}
+.stock-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.stock-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
+}
+.stock-card.low{
+  border-color:#e6cd67;
+  background:#fffdf4;
+}
+.stock-card.out{
+  border-color:#dfaaa4;
+  background:#fff8f7;
+}
+.stock-card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.stock-card-head h3{
+  margin:7px 0 0;
+  font-size:19px;
+}
+.stock-category{
+  display:inline-block;
+  background:#f0ece7;
+  color:#685e55;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:12px;
+  font-weight:800;
+}
+.stock-status{
+  display:inline-block;
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.stock-status.ok{
+  background:#eaf7ef;
+  color:#166c41;
+}
+.stock-status.low{
+  background:#fff3c9;
+  color:#775b00;
+}
+.stock-status.out{
+  background:#fff0ef;
+  color:#a33229;
+}
+.stock-quantity-row{
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+  margin:14px 0 6px;
+}
+.stock-quantity-row strong{
+  font-size:30px;
+  line-height:1;
+}
+.stock-minimum{
+  color:var(--muted);
+  font-size:14px;
+}
+.stock-card-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:13px;
+}
+.stock-adjust-button,
+.stock-edit-button{
+  min-height:42px;
+  border-radius:11px;
+}
+.stock-adjust-button{
+  background:#171513;
+  color:#fff;
+}
+.stock-edit-button{
+  background:#eee;
+  color:#0878de;
+}
+.stock-adjust-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:50000;
+  overflow-y:auto;
+  padding:18px 12px max(50px,env(safe-area-inset-bottom));
+}
+.stock-adjust-modal.show{
+  display:block;
+}
+.stock-adjust-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(20,17,15,.72);
+}
+.stock-adjust-dialog{
+  position:relative;
+  z-index:1;
+  width:min(100%,560px);
+  margin:0 auto;
+  background:#fff;
+  border-radius:20px;
+  padding:18px;
+}
+.stock-adjust-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.stock-adjust-header h2{
+  margin:0 0 4px;
+}
+.stock-adjust-header button{
+  background:#eee;
+  color:#171513;
+}
+.stock-field{
+  display:block;
+  margin:12px 0;
+}
+.stock-field span{
+  display:block;
+  font-weight:900;
+  margin-bottom:6px;
+}
+.stock-field input,
+.stock-field select{
+  width:100%;
+  box-sizing:border-box;
+  min-height:46px;
+  border:1px solid #cbc2b9;
+  border-radius:12px;
+  padding:10px 11px;
+  background:#fff;
+  font:inherit;
+}
+.stock-active-toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:900;
+  margin:12px 0;
+}
+.stock-active-toggle input{
+  width:22px;
+  height:22px;
+}
+.stock-error{
+  min-height:22px;
+  color:#b42318;
+  font-weight:800;
+  margin:8px 0;
+}
+.stock-delete-item-button{
+  width:100%;
+  margin-top:9px;
+  min-height:44px;
+  background:#fff0ef;
+  color:#a33229;
+}
+@media (max-width:700px){
+  .stock-toolbar{
+    grid-template-columns:1fr;
+  }
+  .stock-list,
+  .stock-center-problem-list{
+    grid-template-columns:1fr;
+  }
+}
+
