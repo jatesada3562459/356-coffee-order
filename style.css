@@ -2607,3 +2607,327 @@ html[lang="en"] .card .name{
   }
 }
 
+
+/* =========================================================
+   356 POS — BACK OFFICE TABLE RESTORE PACK
+   Restores table/card layouts across Reports + Stock modules
+   without changing data, JS, Supabase, or business logic.
+   ========================================================= */
+
+/* ---------- Shared table surface ---------- */
+.table-wrap,
+.table-container,
+.data-table-wrap,
+.report-table-wrap,
+.stock-table-wrap,
+.responsive-table{
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  margin:12px 0;
+}
+
+main table,
+.data-table,
+.report-table,
+.sales-table,
+.stock-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  background:#fff;
+  color:var(--ink);
+  font-size:14px;
+}
+
+main table th,
+main table td,
+.data-table th,.data-table td,
+.report-table th,.report-table td,
+.sales-table th,.sales-table td,
+.stock-table th,.stock-table td{
+  padding:11px 12px;
+  text-align:left;
+  vertical-align:middle;
+  border-bottom:1px solid var(--line);
+}
+
+main table th,
+.data-table th,
+.report-table th,
+.sales-table th,
+.stock-table th{
+  background:#f3efea;
+  color:var(--ink);
+  font-weight:900;
+  white-space:nowrap;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+
+main table tr:last-child td,
+.data-table tr:last-child td,
+.report-table tr:last-child td,
+.sales-table tr:last-child td,
+.stock-table tr:last-child td{border-bottom:0}
+
+main table tbody tr:hover,
+.data-table tbody tr:hover,
+.report-table tbody tr:hover,
+.sales-table tbody tr:hover,
+.stock-table tbody tr:hover{background:#faf8f5}
+
+/* ---------- Shared toolbar / filters ---------- */
+.stock-page-toolbar,
+.bulk-stock-toolbar,
+.report-toolbar,
+.report-filters,
+.stock-filters,
+.filter-bar,
+.filters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:end;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px;
+  margin:12px 0;
+}
+
+.stock-page-toolbar input,
+.stock-page-toolbar select,
+.bulk-stock-toolbar input,
+.bulk-stock-toolbar select,
+.report-toolbar input,
+.report-toolbar select,
+.report-filters input,
+.report-filters select,
+.stock-filters input,
+.stock-filters select,
+.filter-bar input,.filter-bar select,
+.filters input,.filters select{
+  min-height:42px;
+  border:1px solid #d6cec6;
+  border-radius:10px;
+  padding:9px 11px;
+  background:#fff;
+  font:inherit;
+}
+
+/* ---------- Stock sub-pages: restore row/card grid ---------- */
+#stockIssueList,
+#stockReceiveList,
+#stockOrderList,
+#stockReportList,
+#stockCountList,
+#stockHistoryList,
+#stockRulesList,
+#issueList,
+#receiveList,
+#orderList,
+#reportList,
+#countList,
+#historyList,
+#rulesList,
+.bulk-stock-list,
+.stock-issue-list,
+.stock-receive-list,
+.stock-order-list,
+.stock-report-list,
+.stock-count-list,
+.stock-history-list,
+.stock-rules-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+
+/* direct rows/items from the stock sub-page renderers */
+#stockIssueList > *,#stockReceiveList > *,#stockOrderList > *,
+#stockReportList > *,#stockCountList > *,#stockHistoryList > *,#stockRulesList > *,
+#issueList > *,#receiveList > *,#orderList > *,#reportList > *,#countList > *,
+#historyList > *,#rulesList > *,
+.bulk-stock-list > *,
+.stock-issue-list > *,
+.stock-receive-list > *,
+.stock-order-list > *,
+.stock-report-list > *,
+.stock-count-list > *,
+.stock-history-list > *,
+.stock-rules-list > *{
+  min-width:0;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+}
+
+/* probable renderer row class names used by the stock modules */
+.stock-row,.stock-item-row,.bulk-stock-row,.bulk-item,
+.issue-row,.receive-row,.order-stock-row,.count-row,.history-row,.rule-row,
+.stock-report-row,.stock-rule-row,.stock-history-row,.stock-count-row{
+  display:grid;
+  grid-template-columns:minmax(180px,1.6fr) minmax(120px,.8fr) minmax(140px,1fr);
+  gap:10px;
+  align-items:center;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  margin:8px 0;
+}
+
+.stock-row input[type="number"],.stock-item-row input[type="number"],
+.bulk-stock-row input[type="number"],.bulk-item input[type="number"],
+.issue-row input[type="number"],.receive-row input[type="number"],
+.count-row input[type="number"],.rule-row input[type="number"],
+.stock-count-row input[type="number"],.stock-rule-row input[type="number"]{
+  width:100%;
+  min-height:40px;
+  border:1px solid #d6cec6;
+  border-radius:9px;
+  padding:8px 10px;
+  background:#fff;
+  font:inherit;
+}
+
+/* ---------- Sales report page ---------- */
+.report-summary,
+.sales-summary,
+.report-summary-grid,
+.sales-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin:12px 0;
+}
+
+.report-summary > *,
+.sales-summary > *,
+.report-summary-grid > *,
+.sales-summary-grid > *{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  min-width:0;
+}
+
+/* Lists on report page that previously visually read as a table */
+#salesReportTable,
+#reportTable,
+#salesTable,
+#topMenuTable,
+#menuSalesTable{
+  width:100%;
+}
+
+.report-list,
+.sales-list,
+#reportRows,
+#salesRows,
+#topMenus,
+#topMenuList{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:0;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  margin:12px 0;
+}
+
+.report-list > *,
+.sales-list > *,
+#reportRows > *,
+#salesRows > *,
+#topMenus > *,
+#topMenuList > *{
+  display:grid;
+  grid-template-columns:50px minmax(180px,1fr) 110px 120px;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-bottom:1px solid var(--line);
+  min-width:0;
+}
+.report-list > *:last-child,
+.sales-list > *:last-child,
+#reportRows > *:last-child,
+#salesRows > *:last-child,
+#topMenus > *:last-child,
+#topMenuList > *:last-child{border-bottom:0}
+
+/* ---------- History / rules utility cards ---------- */
+.stock-history-card,.history-card,.stock-rule-card,.rule-card,
+.stock-order-card,.stock-report-card,.stock-count-card,
+.stock-receive-card,.stock-issue-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  margin:8px 0;
+}
+
+/* ---------- Keep page actions aligned ---------- */
+.page-actions,
+.stock-actions,
+.report-actions,
+.bulk-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  margin:10px 0;
+}
+
+/* ---------- Tablet / phone ---------- */
+@media(max-width:760px){
+  #stockIssueList,#stockReceiveList,#stockOrderList,#stockReportList,
+  #stockCountList,#stockHistoryList,#stockRulesList,
+  #issueList,#receiveList,#orderList,#reportList,#countList,#historyList,#rulesList,
+  .bulk-stock-list,.stock-issue-list,.stock-receive-list,.stock-order-list,
+  .stock-report-list,.stock-count-list,.stock-history-list,.stock-rules-list{
+    grid-template-columns:1fr;
+  }
+
+  .stock-row,.stock-item-row,.bulk-stock-row,.bulk-item,
+  .issue-row,.receive-row,.order-stock-row,.count-row,.history-row,.rule-row,
+  .stock-report-row,.stock-rule-row,.stock-history-row,.stock-count-row{
+    grid-template-columns:1fr;
+  }
+
+  .report-summary,.sales-summary,.report-summary-grid,.sales-summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  main table,
+  .data-table,.report-table,.sales-table,.stock-table{
+    min-width:680px;
+  }
+
+  .report-list > *,
+  .sales-list > *,
+  #reportRows > *,
+  #salesRows > *,
+  #topMenus > *,
+  #topMenuList > *{
+    grid-template-columns:36px minmax(145px,1fr) 80px 90px;
+    padding:9px 10px;
+    font-size:13px;
+  }
+}
+
+@media(max-width:480px){
+  .report-summary,.sales-summary,.report-summary-grid,.sales-summary-grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
