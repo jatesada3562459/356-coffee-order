@@ -2933,107 +2933,175 @@ main table tbody tr:hover,
 }
 
 /* =========================================================
-   356 POS — STOCK CARD GRID PATCH 2026-08-08 18:46 TH
-   IMPORTANT: this is a NEW patch, not the previous file.
-   Goal: every stock sub-page list, including stock-rules audit,
-   uses the same 2-column rounded-card visual language as stock.html.
+   356 POS — VERIFIED STOCK SUBPAGE LAYOUT FIX
+   Selectors verified from current HTML/JS source, 2026-08-08
    ========================================================= */
 
-/* Recipe / stock-rule audit containers (stock-rules.html render targets) */
-#recipeList,
-#recipesList,
-#recipeAuditList,
-#recipeCheckList,
-#auditList,
-#menuAuditList,
-#ruleAuditList,
-#rulesAuditList,
-#stockRuleAuditList,
-#stockRulesAuditList,
-#completenessList,
-#recipeCompletenessList,
-.stock-recipe-list,
-.stock-rule-audit-list,
-.recipe-audit-list,
-.recipe-list,
-.rules-audit-list{
+/* All stock sub-page item containers: same 2-column card rhythm as stock overview */
+.bulk-issue-list,
+.bulk-receive-list,
+.reorder-list,
+.stock-count-list,
+.stock-history-list,
+.stock-rule-list,
+.stock-attention-list,
+.stock-usage-summary-list,
+.stock-report-movement-list {
   display:grid !important;
   grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  gap:10px !important;
-  width:100% !important;
-  margin:12px 0 !important;
-  align-items:stretch !important;
+  gap:12px !important;
+  align-items:stretch;
 }
 
-#recipeList > *,
-#recipesList > *,
-#recipeAuditList > *,
-#recipeCheckList > *,
-#auditList > *,
-#menuAuditList > *,
-#ruleAuditList > *,
-#rulesAuditList > *,
-#stockRuleAuditList > *,
-#stockRulesAuditList > *,
-#completenessList > *,
-#recipeCompletenessList > *,
-.stock-recipe-list > *,
-.stock-rule-audit-list > *,
-.recipe-audit-list > *,
-.recipe-list > *,
-.rules-audit-list > *,
-.recipe-card,
-.recipe-audit-card,
-.rule-audit-card,
-.stock-recipe-card{
+/* Actual item classes emitted by each page's JS */
+.bulk-issue-card,
+.bulk-receive-card,
+.reorder-card,
+.stock-count-card,
+.stock-history-item,
+.stock-rule-card,
+.stock-attention-card,
+.stock-usage-row,
+.stock-report-movement {
+  min-width:0;
+  width:100%;
+  margin:0 !important;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  box-shadow:none;
+}
+
+/* Bulk issue / receive */
+.bulk-issue-card,
+.bulk-receive-card {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(145px,.72fr);
+  gap:12px;
+  align-items:center;
+}
+.bulk-issue-info h3,
+.bulk-receive-info h3,
+.reorder-card h3,
+.stock-count-card h3,
+.stock-rule-card h3 { margin:5px 0 8px; }
+.bulk-issue-input input,
+.bulk-receive-input input,
+.stock-count-input-wrap input {
+  width:100%;
+  min-height:44px;
+  border:1px solid #d6cec6;
+  border-radius:11px;
+  padding:10px;
+  background:#fff;
+  font:inherit;
+}
+
+/* Reorder cards */
+.reorder-card {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:10px;
+  align-items:start;
+}
+.reorder-current-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+/* Count cards */
+.stock-count-card {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(150px,.8fr);
+  gap:12px;
+  align-items:center;
+}
+
+/* History */
+.stock-history-item {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+.stock-history-values { flex:0 0 auto; text-align:right; }
+
+/* Automatic stock deduction recipe page — verified classes */
+.stock-rule-card { display:block !important; }
+.stock-rule-lines {
+  display:grid;
+  gap:8px;
+  margin-top:10px;
+}
+.stock-rule-row {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  gap:10px;
+  align-items:center;
+  background:#faf7f2;
+  border:1px solid #eee5dc;
+  border-radius:12px;
+  padding:10px 12px;
+}
+.stock-rule-row > div { min-width:0; }
+.stock-rule-row strong,
+.stock-rule-row small { display:block; }
+.stock-rule-delete { flex:0 0 auto; }
+
+/* Stock report sub-sections */
+.stock-attention-card,
+.stock-report-movement {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+.stock-usage-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+}
+.stock-usage-metrics { min-width:0; }
+.stock-attention-value,
+.stock-report-movement-value { flex:0 0 auto; text-align:right; }
+
+/* Reports: keep list data in clear white bordered rows/cards */
+.report-list {
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:12px !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  overflow:visible !important;
+}
+.report-list > .report-row,
+.report-list > * {
   display:block !important;
-  min-width:0 !important;
+  min-width:0;
   background:#fff !important;
-  border:1px solid var(--line,#e5ddd5) !important;
+  border:1px solid var(--line) !important;
   border-radius:16px !important;
   padding:14px !important;
   margin:0 !important;
-  box-shadow:none !important;
-  overflow-wrap:anywhere !important;
 }
 
-/* Keep buttons inside recipe cards compact and aligned */
-.recipe-card button,.recipe-card a,
-.recipe-audit-card button,.recipe-audit-card a,
-.rule-audit-card button,.rule-audit-card a,
-.stock-recipe-card button,.stock-recipe-card a,
-#recipeList > * button,#recipeList > * a,
-#recipeAuditList > * button,#recipeAuditList > * a,
-#auditList > * button,#auditList > * a,
-#completenessList > * button,#completenessList > * a{
-  max-width:100% !important;
-}
-
-/* Other stock render-target aliases seen across versions */
-#itemsList,#stockItemsList,#bulkList,#movementList,#movementsList,
-#purchaseList,#purchaseItems,#historyItems,#countItems,#reportItems{
-  display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  gap:10px !important;
-  margin:12px 0 !important;
-}
-#itemsList > *,#stockItemsList > *,#bulkList > *,#movementList > *,#movementsList > *,
-#purchaseList > *,#purchaseItems > *,#historyItems > *,#countItems > *,#reportItems > *{
-  min-width:0 !important;
-  background:#fff !important;
-  border:1px solid var(--line,#e5ddd5) !important;
-  border-radius:16px !important;
-  padding:14px !important;
-}
-
-/* iPad remains two columns; only narrow phones collapse to one. */
-@media (max-width:600px){
-  #recipeList,#recipesList,#recipeAuditList,#recipeCheckList,#auditList,#menuAuditList,
-  #ruleAuditList,#rulesAuditList,#stockRuleAuditList,#stockRulesAuditList,
-  #completenessList,#recipeCompletenessList,.stock-recipe-list,.stock-rule-audit-list,
-  .recipe-audit-list,.recipe-list,.rules-audit-list,
-  #itemsList,#stockItemsList,#bulkList,#movementList,#movementsList,#purchaseList,
-  #purchaseItems,#historyItems,#countItems,#reportItems{
+@media (max-width:700px){
+  .bulk-issue-list,
+  .bulk-receive-list,
+  .reorder-list,
+  .stock-count-list,
+  .stock-history-list,
+  .stock-rule-list,
+  .stock-attention-list,
+  .stock-usage-summary-list,
+  .stock-report-movement-list,
+  .report-list {
     grid-template-columns:1fr !important;
+  }
+  .bulk-issue-card,
+  .bulk-receive-card,
+  .stock-count-card,
+  .stock-usage-row {
+    grid-template-columns:1fr;
   }
 }
