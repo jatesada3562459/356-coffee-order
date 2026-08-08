@@ -65,9 +65,16 @@ function calculateStoreStatus(settings){
   return {open,text:open?"เปิดรับออเดอร์":"ปิดร้าน",reason:open?"schedule_open":"schedule_closed"};
 }
 
+function storeHoursMessage356(){
+  const settings=lastStoreSettings356||{};
+  const openTime=(settings.open_time||"09:00").slice(0,5);
+  const closeTime=(settings.close_time||"16:00").slice(0,5);
+  return `${openTime} ถึง ${closeTime}`;
+}
+
 function closedMessage356(){
   if(storeStatusReason356==="paused") return "ร้านหยุดรับออเดอร์ชั่วคราว";
-  return "ขออภัย ขณะนี้ร้านปิดให้บริการ";
+  return `ร้านปิด จะเปิดในวันถัดไปเวลา ${storeHoursMessage356()}`;
 }
 
 function ensureStoreOpen356(){
@@ -90,8 +97,9 @@ function applyStoreLock356(status){
     if(hero) hero.appendChild(banner);
   }
   if(!storeOpen356){
-    const hours=document.getElementById("storeHours")?.textContent||"";
-    banner.textContent=(storeStatusReason356==="paused"?"ร้านหยุดรับออเดอร์ชั่วคราว":"ร้านปิดให้บริการ")+(hours?` • เวลา ${hours}`:"");
+    banner.textContent=storeStatusReason356==="paused"
+      ? "ร้านหยุดรับออเดอร์ชั่วคราว"
+      : `ร้านปิด จะเปิดในวันถัดไปเวลา ${storeHoursMessage356()}`;
     banner.style.display="block";
   }else{
     banner.style.display="none";
