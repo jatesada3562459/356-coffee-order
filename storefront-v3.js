@@ -37,6 +37,37 @@ function bangkokNow356(){
   return {date:`${parts.year}-${parts.month}-${parts.day}`,time:`${parts.hour}:${parts.minute}`};
 }
 
+async function loadTodayHoliday356(){
+  const today356=bangkokNow356().date;
+  try{
+    const url=
+      `${APP_CONFIG.SUPABASE_URL.replace(/\/$/,"")}/rest/v1/store_holidays`+
+      `?select=holiday_date,note&holiday_date=eq.${encodeURIComponent(today356)}&limit=1`;
+
+    const res=await fetch(url,{
+      method:"GET",
+      cache:"no-store",
+      headers:{
+        "apikey":APP_CONFIG.SUPABASE_ANON_KEY,
+        "Authorization":"Bearer "+APP_CONFIG.SUPABASE_ANON_KEY,
+        "Accept":"application/json"
+      }
+    });
+
+    if(!res.ok){
+      const text=await res.text();
+      console.warn("โหลดวันหยุดร้านผ่าน REST ไม่สำเร็จ",res.status,text);
+      return null;
+    }
+
+    const rows=await res.json();
+    return Array.isArray(rows) && rows.length ? rows[0] : null;
+  }catch(err){
+    console.warn("โหลดวันหยุดร้านผ่าน REST ไม่สำเร็จ",err);
+    return null;
+  }
+}
+
 function calculateStoreStatus(settings,holiday=null){
   // วันหยุดร้าน = ลำดับความสำคัญสูงสุด
   // ต่อให้หลังบ้านเปิดรับออเดอร์หรือกดเปิดร้านแบบ manual ไว้
@@ -145,13 +176,8 @@ async function loadStoreSettings(){
   const settings=data||{};
   lastStoreSettings356=settings;
 
-  const today356=bangkokNow356().date;
-  const {data:holiday356,error:holidayError356}=await sb
-    .from("store_holidays")
-    .select("holiday_date,note")
-    .eq("holiday_date",today356)
-    .maybeSingle();
-  if(holidayError356) console.warn("โหลดวันหยุดร้านไม่สำเร็จ",holidayError356);
+  // โหลดวันหยุดผ่าน REST ตรง เพื่อไม่ให้ขึ้นกับ supabase-lite
+  const holiday356=await loadTodayHoliday356();
   $("storeName").textContent=settings.store_name||"356 Coffee & Drink";
   $("storeDescription").textContent=
     settings.description||"เครื่องดื่มและขนมจากร้าน 356";
