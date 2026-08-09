@@ -255,105 +255,111 @@ async function requestPin() {
   });
 }
 
-function formatHolidayDate356(value) {
-  if (!value) return "";
-  const [y,m,d] = String(value).split("-");
-  return `${d}/${m}/${y}`;
+const WEEKLY_DAYS_356 = [
+  { day: 0, name: "วันอาทิตย์" },
+  { day: 1, name: "วันจันทร์" },
+  { day: 2, name: "วันอังคาร" },
+  { day: 3, name: "วันพุธ" },
+  { day: 4, name: "วันพฤหัสบดี" },
+  { day: 5, name: "วันศุกร์" },
+  { day: 6, name: "วันเสาร์" }
+];
+
+let weeklySchedule356 = [];
+
+function normalizeWeeklyRow356(row, day) {
+  return {
+    day_of_week: Number(row?.day_of_week ?? day),
+    is_open: row ? row.is_open !== false : day !== 0,
+    open_time: String(row?.open_time || "10:00").slice(0, 5),
+    close_time: String(row?.close_time || "15:00").slice(0, 5)
+  };
 }
 
-async function loadStoreHolidays() {
-  storeHolidayError.textContent = "";
-  const today = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit"
-  }).format(new Date());
+function renderWeeklyHours356() {
+  if (!weeklyHoursList) return;
 
-  const { data, error } = await sb
-    .from("store_holidays")
-    .select("holiday_date,note")
-    .gte("holiday_date", today)
-    .order("holiday_date", { ascending: true });
+  const byDay = new Map(
+    (weeklySchedule356 || []).map(row => [Number(row.day_of_week), row])
+  );
 
-  if (error) {
-    storeHolidayList.innerHTML = '<div class="store-holiday-empty">ยังโหลดวันหยุดไม่ได้ — กรุณารันไฟล์ SQL ที่แนบมาก่อน</div>';
-    return;
-  }
+  weeklyHoursList.innerHTML = "";
 
-  const rows = data || [];
-  if (!rows.length) {
-    storeHolidayList.innerHTML = '<div class="store-holiday-empty">ยังไม่ได้ตั้งวันหยุดร้าน</div>';
-    return;
-  }
+  WEEKLY_DAYS_356.forEach(meta => {
+    const row = normalizeWeeklyRow356(byDay.get(meta.day), meta.day);
 
-  storeHolidayList.innerHTML = "";
-  rows.forEach(row => {
-    const item = document.createElement("div");
-    item.className = "store-holiday-item";
+    const el = document.createElement("div");
+    el.className = "weekly-hours-row" + (row.is_open ? "" : " is-closed");
+    el.dataset.day = String(meta.day);
 
-    const date = document.createElement("div");
-    date.className = "store-holiday-date";
-    date.textContent = formatHolidayDate356(row.holiday_date);
+    el.innerHTML = `
+      <div class="weekly-day-name">${meta.name}</div>
 
-    const note = document.createElement("div");
-    note.className = "store-holiday-note";
-    note.textContent = row.note || "วันหยุดร้าน";
+      <label class="weekly-open-toggle">
+        <input class="weekly-is-open" type="checkbox" ${row.is_open ? "checked" : ""}>
+        <span>${row.is_open ? "เปิด" : "ปิด"}</span>
+      </label>
 
-    const del = document.createElement("button");
-    del.type = "button";
-    del.className = "store-holiday-delete";
-    del.textContent = "ลบ";
-    del.addEventListener("click", async () => {
-      const pin = await requestPin();
-      if (!pin) return;
-      del.disabled = true;
-      const { error } = await sb.rpc("manager_delete_store_holiday", {
-        p_pin: pin,
-        p_holiday_date: row.holiday_date
-      });
-      if (error) {
-        storeHolidayError.textContent = "ลบวันหยุดไม่สำเร็จ: " + error.message;
-        del.disabled = false;
-        return;
-      }
-      await loadWeeklyHours356();
+      <label class="weekly-time-label">
+        <span>เวลาเปิด</span>
+        <input class="weekly-open-time" type="time"
+          value="${row.open_time}" ${row.is_open ? "" : "disabled"}>
+      </label>
+
+      <label class="weekly-time-label">
+        <span>เวลาปิด</span>
+        <input class="weekly-close-time" type="time"
+          value="${row.close_time}" ${row.is_open ? "" : "disabled"}>
+      </label>
+    `;
+
+    const toggle = el.querySelector(".weekly-is-open");
+    const toggleText = el.querySelector(".weekly-open-toggle span");
+    const openInput = el.querySelector(".weekly-open-time");
+    const closeInput = el.querySelector(".weekly-close-time");
+
+    toggle.addEventListener("change", () => {
+      const enabled = toggle.checked;
+      toggleText.textContent = enabled ? "เปิด" : "ปิด";
+      openInput.disabled = !enabled;
+      closeInput.disabled = !enabled;
+      el.classList.toggle("is-closed", !enabled);
     });
 
-    item.append(date, note, del);
-    storeHolidayList.appendChild(item);
+    weeklyHoursList.appendChild(el);
   });
 }
 
-addStoreHolidayButton?.addEventListener("click", async () => {
-  const holidayDate = storeHolidayDate.value;
-  const note = storeHolidayNote.value.trim();
-  storeHolidayError.textContent = "";
-  if (!holidayDate) {
-    storeHolidayError.textContent = "กรุณาเลือกวันที่หยุด";
-    return;
-  }
+function collectWeeklyHours356() {
+  return [...weeklyHoursList.querySelectorAll(".weekly-hours-row")].map(el => ({
+    day_of_week: Number(el.dataset.day),
+    is_open: el.querySelector(".weekly-is-open").checked,
+    open_time: el.querySelector(".weekly-open-time").value || "10:00",
+    close_time: el.querySelector(".weekly-close-time").value || "15:00"
+  }));
+}
 
-  const pin = await requestPin();
-  if (!pin) return;
-  addStoreHolidayButton.disabled = true;
-  addStoreHolidayButton.textContent = "กำลังบันทึก...";
+async function loadWeeklyHours356() {
+  if (!weeklyHoursError) return;
 
-  const { error } = await sb.rpc("manager_save_store_holiday", {
-    p_pin: pin,
-    p_holiday_date: holidayDate,
-    p_note: note || null
-  });
+  weeklyHoursError.textContent = "";
 
-  addStoreHolidayButton.disabled = false;
-  addStoreHolidayButton.textContent = "＋ เพิ่มวันหยุด";
+  const { data, error } = await sb
+    .from("store_weekly_hours")
+    .select("day_of_week,is_open,open_time,close_time")
+    .order("day_of_week", { ascending: true });
 
   if (error) {
-    storeHolidayError.textContent = "เพิ่มวันหยุดไม่สำเร็จ: " + error.message;
+    weeklySchedule356 = [];
+    weeklyHoursError.textContent =
+      "ยังโหลดตารางเวลาไม่ได้ — กรุณาตรวจว่าได้รัน SQL ตาราง store_weekly_hours แล้ว";
+    renderWeeklyHours356();
     return;
   }
 
-  storeHolidayDate.value = "";
-  storeHolidayNote.value = "";
-  await loadWeeklyHours356();
-});
+  weeklySchedule356 = data || [];
+  renderWeeklyHours356();
+}
 
 async function loadStoreSettings() {
   if (loaded) return;
