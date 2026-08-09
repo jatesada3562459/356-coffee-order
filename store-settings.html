@@ -10,14 +10,19 @@
   <script src="manager-auth.js"></script>
 
   <style>
-    .store-holiday-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:10px;align-items:end}
-    .store-holiday-list{display:grid;gap:8px;margin-top:14px}
-    .store-holiday-item{display:grid;grid-template-columns:minmax(120px,.7fr) minmax(0,1.4fr) auto;gap:10px;align-items:center;background:#faf7f2;border:1px solid #e1d9d1;border-radius:13px;padding:11px}
-    .store-holiday-date{font-weight:900}
-    .store-holiday-note{color:#625a53;overflow-wrap:anywhere}
-    .store-holiday-delete{background:#fff0ef;color:#a33229;border:1px solid #e3b9b5}
-    .store-holiday-empty{color:#736b64;padding:8px 2px}
-    @media(max-width:650px){.store-holiday-form{grid-template-columns:1fr}.store-holiday-item{grid-template-columns:1fr}.store-holiday-delete{width:100%}}
+    .weekly-hours-list{display:grid;gap:10px;margin-top:12px}
+    .weekly-hours-row{display:grid;grid-template-columns:minmax(110px,.8fr) auto minmax(120px,1fr) minmax(120px,1fr);gap:10px;align-items:center;background:#faf7f2;border:1px solid #e1d9d1;border-radius:14px;padding:12px}
+    .weekly-day-name{font-weight:900}
+    .weekly-open-toggle{display:flex;gap:7px;align-items:center;font-weight:800;white-space:nowrap}
+    .weekly-time-label{display:grid;gap:5px;font-size:12px;color:#655d56}
+    .weekly-time-label input{font-size:16px}
+    .weekly-hours-row.is-closed .weekly-time-label{opacity:.35}
+    .weekly-hours-help{margin-top:8px;color:#6f675f;font-size:13px;line-height:1.6}
+    .schedule-status-note{background:#eef9f1;border:1px solid #c8e7cf;border-radius:12px;padding:10px 12px;margin-top:12px;color:#245c32;font-weight:700}
+    @media(max-width:720px){
+      .weekly-hours-row{grid-template-columns:1fr auto}
+      .weekly-time-label{grid-column:1 / -1}
+    }
   </style>
 </head>
 <body>
@@ -79,44 +84,27 @@
           placeholder="เช่น กาแฟ ชา และเครื่องดื่มสดใหม่ทุกแก้ว"></textarea>
       </label>
 
-      <div class="store-time-grid">
-        <label class="store-settings-field">
-          <span>เวลาเปิด</span>
-          <input id="storeOpenTime" type="time">
-        </label>
+      <!-- เวลาเปิด/ปิดแบบเดิมเก็บไว้เป็นค่า legacy แต่ไม่ใช้ตัดสินสถานะร้านแล้ว -->
+      <input id="storeOpenTime" type="hidden">
+      <input id="storeCloseTime" type="hidden">
 
-        <label class="store-settings-field">
-          <span>เวลาปิด</span>
-          <input id="storeCloseTime" type="time">
-        </label>
+      <div class="schedule-status-note">
+        สถานะร้านจะเปิด/ปิดตาม “ตารางเวลารายสัปดาห์” ด้านล่างเท่านั้น
       </div>
-
-      <label class="store-accepting-toggle">
-        <input id="storeAcceptingOrders" type="checkbox">
-        <span>เปิดรับออเดอร์</span>
-      </label>
     </section>
 
 
 
     <section class="store-settings-panel">
-      <h2>วันหยุดร้าน</h2>
-      <p class="muted">ตั้งวันหยุดล่วงหน้าได้ วันดังกล่าวหน้าเว็บลูกค้าจะปิดรับออเดอร์อัตโนมัติ</p>
-
-      <div class="store-holiday-form">
-        <label class="store-settings-field">
-          <span>วันที่หยุด</span>
-          <input id="storeHolidayDate" type="date">
-        </label>
-        <label class="store-settings-field">
-          <span>หมายเหตุ (ไม่บังคับ)</span>
-          <input id="storeHolidayNote" type="text" maxlength="120" placeholder="เช่น หยุดสงกรานต์">
-        </label>
-        <button id="addStoreHolidayButton" type="button">＋ เพิ่มวันหยุด</button>
+      <h2>🕒 เวลาเปิด-ปิดร้านรายสัปดาห์</h2>
+      <p class="muted">เลือกได้เลยว่าแต่ละวันเปิดหรือปิด และกำหนดเวลาแยกแต่ละวัน</p>
+      <div id="weeklyHoursList" class="weekly-hours-list"></div>
+      <div class="weekly-hours-help">
+        • วันที่ปิด = ร้านปิดทั้งวัน<br>
+        • วันที่เปิด = รับออเดอร์เฉพาะช่วงเวลาที่กำหนด<br>
+        • ก่อนเวลาเปิดและหลังเวลาปิด = หน้าเว็บลูกค้าปิดรับออเดอร์อัตโนมัติ
       </div>
-
-      <div id="storeHolidayError" class="store-settings-error"></div>
-      <div id="storeHolidayList" class="store-holiday-list"></div>
+      <div id="weeklyHoursError" class="store-settings-error"></div>
     </section>
 
     <div id="storeImageStatus" class="store-image-status">ยังไม่ได้เลือกรูปใหม่</div>
@@ -126,9 +114,9 @@
       บันทึกหน้าร้าน
     </button>
 
-    <footer class="version-label">356 POS V1.5.6 — Store Holidays</footer>
+    <footer class="version-label">356 POS V1.5.7 — Weekly Store Hours</footer>
   </main>
 
-  <script src="store-settings-v2.js?v=1156"></script>
+  <script src="store-settings-v2.js?v=1157"></script>
 </body>
 </html>

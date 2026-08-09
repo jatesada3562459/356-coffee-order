@@ -37,12 +37,19 @@ function bangkokNow356(){
   return {date:`${parts.year}-${parts.month}-${parts.day}`,time:`${parts.hour}:${parts.minute}`};
 }
 
-async function loadTodayHoliday356(){
-  const today356=bangkokNow356().date;
+function bangkokWeekday356(){
+  const short=new Intl.DateTimeFormat("en-US",{
+    timeZone:"Asia/Bangkok",weekday:"short"
+  }).format(new Date());
+  return ({Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6})[short] ?? 0;
+}
+
+async function loadTodayWeeklyHours356(){
+  const day=bangkokWeekday356();
   try{
     const url=
-      `${APP_CONFIG.SUPABASE_URL.replace(/\/$/,"")}/rest/v1/store_holidays`+
-      `?select=holiday_date,note&holiday_date=eq.${encodeURIComponent(today356)}&limit=1`;
+      `${APP_CONFIG.SUPABASE_URL.replace(/\/$/,"")}/rest/v1/store_weekly_hours`+
+      `?select=day_of_week,is_open,open_time,close_time&day_of_week=eq.${day}&limit=1`;
 
     const res=await fetch(url,{
       method:"GET",
@@ -55,65 +62,66 @@ async function loadTodayHoliday356(){
     });
 
     if(!res.ok){
-      const text=await res.text();
-      console.warn("โหลดวันหยุดร้านผ่าน REST ไม่สำเร็จ",res.status,text);
+      console.warn("โหลดตารางเวลาร้านไม่สำเร็จ",res.status,await res.text());
       return null;
     }
 
     const rows=await res.json();
-    return Array.isArray(rows) && rows.length ? rows[0] : null;
+    return Array.isArray(rows)&&rows.length?rows[0]:null;
   }catch(err){
-    console.warn("โหลดวันหยุดร้านผ่าน REST ไม่สำเร็จ",err);
+    console.warn("โหลดตารางเวลาร้านไม่สำเร็จ",err);
     return null;
   }
 }
 
-function calculateStoreStatus(settings,holiday=null){
-  // วันหยุดร้าน = ลำดับความสำคัญสูงสุด
-  // ต่อให้หลังบ้านเปิดรับออเดอร์หรือกดเปิดร้านแบบ manual ไว้
-  // หน้าเว็บลูกค้าต้องปิดรับออเดอร์ในวันที่ถูกกำหนดเป็นวันหยุดเสมอ
-  if(holiday){
-    return {open:false,text:"หยุดวันนี้",reason:"holiday",holiday};
-  }
-
+function calculateStoreStatus(settings,weekly=null){
+  // accepting_orders=false ใช้เฉพาะเป็นการหยุดรับออเดอร์ฉุกเฉิน
+  // แต่ accepting_orders=true ไม่มีสิทธิ์เปิดร้านนอกตาราง
   if(settings.accepting_orders===false){
     return {open:false,text:"ปิดรับออเดอร์ชั่วคราว",reason:"paused"};
   }
 
-  const now=bangkokNow356();
-  const override=(settings.manual_override||"auto").toLowerCase();
-  const overrideDate=settings.manual_override_date||null;
-  if(overrideDate===now.date && override==="open"){
-    return {open:true,text:"เปิดรับออเดอร์",reason:"manual_open"};
-  }
-  if(overrideDate===now.date && override==="closed"){
-    return {open:false,text:"ปิดร้าน",reason:"manual_closed"};
+  if(!weekly){
+    return {open:false,text:"ปิดร้าน",reason:"schedule_missing"};
   }
 
-  const openTime=(settings.open_time||"09:00").slice(0,5);
-  const closeTime=(settings.close_time||"16:00").slice(0,5);
+  if(weekly.is_open===false){
+    return {open:false,text:"ปิดทั้งวัน",reason:"weekly_closed",weekly};
+  }
+
+  const now=bangkokNow356();
+  const openTime=String(weekly.open_time||"10:00").slice(0,5);
+  const closeTime=String(weekly.close_time||"15:00").slice(0,5);
+
   let open=false;
   if(openTime===closeTime){
     open=true;
   }else if(openTime<closeTime){
     open=now.time>=openTime && now.time<closeTime;
   }else{
-    // รองรับร้านที่เปิดข้ามเที่ยงคืน เช่น 18:00–02:00
+    // รองรับเวลาข้ามเที่ยงคืน
     open=now.time>=openTime || now.time<closeTime;
   }
-  return {open,text:open?"เปิดรับออเดอร์":"ปิดร้าน",reason:open?"schedule_open":"schedule_closed"};
+
+  return {
+    open,
+    text:open?"เปิดรับออเดอร์":"ปิดร้าน",
+    reason:open?"schedule_open":"schedule_closed",
+    weekly
+  };
 }
 
 function storeHoursMessage356(){
-  const settings=lastStoreSettings356||{};
-  const openTime=(settings.open_time||"09:00").slice(0,5);
-  const closeTime=(settings.close_time||"16:00").slice(0,5);
+  const weekly=lastStoreSettings356?.weekly_hours;
+  if(!weekly || weekly.is_open===false) return "วันนี้ปิด";
+  const openTime=String(weekly.open_time||"10:00").slice(0,5);
+  const closeTime=String(weekly.close_time||"15:00").slice(0,5);
   return `${openTime} ถึง ${closeTime}`;
 }
 
 function closedMessage356(){
   if(storeStatusReason356==="paused") return "ร้านหยุดรับออเดอร์ชั่วคราว";
-  if(storeStatusReason356==="holiday") return "ร้านหยุดวันนี้ จะเปิดอีกครั้งตามวันและเวลาทำการถัดไป";
+  if(storeStatusReason356==="weekly_closed") return "วันนี้ร้านปิดทั้งวัน";
   return `ร้านปิด จะเปิดในวันถัดไปเวลา ${storeHoursMessage356()}`;
 }
 
@@ -139,9 +147,9 @@ function applyStoreLock356(status){
   if(!storeOpen356){
     banner.textContent=storeStatusReason356==="paused"
       ? "ร้านหยุดรับออเดอร์ชั่วคราว"
-      : storeStatusReason356==="holiday"
-        ? "ร้านหยุดวันนี้ จะเปิดอีกครั้งตามวันและเวลาทำการถัดไป"
-        : `ร้านปิด จะเปิดในวันถัดไปเวลา ${storeHoursMessage356()}`;
+      : storeStatusReason356==="weekly_closed"
+        ? "วันนี้ร้านปิดทั้งวัน"
+        : `ร้านปิด — เวลาทำการวันนี้ ${storeHoursMessage356()}`;
     banner.style.display="block";
   }else{
     banner.style.display="none";
@@ -176,15 +184,19 @@ async function loadStoreSettings(){
   const settings=data||{};
   lastStoreSettings356=settings;
 
-  // โหลดวันหยุดผ่าน REST ตรง เพื่อไม่ให้ขึ้นกับ supabase-lite
-  const holiday356=await loadTodayHoliday356();
+  const weekly356=await loadTodayWeeklyHours356();
+  settings.weekly_hours=weekly356;
   $("storeName").textContent=settings.store_name||"356 Coffee & Drink";
   $("storeDescription").textContent=
     settings.description||"เครื่องดื่มและขนมจากร้าน 356";
 
-  const openTime=settings.open_time||"09:00";
-  const closeTime=settings.close_time||"16:00";
-  $("storeHours").textContent=`${openTime}–${closeTime}`;
+  if(weekly356 && weekly356.is_open!==false){
+    const openTime=String(weekly356.open_time||"10:00").slice(0,5);
+    const closeTime=String(weekly356.close_time||"15:00").slice(0,5);
+    $("storeHours").textContent=`${openTime}–${closeTime}`;
+  }else{
+    $("storeHours").textContent="ปิดวันนี้";
+  }
 
   setImageState(
     $("storeCoverImage"),
@@ -227,7 +239,7 @@ async function loadStoreSettings(){
     logoPlaceholder.classList.remove("hidden");
   }
 
-  const status=calculateStoreStatus(settings,holiday356||null);
+  const status=calculateStoreStatus(settings,weekly356||null);
   $("storeStatusBadge").textContent=status.text;
   $("storeStatusBadge").classList.toggle("closed",!status.open);
   applyStoreLock356(status);

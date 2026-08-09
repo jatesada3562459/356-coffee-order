@@ -21,11 +21,8 @@ const storeAcceptingOrders = document.getElementById("storeAcceptingOrders");
 const storeImageStatus = document.getElementById("storeImageStatus");
 const storeSettingsError = document.getElementById("storeSettingsError");
 const saveStoreSettingsButton = document.getElementById("saveStoreSettingsButton");
-const storeHolidayDate = document.getElementById("storeHolidayDate");
-const storeHolidayNote = document.getElementById("storeHolidayNote");
-const addStoreHolidayButton = document.getElementById("addStoreHolidayButton");
-const storeHolidayError = document.getElementById("storeHolidayError");
-const storeHolidayList = document.getElementById("storeHolidayList");
+const weeklyHoursList = document.getElementById("weeklyHoursList");
+const weeklyHoursError = document.getElementById("weeklyHoursError");
 
 
 let coverFile = null;
@@ -317,7 +314,7 @@ async function loadStoreHolidays() {
         del.disabled = false;
         return;
       }
-      await loadStoreHolidays();
+      await loadWeeklyHours356();
     });
 
     item.append(date, note, del);
@@ -355,7 +352,7 @@ addStoreHolidayButton?.addEventListener("click", async () => {
 
   storeHolidayDate.value = "";
   storeHolidayNote.value = "";
-  await loadStoreHolidays();
+  await loadWeeklyHours356();
 });
 
 async function loadStoreSettings() {
@@ -380,7 +377,7 @@ async function loadStoreSettings() {
     settings.description || "เครื่องดื่มและขนมจากร้าน 356";
   storeOpenTime.value = String(settings.open_time || "09:00").slice(0, 5);
   storeCloseTime.value = String(settings.close_time || "16:00").slice(0, 5);
-  storeAcceptingOrders.checked = settings.accepting_orders !== false;
+  loadedAcceptingOrders356 = settings.accepting_orders !== false;
 
   currentCoverUrl = settings.cover_url || null;
   currentLogoUrl = settings.logo_url || null;
@@ -401,7 +398,7 @@ async function loadStoreSettings() {
       ? "โหลดรูปที่บันทึกไว้แล้ว"
       : "ยังไม่ได้เลือกรูปใหม่";
 
-  await loadStoreHolidays();
+  await loadWeeklyHours356();
 }
 
 saveStoreSettingsButton.addEventListener("click", async () => {
@@ -438,10 +435,19 @@ saveStoreSettingsButton.addEventListener("click", async () => {
       p_logo_url: logoUrl,
       p_open_time: openTime,
       p_close_time: closeTime,
-      p_accepting_orders: storeAcceptingOrders.checked
+      p_accepting_orders: loadedAcceptingOrders356
     });
 
     if (error) throw new Error(error.message);
+
+    const schedule356 = collectWeeklyHours356();
+    const { error: scheduleError356 } = await sb.rpc("manager_save_store_weekly_hours", {
+      p_pin: pin,
+      p_schedule: schedule356
+    });
+    if (scheduleError356) throw new Error("บันทึกตารางเวลาไม่สำเร็จ: " + scheduleError356.message);
+
+    weeklySchedule356 = schedule356;
 
     currentCoverUrl = coverUrl;
     currentLogoUrl = logoUrl;
