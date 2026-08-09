@@ -377,7 +377,7 @@ async function loadStoreSettings() {
     settings.description || "เครื่องดื่มและขนมจากร้าน 356";
   storeOpenTime.value = String(settings.open_time || "09:00").slice(0, 5);
   storeCloseTime.value = String(settings.close_time || "16:00").slice(0, 5);
-  loadedAcceptingOrders356 = settings.accepting_orders !== false;
+  storeAcceptingOrders.checked = settings.accepting_orders !== false;
 
   currentCoverUrl = settings.cover_url || null;
   currentLogoUrl = settings.logo_url || null;
@@ -435,18 +435,17 @@ saveStoreSettingsButton.addEventListener("click", async () => {
       p_logo_url: logoUrl,
       p_open_time: openTime,
       p_close_time: closeTime,
-      p_accepting_orders: loadedAcceptingOrders356
+      p_accepting_orders: storeAcceptingOrders.checked
     });
 
     if (error) throw new Error(error.message);
 
     const schedule356 = collectWeeklyHours356();
-    const { error: scheduleError356 } = await sb.rpc("manager_save_store_weekly_hours", {
+    const { error: weeklyError356 } = await sb.rpc("manager_save_store_weekly_hours", {
       p_pin: pin,
       p_schedule: schedule356
     });
-    if (scheduleError356) throw new Error("บันทึกตารางเวลาไม่สำเร็จ: " + scheduleError356.message);
-
+    if (weeklyError356) throw new Error("บันทึกตารางเวลาไม่สำเร็จ: " + weeklyError356.message);
     weeklySchedule356 = schedule356;
 
     currentCoverUrl = coverUrl;

@@ -50,43 +50,28 @@ async function loadTodayWeeklyHours356(){
     const url=
       `${APP_CONFIG.SUPABASE_URL.replace(/\/$/,"")}/rest/v1/store_weekly_hours`+
       `?select=day_of_week,is_open,open_time,close_time&day_of_week=eq.${day}&limit=1`;
-
     const res=await fetch(url,{
-      method:"GET",
       cache:"no-store",
       headers:{
-        "apikey":APP_CONFIG.SUPABASE_ANON_KEY,
-        "Authorization":"Bearer "+APP_CONFIG.SUPABASE_ANON_KEY,
-        "Accept":"application/json"
+        apikey:APP_CONFIG.SUPABASE_ANON_KEY,
+        Authorization:"Bearer "+APP_CONFIG.SUPABASE_ANON_KEY
       }
     });
-
-    if(!res.ok){
-      console.warn("โหลดตารางเวลาร้านไม่สำเร็จ",res.status,await res.text());
-      return null;
-    }
-
+    if(!res.ok) return null;
     const rows=await res.json();
     return Array.isArray(rows)&&rows.length?rows[0]:null;
   }catch(err){
-    console.warn("โหลดตารางเวลาร้านไม่สำเร็จ",err);
+    console.warn("โหลดตารางเวลาไม่สำเร็จ",err);
     return null;
   }
 }
 
 function calculateStoreStatus(settings,weekly=null){
-  // accepting_orders=false ใช้เฉพาะเป็นการหยุดรับออเดอร์ฉุกเฉิน
-  // แต่ accepting_orders=true ไม่มีสิทธิ์เปิดร้านนอกตาราง
-  if(settings.accepting_orders===false){
-    return {open:false,text:"ปิดรับออเดอร์ชั่วคราว",reason:"paused"};
-  }
-
   if(!weekly){
     return {open:false,text:"ปิดร้าน",reason:"schedule_missing"};
   }
-
   if(weekly.is_open===false){
-    return {open:false,text:"ปิดทั้งวัน",reason:"weekly_closed",weekly};
+    return {open:false,text:"ปิดวันนี้",reason:"weekly_closed",weekly};
   }
 
   const now=bangkokNow356();
@@ -99,7 +84,6 @@ function calculateStoreStatus(settings,weekly=null){
   }else if(openTime<closeTime){
     open=now.time>=openTime && now.time<closeTime;
   }else{
-    // รองรับเวลาข้ามเที่ยงคืน
     open=now.time>=openTime || now.time<closeTime;
   }
 
@@ -114,9 +98,7 @@ function calculateStoreStatus(settings,weekly=null){
 function storeHoursMessage356(){
   const weekly=lastStoreSettings356?.weekly_hours;
   if(!weekly || weekly.is_open===false) return "วันนี้ปิด";
-  const openTime=String(weekly.open_time||"10:00").slice(0,5);
-  const closeTime=String(weekly.close_time||"15:00").slice(0,5);
-  return `${openTime} ถึง ${closeTime}`;
+  return `${String(weekly.open_time||"10:00").slice(0,5)} ถึง ${String(weekly.close_time||"15:00").slice(0,5)}`;
 }
 
 function closedMessage356(){
@@ -191,9 +173,7 @@ async function loadStoreSettings(){
     settings.description||"เครื่องดื่มและขนมจากร้าน 356";
 
   if(weekly356 && weekly356.is_open!==false){
-    const openTime=String(weekly356.open_time||"10:00").slice(0,5);
-    const closeTime=String(weekly356.close_time||"15:00").slice(0,5);
-    $("storeHours").textContent=`${openTime}–${closeTime}`;
+    $("storeHours").textContent=`${String(weekly356.open_time||"10:00").slice(0,5)}–${String(weekly356.close_time||"15:00").slice(0,5)}`;
   }else{
     $("storeHours").textContent="ปิดวันนี้";
   }
