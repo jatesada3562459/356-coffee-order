@@ -54,7 +54,7 @@
       </button>
     </div>
 
-    <footer class="version-label">356 POS V1.6.5.4 — Custom Categories</footer>
+    <footer class="version-label">356 POS V1.6.5.3/5.4 — Recommended + Custom Categories</footer>
   </main>
 
 
@@ -188,6 +188,11 @@
         <small>รองรับ JPG, PNG และ WebP ขนาดไม่เกิน 10 MB • แนะนำรูปสี่เหลี่ยม 1:1</small>
       </section>
 
+      <label id="editorRecommendedWrap" class="menu-active-editor recommended-editor">
+        <input id="editorRecommended" type="checkbox">
+        <span>⭐ แสดงในหมวด “แนะนำ”</span>
+      </label>
+
       <label class="menu-active-editor">
         <input id="editorIsActive" type="checkbox" checked>
         <span>เปิดขายทันที</span>
@@ -235,12 +240,14 @@
     .category-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #e5ddd5;border-radius:12px;padding:10px}
     .category-row.hidden-category{opacity:.62;background:#f5f5f5}
     .category-row-name{font-weight:900}.category-row-meta{font-size:12px;color:#766d65;margin-top:3px}
+    .recommended-menu-badge{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;background:#fff4c7;color:#8b6200;font-size:11px;font-weight:900}
+    .recommended-editor{background:#fff9df;border:1px solid #ead79b;border-radius:12px;padding:12px}
     .category-row-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
     .category-row-actions button{border:0;border-radius:9px;min-width:38px;min-height:38px;padding:7px 10px;font-weight:800}
     .category-move{background:#eee}.category-edit{background:#f1eee9;color:#1674c8}
     @media(max-width:620px){.category-manager-head{align-items:stretch;flex-direction:column}.add-category-button{width:100%}.category-row{grid-template-columns:1fr}.category-row-actions{justify-content:flex-start}}
   </style>
 
-  <script src="settings.js"></script>
+  <script src="settings.js?v=16546"></script>
 </body>
 </html>

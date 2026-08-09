@@ -33,6 +33,8 @@ const editorCategory = document.getElementById("editorCategory");
 const editorPrice = document.getElementById("editorPrice");
 const editorOptionsWrap = document.getElementById("editorOptionsWrap");
 const editorIsActive = document.getElementById("editorIsActive");
+const editorRecommendedWrap = document.getElementById("editorRecommendedWrap");
+const editorRecommended = document.getElementById("editorRecommended");
 const menuEditorError = document.getElementById("menuEditorError");
 const saveMenuEditorButton = document.getElementById("saveMenuEditorButton");
 const deleteCustomMenuButton = document.getElementById("deleteCustomMenuButton");
@@ -167,6 +169,7 @@ function renderItems() {
             ${item.item_type === "addon" ? "ADD-ON" : categoryLabel(item.category)}
           </span>
           ${item.is_custom ? '<span class="custom-menu-badge">เมนูเพิ่มเอง</span>' : ""}
+          ${item.item_type === "product" && item.item_data?.recommended ? '<span class="recommended-menu-badge">⭐ แนะนำ</span>' : ""}
           <h3>${item.item_name}</h3>
         </div>
 
@@ -422,6 +425,8 @@ function updateEditorTypeUI() {
   const isAddon = editorItemType.value === "addon";
   editorCategoryWrap.classList.toggle("hidden", isAddon);
   editorOptionsWrap.classList.toggle("hidden", isAddon);
+  if (editorRecommendedWrap) editorRecommendedWrap.classList.toggle("hidden", isAddon);
+  if (isAddon && editorRecommended) editorRecommended.checked = false;
 }
 
 function applySuggestedOptionsForCategory() {
@@ -465,6 +470,7 @@ function openMenuEditor(item = null) {
     editorCategory.value = item.category || "";
     editorPrice.value = Number(item.price);
     editorIsActive.checked = Boolean(item.is_active);
+    editorRecommended.checked = item.item_type === "product" && Boolean(item.item_data?.recommended);
     setSelectedGroups(item.item_data?.groups || []);
     pendingImageFile = null;
     removeCurrentImage = false;
@@ -481,6 +487,7 @@ function openMenuEditor(item = null) {
     editorCategory.value = "";
     editorPrice.value = "";
     editorIsActive.checked = true;
+    editorRecommended.checked = false;
     setSelectedGroups([]);
     pendingImageFile = null;
     removeCurrentImage = false;
@@ -667,6 +674,7 @@ saveMenuEditorButton.addEventListener("click", async () => {
   const category = type === "addon" ? "ADD-ON" : editorCategory.value.trim();
   const price = Number(editorPrice.value || 0);
   const isActive = editorIsActive.checked;
+  const isRecommended = type === "product" && editorRecommended.checked;
   const groups = type === "product" ? selectedGroups() : [];
 
   menuEditorError.textContent = "";
@@ -730,7 +738,7 @@ saveMenuEditorButton.addEventListener("click", async () => {
     p_category: category,
     p_price: price,
     p_is_active: isActive,
-    p_item_data: { groups },
+    p_item_data: { groups, recommended: isRecommended },
     p_is_custom: editingItem ? Boolean(editingItem.is_custom) : true,
     p_image_url: finalImageUrl
   });
