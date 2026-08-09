@@ -30,10 +30,13 @@
     function from(table){
       var selectFields='*';
       var filters=[];
+      var orderBy=null;
 
       async function runSelect(singleMode){
         try{
-          var qs=['select='+encodeURIComponent(encodeSelect(selectFields))].concat(filters).join('&');
+          var queryParts=['select='+encodeURIComponent(encodeSelect(selectFields))].concat(filters);
+          if(orderBy){ queryParts.push('order='+encodeURIComponent(orderBy)); }
+          var qs=queryParts.join('&');
           var res=await timeoutFetch(restBase+'/'+encodeURIComponent(table)+'?'+qs,{
             method:'GET',
             headers:Object.assign({},baseHeaders,{'Accept':'application/json'})
@@ -56,6 +59,11 @@
         select:function(fields){ selectFields=fields||'*'; return builder; },
         eq:function(column,value){
           filters.push(encodeURIComponent(column)+'=eq.'+encodeURIComponent(String(value)));
+          return builder;
+        },
+        order:function(column,options){
+          var ascending = !options || options.ascending !== false;
+          orderBy = String(column) + '.' + (ascending ? 'asc' : 'desc');
           return builder;
         },
         maybeSingle:function(){ return runSelect(true); },
