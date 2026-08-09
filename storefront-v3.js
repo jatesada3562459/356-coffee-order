@@ -38,6 +38,13 @@ function bangkokNow356(){
 }
 
 function calculateStoreStatus(settings,holiday=null){
+  // วันหยุดร้าน = ลำดับความสำคัญสูงสุด
+  // ต่อให้หลังบ้านเปิดรับออเดอร์หรือกดเปิดร้านแบบ manual ไว้
+  // หน้าเว็บลูกค้าต้องปิดรับออเดอร์ในวันที่ถูกกำหนดเป็นวันหยุดเสมอ
+  if(holiday){
+    return {open:false,text:"หยุดวันนี้",reason:"holiday",holiday};
+  }
+
   if(settings.accepting_orders===false){
     return {open:false,text:"ปิดรับออเดอร์ชั่วคราว",reason:"paused"};
   }
@@ -50,9 +57,6 @@ function calculateStoreStatus(settings,holiday=null){
   }
   if(overrideDate===now.date && override==="closed"){
     return {open:false,text:"ปิดร้าน",reason:"manual_closed"};
-  }
-  if(holiday){
-    return {open:false,text:"หยุดวันนี้",reason:"holiday",holiday};
   }
 
   const openTime=(settings.open_time||"09:00").slice(0,5);
