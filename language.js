@@ -241,14 +241,16 @@ function setLanguage356(lang){
 }
 window.setLanguage356 = setLanguage356;
 
-/* Keep original calculation, but translate status returned to async loadStoreSettings(). */
+/* Step Weekly Hours V4:
+   แปลข้อความสถานะเท่านั้น ห้ามทิ้ง weekly schedule / reason ที่ storefront คำนวณไว้ */
 var originalCalculateStoreStatus356 = calculateStoreStatus;
-calculateStoreStatus = function(settings){
-  var result = originalCalculateStoreStatus356(settings);
-  if(settings && settings.accepting_orders === false){
-    return {open:false, text:tr356("storePaused")};
-  }
-  return {open:result.open, text:result.open ? tr356("storeOpen") : tr356("storeClosed")};
+calculateStoreStatus = function(settings, weekly){
+  var result = originalCalculateStoreStatus356(settings, weekly);
+
+  return {
+    ...result,
+    text: result.open ? tr356("storeOpen") : tr356("storeClosed")
+  };
 };
 
 /* Step 16.5.4.4 — Translate category tabs without overwriting custom categories. */
