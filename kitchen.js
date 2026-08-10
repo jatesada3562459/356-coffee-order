@@ -1136,9 +1136,12 @@ function renderOrders(newOrderIds = []) {
         ${order.refund_status === "refunded" ? `<br>↩️ คืนเงิน: ${numberBaht(order.refund_amount)} (${order.refund_reason || "-"})` : ""}
       </div>
 
-      ${(order.order_items || []).map(item => `
+      ${(order.order_items || []).map((item, itemIndex) => `
         <div class="row">
-          <b>${item.product_name} × ${item.quantity}</b>
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+            <b>${itemIndex + 1}. ${item.product_name} × ${item.quantity}</b>
+            <b style="white-space:nowrap;">${numberBaht(Number(item.line_total || 0))}</b>
+          </div>
           <div class="muted">
             ${(item.options || []).join(" • ") || "ไม่มีตัวเลือกเพิ่มเติม"}
           </div>
