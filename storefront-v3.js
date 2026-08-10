@@ -1,6 +1,5 @@
 const sb=supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
 let db={products:[],addons:[]},cat="ทั้งหมด",cart=[],current=null,editIndex=null,qty=1,currentAddon=null;
-let menuCategories356=[];
 let storeOpen356=false;
 let storeStatusReason356="checking";
 let lastStoreSettings356=null;
@@ -37,74 +36,38 @@ function bangkokNow356(){
   return {date:`${parts.year}-${parts.month}-${parts.day}`,time:`${parts.hour}:${parts.minute}`};
 }
 
-function bangkokWeekday356(){
-  const short=new Intl.DateTimeFormat("en-US",{
-    timeZone:"Asia/Bangkok",weekday:"short"
-  }).format(new Date());
-  return ({Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6})[short] ?? 0;
-}
-
-async function loadTodayWeeklyHours356(){
-  const day=bangkokWeekday356();
-  try{
-    const url=
-      `${APP_CONFIG.SUPABASE_URL.replace(/\/$/,"")}/rest/v1/store_weekly_hours`+
-      `?select=day_of_week,is_open,open_time,close_time&day_of_week=eq.${day}&limit=1`;
-    const res=await fetch(url,{
-      cache:"no-store",
-      headers:{
-        apikey:APP_CONFIG.SUPABASE_ANON_KEY,
-        Authorization:"Bearer "+APP_CONFIG.SUPABASE_ANON_KEY
-      }
-    });
-    if(!res.ok) return null;
-    const rows=await res.json();
-    return Array.isArray(rows)&&rows.length?rows[0]:null;
-  }catch(err){
-    console.warn("โหลดตารางเวลาไม่สำเร็จ",err);
-    return null;
-  }
-}
-
-function calculateStoreStatus(settings,weekly=null){
-  if(!weekly){
-    return {open:false,text:"ปิดร้าน",reason:"schedule_missing"};
-  }
-  if(weekly.is_open===false){
-    return {open:false,text:"ปิดวันนี้",reason:"weekly_closed",weekly};
+function calculateStoreStatus(settings){
+  if(settings.accepting_orders===false){
+    return {open:false,text:"ปิดรับออเดอร์ชั่วคราว",reason:"paused"};
   }
 
   const now=bangkokNow356();
-  const openTime=String(weekly.open_time||"10:00").slice(0,5);
-  const closeTime=String(weekly.close_time||"15:00").slice(0,5);
+  const override=(settings.manual_override||"auto").toLowerCase();
+  const overrideDate=settings.manual_override_date||null;
+  if(overrideDate===now.date && override==="open"){
+    return {open:true,text:"เปิดรับออเดอร์",reason:"manual_open"};
+  }
+  if(overrideDate===now.date && override==="closed"){
+    return {open:false,text:"ปิดร้าน",reason:"manual_closed"};
+  }
 
+  const openTime=(settings.open_time||"09:00").slice(0,5);
+  const closeTime=(settings.close_time||"16:00").slice(0,5);
   let open=false;
   if(openTime===closeTime){
     open=true;
   }else if(openTime<closeTime){
     open=now.time>=openTime && now.time<closeTime;
   }else{
+    // รองรับร้านที่เปิดข้ามเที่ยงคืน เช่น 18:00–02:00
     open=now.time>=openTime || now.time<closeTime;
   }
-
-  return {
-    open,
-    text:open?"เปิดรับออเดอร์":"ปิดร้าน",
-    reason:open?"schedule_open":"schedule_closed",
-    weekly
-  };
-}
-
-function storeHoursMessage356(){
-  const weekly=lastStoreSettings356?.weekly_hours;
-  if(!weekly || weekly.is_open===false) return "วันนี้ปิด";
-  return `${String(weekly.open_time||"10:00").slice(0,5)} ถึง ${String(weekly.close_time||"15:00").slice(0,5)}`;
+  return {open,text:open?"เปิดรับออเดอร์":"ปิดร้าน",reason:open?"schedule_open":"schedule_closed"};
 }
 
 function closedMessage356(){
   if(storeStatusReason356==="paused") return "ร้านหยุดรับออเดอร์ชั่วคราว";
-  if(storeStatusReason356==="weekly_closed") return "วันนี้ร้านปิดทั้งวัน";
-  return `ร้านปิด จะเปิดในวันถัดไปเวลา ${storeHoursMessage356()}`;
+  return "ขออภัย ขณะนี้ร้านปิดให้บริการ";
 }
 
 function ensureStoreOpen356(){
@@ -127,11 +90,8 @@ function applyStoreLock356(status){
     if(hero) hero.appendChild(banner);
   }
   if(!storeOpen356){
-    banner.textContent=storeStatusReason356==="paused"
-      ? "ร้านหยุดรับออเดอร์ชั่วคราว"
-      : storeStatusReason356==="weekly_closed"
-        ? "วันนี้ร้านปิดทั้งวัน"
-        : `ร้านปิด — เวลาทำการวันนี้ ${storeHoursMessage356()}`;
+    const hours=document.getElementById("storeHours")?.textContent||"";
+    banner.textContent=(storeStatusReason356==="paused"?"ร้านหยุดรับออเดอร์ชั่วคราว":"ร้านปิดให้บริการ")+(hours?` • เวลา ${hours}`:"");
     banner.style.display="block";
   }else{
     banner.style.display="none";
@@ -165,18 +125,13 @@ async function loadStoreSettings(){
 
   const settings=data||{};
   lastStoreSettings356=settings;
-
-  const weekly356=await loadTodayWeeklyHours356();
-  settings.weekly_hours=weekly356;
   $("storeName").textContent=settings.store_name||"356 Coffee & Drink";
   $("storeDescription").textContent=
     settings.description||"เครื่องดื่มและขนมจากร้าน 356";
 
-  if(weekly356 && weekly356.is_open!==false){
-    $("storeHours").textContent=`${String(weekly356.open_time||"10:00").slice(0,5)}–${String(weekly356.close_time||"15:00").slice(0,5)}`;
-  }else{
-    $("storeHours").textContent="ปิดวันนี้";
-  }
+  const openTime=settings.open_time||"09:00";
+  const closeTime=settings.close_time||"16:00";
+  $("storeHours").textContent=`${openTime}–${closeTime}`;
 
   setImageState(
     $("storeCoverImage"),
@@ -219,7 +174,7 @@ async function loadStoreSettings(){
     logoPlaceholder.classList.remove("hidden");
   }
 
-  const status=calculateStoreStatus(settings,weekly356||null);
+  const status=calculateStoreStatus(settings);
   $("storeStatusBadge").textContent=status.text;
   $("storeStatusBadge").classList.toggle("closed",!status.open);
   applyStoreLock356(status);
@@ -236,7 +191,6 @@ async function loadMenu(){
     renderTabs();
     renderMenu();
 
-    // โหลดข้อมูลเมนูก่อน เพื่อให้ราคา/รูปแสดงทันที ไม่ต้องรอข้อมูลหมวดหมู่
     const {data:settings,error}=await sb
       .from("menu_settings")
       .select("item_type,item_name,category,price,is_active,is_custom,item_data,image_url");
@@ -290,7 +244,6 @@ async function loadMenu(){
           category:item.category||"อื่น ๆ",
           price:Number(item.price),
           groups:Array.isArray(item.item_data?.groups)?item.item_data.groups:[],
-          recommended:Boolean(item.item_data?.recommended),
           is_active:item.is_active,
           is_custom:true,
           image_url:item.image_url||null
@@ -311,35 +264,6 @@ async function loadMenu(){
       db.addons.push(...customAddons);
     }
 
-    // ตอนนี้ข้อมูลรูป/ราคาได้แล้ว แสดงก่อนทันที
-    renderTabs();
-    renderMenu();
-
-    // โหลดหมวดหมู่แยกภายหลัง เพื่อไม่ให้การโหลดหมวดใหม่ทำให้รูปเมนูหาย/ค้าง
-    const {data:categoryRows,error:categoryError}=await sb
-      .from("menu_categories")
-      .select("category_key,display_name,sort_order,is_active")
-      .order("sort_order",{ascending:true});
-
-    if(categoryError){
-      console.warn("โหลดการจัดการหมวดหมู่ไม่สำเร็จ ใช้หมวดจากเมนูเดิมแทน",categoryError);
-      menuCategories356=[];
-    }else{
-      menuCategories356=categoryRows||[];
-    }
-
-    // Step 16.5.4.2:
-    // ให้หมวด “ซิกเนเจอร์” แสดงบนหน้าลูกค้าได้ทันที
-    // แม้หมวดนี้ยังไม่มีเมนูอยู่ข้างใน
-    if(!menuCategories356.some(c=>c.category_key==="ซิกเนเจอร์")){
-      menuCategories356.push({
-        category_key:"ซิกเนเจอร์",
-        display_name:"ซิกเนเจอร์",
-        sort_order:5,
-        is_active:true
-      });
-    }
-
     renderTabs();
     renderMenu();
   }catch(error){
@@ -351,47 +275,14 @@ loadStoreSettings();
 loadMenu();
 setInterval(loadStoreSettings,10000);
 
-function visibleCategoryKeys356(){
-  if(!menuCategories356.length) return null;
-  return new Set(menuCategories356.filter(c=>c.is_active!==false).map(c=>c.category_key));
-}
-
 function renderTabs(){
-  let cats;
-  if(menuCategories356.length){
-    cats=[
-      {key:"ทั้งหมด",label:"ทั้งหมด"},
-      {key:"แนะนำ",label:"แนะนำ"},
-      ...menuCategories356
-        .filter(c=>c.is_active!==false)
-        .sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
-        .map(c=>({key:c.category_key,label:c.display_name})),
-      {key:"ADD-ON",label:"ADD-ON"}
-    ];
-  }else{
-    cats=[
-      {key:"ทั้งหมด",label:"ทั้งหมด"},
-      {key:"แนะนำ",label:"แนะนำ"},
-      ...[...new Set(db.products.filter(x=>x.is_active!==false).map(x=>x.category))].map(x=>({key:x,label:x})),
-      {key:"ADD-ON",label:"ADD-ON"}
-    ];
-  }
-
-  // กันชื่อซ้ำ เช่น มีหมวดชื่อ “แนะนำ” หรือ ADD-ON อยู่ในฐานข้อมูล
-  const seen=new Set();
-  cats=cats.filter(c=>{
-    if(seen.has(c.key)) return false;
-    seen.add(c.key);
-    return true;
-  });
-
-  if(cat!=="ทั้งหมด"&&!cats.some(c=>c.key===cat)) cat="ทั้งหมด";
+  const cats=["ทั้งหมด",...new Set(db.products.filter(x=>x.is_active!==false).map(x=>x.category)),"ADD-ON"];
   $("tabs").innerHTML="";
   cats.forEach(c=>{
     const b=document.createElement("button");
-    b.textContent=c.label;
-    b.className=c.key===cat?"active":"";
-    b.onclick=()=>{cat=c.key;renderTabs();renderMenu()};
+    b.textContent=c;
+    b.className=c===cat?"active":"";
+    b.onclick=()=>{cat=c;renderTabs();renderMenu()};
     $("tabs").appendChild(b);
   });
 }
@@ -404,7 +295,7 @@ function renderMenu(){
       d.className="card";
       d.innerHTML=`
         ${a.image_url
-          ? `<img class="menu-card-image" src="${a.image_url}" alt="${a.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="menu-card-placeholder" style="display:none">356</div>`
+          ? `<img class="menu-card-image" src="${a.image_url}" alt="${a.name}" loading="lazy">`
           : `<div class="menu-card-placeholder">356</div>`}
         <div class="name">${a.name}</div>
         <div class="price">+฿${a.price}</div>
@@ -417,13 +308,13 @@ function renderMenu(){
   }
 
   db.products
-    .filter(x=>{const visible=visibleCategoryKeys356(); return x.is_active!==false && (!visible || visible.has(x.category)) && (cat==="ทั้งหมด"||(cat==="แนะนำ"&&x.recommended===true)||x.category===cat)})
+    .filter(x=>x.is_active!==false&&(cat==="ทั้งหมด"||x.category===cat))
     .forEach(p=>{
       const d=document.createElement("div");
       d.className="card";
       d.innerHTML=`
         ${p.image_url
-          ? `<img class="menu-card-image" src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="menu-card-placeholder" style="display:none">356</div>`
+          ? `<img class="menu-card-image" src="${p.image_url}" alt="${p.name}" loading="lazy">`
           : `<div class="menu-card-placeholder">356</div>`}
         <div class="name">${p.name}</div>
         <div class="price">฿${p.price}</div>
@@ -673,6 +564,7 @@ async function submitOrder(){
     quantity:x.qty,
     unit_price:x.unit,
     options:x.options,
+    note:x.note || null,
     line_total:x.unit*x.qty
   }));
 
