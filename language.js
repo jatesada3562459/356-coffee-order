@@ -241,26 +241,64 @@ function setLanguage356(lang){
 }
 window.setLanguage356 = setLanguage356;
 
-/* Keep original calculation, but translate status returned to async loadStoreSettings(). */
+/* Step Weekly Hours V4:
+   แปลข้อความสถานะเท่านั้น ห้ามทิ้ง weekly schedule / reason ที่ storefront คำนวณไว้ */
 var originalCalculateStoreStatus356 = calculateStoreStatus;
-calculateStoreStatus = function(settings){
-  var result = originalCalculateStoreStatus356(settings);
-  if(settings && settings.accepting_orders === false){
-    return {open:false, text:tr356("storePaused")};
-  }
-  return {open:result.open, text:result.open ? tr356("storeOpen") : tr356("storeClosed")};
+calculateStoreStatus = function(settings, weekly){
+  var result = originalCalculateStoreStatus356(settings, weekly);
+
+  return {
+    ...result,
+    text: result.open ? tr356("storeOpen") : tr356("storeClosed")
+  };
 };
 
-/* Translate category tabs while keeping raw category values for filtering. */
+/* Step 16.5.4.4 — Translate category tabs without overwriting custom categories. */
 renderTabs = function(){
-  var cats = ["ทั้งหมด"].concat(Array.from(new Set(db.products.filter(function(x){return x.is_active!==false;}).map(function(x){return x.category;})))).concat(["ADD-ON"]);
-  document.getElementById("tabs").innerHTML = "";
+  var cats = [];
+
+  if(typeof menuCategories356 !== "undefined" && Array.isArray(menuCategories356) && menuCategories356.length){
+    cats = [
+      {key:"ทั้งหมด", label:"ทั้งหมด"},
+      {key:"แนะนำ", label:"แนะนำ"}
+    ].concat(
+      menuCategories356
+        .filter(function(c){ return c && c.is_active !== false; })
+        .sort(function(a,b){ return Number(a.sort_order||0)-Number(b.sort_order||0); })
+        .map(function(c){ return {key:c.category_key, label:c.display_name || c.category_key}; })
+    ).concat([{key:"ADD-ON", label:"ADD-ON"}]);
+  }else{
+    cats = [
+      {key:"ทั้งหมด", label:"ทั้งหมด"},
+      {key:"แนะนำ", label:"แนะนำ"}
+    ].concat(
+      Array.from(new Set(
+        db.products
+          .filter(function(x){ return x.is_active!==false; })
+          .map(function(x){ return x.category; })
+      )).map(function(c){ return {key:c,label:c}; })
+    ).concat([{key:"ADD-ON",label:"ADD-ON"}]);
+  }
+
+  var seen = {};
+  cats = cats.filter(function(c){
+    if(!c || !c.key || seen[c.key]) return false;
+    seen[c.key] = true;
+    return true;
+  });
+
+  if(cat !== "ทั้งหมด" && !cats.some(function(c){ return c.key === cat; })){
+    cat = "ทั้งหมด";
+  }
+
+  var tabsEl = document.getElementById("tabs");
+  tabsEl.innerHTML = "";
   cats.forEach(function(c){
     var b = document.createElement("button");
-    b.textContent = displayCategory356(c);
-    b.className = c === cat ? "active" : "";
-    b.onclick = function(){ cat=c; renderTabs(); renderMenu(); };
-    document.getElementById("tabs").appendChild(b);
+    b.textContent = displayCategory356(c.label);
+    b.className = c.key === cat ? "active" : "";
+    b.onclick = function(){ cat=c.key; renderTabs(); renderMenu(); };
+    tabsEl.appendChild(b);
   });
 };
 
@@ -287,7 +325,12 @@ renderMenu = function(){
   }
 
   db.products
-    .filter(function(x){return x.is_active!==false && (cat==="ทั้งหมด" || x.category===cat);})
+    .filter(function(x){
+      var visible = (typeof visibleCategoryKeys356 === "function") ? visibleCategoryKeys356() : null;
+      return x.is_active!==false &&
+        (!visible || visible.has(x.category)) &&
+        (cat==="ทั้งหมด" || (cat==="แนะนำ" && x.recommended===true) || x.category===cat);
+    })
     .forEach(function(p){
       var d = document.createElement("div");
       var shownName = displayProduct356(p.name);
@@ -448,7 +491,9 @@ function dbOption356(v){
     "ไข่มุกบุก":10,
     "ปีโป้":10,
     "โยเกิร์ต":10,
+    "ใส่โยเกิร์ต":10,
     "ครีมชีส":15,
+    "ช็อตกาแฟ":20,
     "อัปไซส์แก้วใหญ่":10
   };
   if(priceMap[v]) return v+" +"+priceMap[v];
