@@ -528,6 +528,20 @@ function applyAddon(i){
   renderCart();
 }
 
+
+function dbOption356(v){
+  var priceMap = {
+    "ปั่น":10,
+    "ไข่มุกบุก":10,
+    "ปีโป้":10,
+    "โยเกิร์ต":10,
+    "ครีมชีส":15,
+    "อัปไซส์แก้วใหญ่":10
+  };
+  if(priceMap[v]) return v+" +"+priceMap[v];
+  return v;
+}
+
 async function submitOrder(){
   await loadStoreSettings();
   if(!ensureStoreOpen356()) return;
@@ -563,7 +577,7 @@ async function submitOrder(){
     product_name:x.name,
     quantity:x.qty,
     unit_price:x.unit,
-    options:x.options,
+    options:(x.note ? x.options.concat(["หมายเหตุ: "+x.note]) : x.options).map(dbOption356),
     note:x.note || null,
     line_total:x.unit*x.qty
   }));
